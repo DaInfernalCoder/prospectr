@@ -10,6 +10,7 @@ import ButtonGradient from "@/components/ButtonGradient";
 import ButtonLead from "@/components/ButtonLead";
 import ButtonSupport from "@/components/ButtonSupport";
 import CTA from "@/components/CTA";
+import FAQ from "@/components/FAQ";
 
 export default function Page() {
   return (
@@ -58,6 +59,7 @@ export default function Page() {
         {/* <ButtonLead /> */}
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
+        <FAQ />
         <Footer />
       </main>
     </>
