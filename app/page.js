@@ -12,11 +12,13 @@ import ButtonSupport from "@/components/ButtonSupport";
 import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
 import FeaturesListicle from "@/components/FeaturesListicle";
+import Header from "@/components/Header";
 
 export default function Page() {
   return (
     <>
       <header className="p-4 flex justify-end max-w-7xl mx-auto">
+        <Header />
         <ButtonSignin text="Login" />
       </header>
       <main>
