@@ -63,6 +63,7 @@ export default function Page() {
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
         {/* <FeaturesListicle /> */}
+        <Hero />
         <FAQ />
         <Footer />
       </main>
