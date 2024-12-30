@@ -21,6 +21,7 @@ import Testimonials11 from "@/components/Testimonials11";
 import Testimonial1Small from "@/components/Testimonial1Small";
 import Testimonials3 from "@/components/Testimonials3";
 import TestimonialsAvatars from "@/components/TestimonialsAvatars";
+import WithWithout from "@/components/WithWithout";
 
 export default function Page() {
   return (
@@ -78,6 +79,7 @@ export default function Page() {
         {/* <Testimonial1Small /> */}
         {/* <Testimonials3 /> */}
         {/* <TestimonialsAvatars /> */}
+        <WithWithout />
         <FAQ />
         <Footer />
       </main>
