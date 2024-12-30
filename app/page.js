@@ -18,6 +18,7 @@ import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
 import Testimonial from "@/components/Testimonials1";
 import Testimonials11 from "@/components/Testimonials11";
+import Testimonial1Small from "@/components/Testimonial1Small";
 
 export default function Page() {
   return (
@@ -72,6 +73,7 @@ export default function Page() {
         <Pricing />
         {/* <Testimonial /> */}
         {/* <Testimonials11 /> */}
+        <Testimonial1Small />
         <FAQ />
         <Footer />
       </main>
