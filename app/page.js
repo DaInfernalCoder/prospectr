@@ -75,7 +75,7 @@ export default function Page() {
         <Problem />
         <Pricing />
         {/* <Testimonial /> */}
-        {/* <Testimonials11 /> */}
+        <Testimonials11 />
         {/* <Testimonial1Small /> */}
         {/* <Testimonials3 /> */}
         {/* <TestimonialsAvatars /> */}
