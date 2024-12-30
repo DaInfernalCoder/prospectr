@@ -18,7 +18,6 @@ export default function Page() {
   return (
     <>
       <header className="p-4 flex justify-end max-w-7xl mx-auto">
-        <Header />
         <ButtonSignin text="Login" />
       </header>
       <main>
