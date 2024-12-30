@@ -51,7 +51,7 @@ export default function Page() {
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
         {/* <ButtonCheckout /> */}
-        <ButtonGradient />
+        {/* <ButtonGradient /> */}
 
         <Footer />
       </main>
