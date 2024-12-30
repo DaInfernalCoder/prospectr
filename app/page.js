@@ -60,7 +60,7 @@ export default function Page() {
         {/* <ButtonLead /> */}
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
-        <FeaturesListicle />
+        {/* <FeaturesListicle /> */}
         <FAQ />
         <Footer />
       </main>
