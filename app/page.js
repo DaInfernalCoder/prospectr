@@ -7,6 +7,7 @@ import BetterIcon from "@/components/BetterIcon";
 import ButtonAccount from "@/components/ButtonAccount";
 import ButtonCheckout from "@/components/ButtonCheckout";
 import ButtonGradient from "@/components/ButtonGradient";
+import ButtonLead from "@/components/ButtonLead";
 
 export default function Page() {
   return (
@@ -52,6 +53,7 @@ export default function Page() {
         {/* <BetterIcon /> */}
         {/* <ButtonCheckout /> */}
         {/* <ButtonGradient /> */}
+        <ButtonLead />
 
         <Footer />
       </main>
