@@ -1,5 +1,5 @@
 import Link from "next/link";
-import ButtonSignin from "@/components/ButtonSignin";
+// import ButtonSignin from "@/components/ButtonSignin";
 import Hero from "@/components/Hero";
 import FeaturesAccordion from "@/components/FeaturesAccordion";
 import Footer from "@/components/Footer";
