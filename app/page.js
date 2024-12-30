@@ -9,7 +9,7 @@ import ButtonCheckout from "@/components/ButtonCheckout";
 import ButtonGradient from "@/components/ButtonGradient";
 import ButtonLead from "@/components/ButtonLead";
 import ButtonSupport from "@/components/ButtonSupport";
-import CTA from "@/components/CTA";
+// import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
 // import FeaturesListicle from "@/components/FeaturesListicle";
 import Header from "@/components/Header";
