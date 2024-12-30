@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import BetterIcon from "@/components/BetterIcon";
 import ButtonAccount from "@/components/ButtonAccount";
 import ButtonCheckout from "@/components/ButtonCheckout";
-import ButtonGradient from "@/components/ButtonGradient";
+// import ButtonGradient from "@/components/ButtonGradient";
 // import ButtonLead from "@/components/ButtonLead";
 // import ButtonSupport from "@/components/ButtonSupport";
 // import CTA from "@/components/CTA";
