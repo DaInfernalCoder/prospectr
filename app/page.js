@@ -49,7 +49,7 @@ export default function Page() {
         {/* <ButtonAccount /> */}
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
-        <ButtonCheckout />
+        {/* <ButtonCheckout /> */}
 
         <Footer />
       </main>
