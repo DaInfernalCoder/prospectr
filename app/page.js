@@ -8,6 +8,7 @@ import ButtonAccount from "@/components/ButtonAccount";
 import ButtonCheckout from "@/components/ButtonCheckout";
 import ButtonGradient from "@/components/ButtonGradient";
 import ButtonLead from "@/components/ButtonLead";
+import ButtonSupport from "@/components/ButtonSupport";
 
 export default function Page() {
   return (
@@ -54,7 +55,7 @@ export default function Page() {
         {/* <ButtonCheckout /> */}
         {/* <ButtonGradient /> */}
         {/* <ButtonLead /> */}
-
+        <ButtonSupport />
         <Footer />
       </main>
     </>
