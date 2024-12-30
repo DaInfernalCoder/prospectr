@@ -57,7 +57,7 @@ export default function Page() {
         {/* <ButtonGradient /> */}
         {/* <ButtonLead /> */}
         {/* <ButtonSupport /> */}
-        <CTA />
+        {/* <CTA /> */}
         <Footer />
       </main>
     </>
