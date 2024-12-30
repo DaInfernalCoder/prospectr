@@ -53,7 +53,7 @@ export default function Page() {
         {/* <BetterIcon /> */}
         {/* <ButtonCheckout /> */}
         {/* <ButtonGradient /> */}
-        <ButtonLead />
+        {/* <ButtonLead /> */}
 
         <Footer />
       </main>
