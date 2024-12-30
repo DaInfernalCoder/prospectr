@@ -13,6 +13,7 @@ import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
 import FeaturesListicle from "@/components/FeaturesListicle";
 import Header from "@/components/Header";
+import Modal from "@/components/Modal";
 
 export default function Page() {
   return (
@@ -63,6 +64,7 @@ export default function Page() {
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
         {/* <FeaturesListicle /> */}
+        <Modal />
 
         <FAQ />
         <Footer />
