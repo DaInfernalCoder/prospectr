@@ -11,6 +11,7 @@ import ButtonLead from "@/components/ButtonLead";
 import ButtonSupport from "@/components/ButtonSupport";
 import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
+import FeaturesListicle from "@/components/FeaturesListicle";
 
 export default function Page() {
   return (
@@ -59,6 +60,7 @@ export default function Page() {
         {/* <ButtonLead /> */}
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
+        <FeaturesListicle />
         <FAQ />
         <Footer />
       </main>
