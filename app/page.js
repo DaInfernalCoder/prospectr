@@ -13,7 +13,7 @@ import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
 import FeaturesListicle from "@/components/FeaturesListicle";
 import Header from "@/components/Header";
-import Modal from "@/components/Modal";
+// import Modal from "@/components/Modal";
 import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
 // import Testimonial from "@/components/Testimonials1";
