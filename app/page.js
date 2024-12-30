@@ -73,7 +73,7 @@ export default function Page() {
         <Pricing />
         {/* <Testimonial /> */}
         {/* <Testimonials11 /> */}
-        <Testimonial1Small />
+        {/* <Testimonial1Small /> */}
         <FAQ />
         <Footer />
       </main>
