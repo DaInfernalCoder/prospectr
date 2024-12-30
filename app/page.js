@@ -77,7 +77,7 @@ export default function Page() {
         {/* <Testimonials11 /> */}
         {/* <Testimonial1Small /> */}
         {/* <Testimonials3 /> */}
-        <TestimonialsAvatars />
+        {/* <TestimonialsAvatars /> */}
         <FAQ />
         <Footer />
       </main>
