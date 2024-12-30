@@ -45,7 +45,7 @@ export default function Page() {
           </Link>
         </section> */}
         <Hero />
-        <ButtonAccount />
+        {/* <ButtonAccount /> */}
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
 
