@@ -11,7 +11,7 @@ import ButtonLead from "@/components/ButtonLead";
 import ButtonSupport from "@/components/ButtonSupport";
 import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
-import FeaturesListicle from "@/components/FeaturesListicle";
+// import FeaturesListicle from "@/components/FeaturesListicle";
 import Header from "@/components/Header";
 // import Modal from "@/components/Modal";
 import Pricing from "@/components/Pricing";
