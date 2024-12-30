@@ -17,6 +17,7 @@ import Modal from "@/components/Modal";
 import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
 import Testimonial from "@/components/Testimonials1";
+import Testimonials11 from "@/components/Testimonials11";
 
 export default function Page() {
   return (
@@ -69,7 +70,8 @@ export default function Page() {
         {/* <FeaturesListicle /> */}
         <Problem />
         <Pricing />
-        <Testimonial />
+        {/* <Testimonial /> */}
+        <Testimonials11 />
         <FAQ />
         <Footer />
       </main>
