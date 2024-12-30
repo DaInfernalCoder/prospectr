@@ -16,7 +16,7 @@ import Header from "@/components/Header";
 import Modal from "@/components/Modal";
 import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
-import Testimonial from "@/components/Testimonials1";
+// import Testimonial from "@/components/Testimonials1";
 import Testimonials11 from "@/components/Testimonials11";
 // import Testimonial1Small from "@/components/Testimonial1Small";
 // import Testimonials3 from "@/components/Testimonials3";
