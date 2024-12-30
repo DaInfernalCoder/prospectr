@@ -55,7 +55,7 @@ export default function Page() {
         {/* <ButtonCheckout /> */}
         {/* <ButtonGradient /> */}
         {/* <ButtonLead /> */}
-        <ButtonSupport />
+        {/* <ButtonSupport /> */}
         <Footer />
       </main>
     </>
