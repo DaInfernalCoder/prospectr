@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import BetterIcon from "@/components/BetterIcon";
 import ButtonAccount from "@/components/ButtonAccount";
 import ButtonCheckout from "@/components/ButtonCheckout";
+import ButtonGradient from "@/components/ButtonGradient";
 
 export default function Page() {
   return (
@@ -50,6 +51,7 @@ export default function Page() {
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
         {/* <ButtonCheckout /> */}
+        <ButtonGradient />
 
         <Footer />
       </main>
