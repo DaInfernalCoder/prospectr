@@ -5,6 +5,7 @@ import FeaturesAccordion from "@/components/FeaturesAccordion";
 import Footer from "@/components/Footer";
 import BetterIcon from "@/components/BetterIcon";
 import ButtonAccount from "@/components/ButtonAccount";
+import ButtonCheckout from "@/components/ButtonCheckout";
 
 export default function Page() {
   return (
@@ -48,6 +49,7 @@ export default function Page() {
         {/* <ButtonAccount /> */}
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
+        <ButtonCheckout />
 
         <Footer />
       </main>
