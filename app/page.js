@@ -64,7 +64,7 @@ export default function Page() {
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
         {/* <FeaturesListicle /> */}
-        <Modal />
+        <Modal isModalOpen={true} />
 
         <FAQ />
         <Footer />
