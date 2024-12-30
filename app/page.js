@@ -4,7 +4,7 @@ import Hero from "@/components/Hero";
 import FeaturesAccordion from "@/components/FeaturesAccordion";
 import Footer from "@/components/Footer";
 import BetterIcon from "@/components/BetterIcon";
-import ButtonAccount from "@/components/ButtonAccount";
+// import ButtonAccount from "@/components/ButtonAccount";
 // import ButtonCheckout from "@/components/ButtonCheckout";
 // import ButtonGradient from "@/components/ButtonGradient";
 // import ButtonLead from "@/components/ButtonLead";
