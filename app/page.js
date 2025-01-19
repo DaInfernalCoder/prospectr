@@ -17,7 +17,7 @@ import Header from "@/components/Header";
 import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
 // import Testimonial from "@/components/Testimonials1";
-import Testimonials11 from "@/components/Testimonials11";
+//import Testimonials11 from "@/components/Testimonials11";
 // import Testimonial1Small from "@/components/Testimonial1Small";
 // import Testimonials3 from "@/components/Testimonials3";
 // import TestimonialsAvatars from "@/components/TestimonialsAvatars";
@@ -74,8 +74,9 @@ export default function Page() {
         {/* <FeaturesListicle /> */}
         <Problem />
         <Pricing />
+        {/* <Testimonials11 /> */}
         {/* <Testimonial /> */}
-        <Testimonials11 />
+        
         {/* <Testimonial1Small /> */}
         {/* <Testimonials3 /> */}
         {/* <TestimonialsAvatars /> */}

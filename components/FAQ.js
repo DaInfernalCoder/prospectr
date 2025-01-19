@@ -7,24 +7,51 @@ import { useRef, useState } from "react";
 
 const faqList = [
   {
-    question: "What do I get exactly?",
-    answer: <div className="space-y-2 leading-relaxed">Loreum Ipseum</div>,
-  },
-  {
-    question: "Can I get a refund?",
+    question: "How does Prospectr work with LinkedIn's connection limits?",
     answer: (
       <p>
-        Yes! You can request a refund within 7 days of your purchase. Reach out
-        by email.
+        Prospectr respects LinkedIn's daily connection limit of 50 requests per day. Our smart campaign scheduling ensures you stay within these limits while maximizing your outreach effectiveness.
       </p>
     ),
   },
   {
-    question: "I have another question",
+    question: "Is this compliant with LinkedIn's terms of service?",
     answer: (
-      <div className="space-y-2 leading-relaxed">Cool, contact us by email</div>
+      <p>
+        Yes! Prospectr uses LinkedIn's official API and follows all their guidelines. We maintain strict compliance to ensure your account's safety and good standing.
+      </p>
     ),
   },
+  {
+    question: "Can I export my leads to other tools?",
+    answer: (
+      <p>
+        Absolutely! You can export your leads to CSV format or directly integrate with popular CRM systems. This makes it easy to manage your leads across your entire sales stack.
+      </p>
+    ),
+  },
+  {
+    question: "How does the AI-powered search work?",
+    answer: (
+      <div className="space-y-2 leading-relaxed">
+        Our AI analyzes your ideal customer profile and searches LinkedIn for matching prospects based on multiple factors including:
+        <ul className="list-disc list-inside mt-2">
+          <li>Job titles and roles</li>
+          <li>Industry and company size</li>
+          <li>Location and language</li>
+          <li>Activity patterns and engagement</li>
+        </ul>
+      </div>
+    ),
+  },
+  {
+    question: "What kind of support do you offer?",
+    answer: (
+      <p>
+        We provide email support 7 days a week. For our premium users, we also offer priority support and personalized campaign optimization consultations.
+      </p>
+    ),
+  }
 ];
 
 const Item = ({ item }) => {
