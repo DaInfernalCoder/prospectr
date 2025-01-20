@@ -145,10 +145,37 @@ module.exports = {
   },
   plugins: [require("daisyui"), require("tailwindcss-animate")],
   daisyui: {
-    // Light & dark themes are added by default (it switches automatically based on OS settings)
-    // You can add another theme among the list of 30+
-    // Add "data-theme='theme_name" to any HTML tag to enable the 'theme_name' theme.
-    // https://daisyui.com/
-    themes: ["light", "dark"],
+    themes: [
+      "light",
+      "dark",
+      "cupcake",
+      "bumblebee",
+      "emerald",
+      "corporate",
+      "synthwave",
+      "retro",
+      "cyberpunk",
+      "valentine",
+      "halloween",
+      "garden",
+      "forest",
+      "aqua",
+      "lofi",
+      "pastel",
+      "fantasy",
+      "wireframe",
+      "black",
+      "luxury",
+      "dracula",
+      "cmyk",
+      "autumn",
+      "business",
+      "acid",
+      "lemonade",
+      "night",
+      "coffee",
+      "winter"
+    ],
+    darkTheme: "dark",
   },
 };
