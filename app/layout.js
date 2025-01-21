@@ -20,13 +20,13 @@ export const metadata = getSEOTags();
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-theme={config.colors.theme} className={font.className}>
+    <html lang="en" className={font.className} suppressHydrationWarning>
       {config.domainName && (
         <head>
           <PlausibleProvider domain={config.domainName} />
         </head>
       )}
-      <body>
+      <body data-theme={config.colors.theme}>
         {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
         <ClientLayout>{children}</ClientLayout>
       </body>

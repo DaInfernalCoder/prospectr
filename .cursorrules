@@ -21,6 +21,14 @@ THIS IS A MICRO SAAS, AS SUCH ONE FEATURE WILL BE COMPLETED WITH THE LANDED PAGE
 - Users will be able to send messages to leads and track their responses.
 # Tech Stack
 you will use next js 14, tailwind css, daisy ui, shadcn ui, linkedin api, lucid icons, and supabase.
+# Current Priorities
+1. Implement authentication using Supabase
+2. Integrate LinkedIn API via Unipile for:
+   - Automated lead searching
+   - Connection requests (20/day free tier, 40/day pro)
+   - InMail messages (30/day limit)
+3. Finalize landing page for initial launch
+
 # Docs
 
 # Current File Structure
@@ -78,4 +86,3 @@ app/
 ├─ tos/
 │  └─ page.js
 └─ twitter-image.png
-

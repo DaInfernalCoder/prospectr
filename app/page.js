@@ -42,7 +42,7 @@ export default function Page() {
         {/* <BetterIcon /> */}
         {/* <ButtonCheckout /> */}
         {/* <ButtonGradient /> */}
-        <ButtonLead /> 
+        
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
         {/* <FeaturesListicle /> */}

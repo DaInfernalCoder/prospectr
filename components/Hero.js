@@ -45,8 +45,8 @@ const Hero = () => {
               The simplest way to automate finding contacts with AI. Built without the ridiculous price tag.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 items-start">
-              <RainbowButton className="text-base px-6 py-3">
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+              <RainbowButton className="text-lg font-semibold px-8 py-4 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out">
                 Start Finding Leads
               </RainbowButton>
             </div>
