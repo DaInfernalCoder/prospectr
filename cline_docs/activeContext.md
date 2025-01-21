@@ -1,29 +1,25 @@
-# Active Context
-Last Updated: 2024-01-24
+# Active Context  
+**Last Updated:** 2024-02-21
 
 ## Current Focus
-- Implementing and optimizing the 3D Spline robot component in the Hero section
-- Working on global cursor tracking for the robot's head movement
+1. Supabase Auth Implementation
+   - Custom sign-in/out flows
+   - Session management middleware
+   - Dashboard route protection
+
+2. LinkedIn API Rate Limiting
+   - Redis-backed request counters
+   - Tier-based quotas (Free/Pro)
+   - Client-side quota display
 
 ## Recent Changes
-1. Installed @splinetool/react-spline package
-2. Created Splite component with proper structure and lazy loading
-3. Implemented global cursor tracking using window events
-4. Added coordinate normalization for smooth robot movement
-
-## Active Files
-- components/ui/splite.jsx: Main Spline component implementation
-- components/Hero.js: Integration of Spline component
-- package.json: Added @splinetool/react-spline dependency
+- Updated Supabase client config
+- Added auth middleware
+- Created rate limit tracking service
 
 ## Next Steps
-1. Test robot movement behavior across different screen sizes
-2. Consider adding loading optimization for the 3D model
-3. Add error boundaries for better error handling
-4. Document Spline scene requirements for future updates
+1. Implement connection request queue
+2. Add template selector component
+3. Build quota usage dashboard
 
-## Current Implementation Details
-- Using React.lazy for performance optimization
-- Window-level mouse tracking for full-screen cursor following
-- Coordinate normalization (-1 to 1) for precise movement
-- Proper cleanup of event listeners in useEffect
+[//]: # (Cross-reference: systemPatterns.md#rate-limiting)

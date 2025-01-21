@@ -1,94 +1,42 @@
-# Technical Context
-Last Updated: 2024-01-24
+# Tech Context  
+**Last Updated:** 2024-02-21
 
-## Core Technologies
+## Core Stack
+- Next.js 14 (App Router)
+- Tailwind CSS + Shadcn UI
+- Supabase Auth + Postgres
+- Unipile LinkedIn API
 
-### 3D Integration
-- **@splinetool/react-spline**: ^2.2.6
-  - React wrapper for Spline 3D scenes
-  - Provides scene loading and interaction APIs
-  - Supports event-based animations
+## Auth Implementation
+- Cookie-based sessions with JWT
+- Middleware-protected routes (/dashboard)
+- Custom auth hooks using Zustand
+- Team role management system
 
-### Frontend Framework
-- Next.js
-- React (with Hooks)
-- Tailwind CSS for styling
+## API Security
+- Redis rate limiting (Supabase)
+- Request signing for LinkedIn API calls
+- Daily key rotation via Vault
+- Tier-based quotas (Free/Pro)
+
+## Monitoring & Analytics
+- Supabase Logflare integration
+- Custom quota tracking dashboard
+- Sentry error tracking
+- Campaign performance metrics
 
 ## Development Environment
+- Node.js v18.17+
+- Local Supabase CLI
+- VSCode with Prettier/ESLint
+- Postman for API testing
 
-### Required Dependencies
+## Key Dependencies
 ```json
 {
-  "@splinetool/react-spline": "^2.2.6"
+  "@supabase/supabase-js": "^2.39.0",
+  "@unipile/js-client": "^1.2.1",
 }
 ```
 
-### Browser Support
-- Modern browsers with WebGL support required
-- Fallback loading state provided for slower connections
-- Progressive enhancement approach
-
-## Integration Points
-
-### Component Location
-- components/ui/splite.jsx: Main component
-- components/Hero.js: Implementation
-
-### Event System
-- Uses window-level event listeners
-- Normalized coordinate system
-- Custom event emission to Spline scene
-
-## Technical Constraints
-
-### Performance
-- 3D model size impacts initial load
-- Lazy loading implemented for optimization
-- Event handling optimized for smooth tracking
-
-### Browser Requirements
-- WebGL support needed
-- Modern browser APIs used
-- Responsive design considerations
-
-## Development Workflow
-
-### Local Development
-1. Install dependencies: `npm install`
-2. Import Splite component
-3. Provide scene URL
-4. Configure container dimensions
-
-### Testing Requirements
-- Verify mouse tracking across viewport
-- Check loading performance
-- Test responsive behavior
-
-## Configuration
-
-### Scene URL Format
-```javascript
-scene="https://prod.spline.design/[scene-id]/scene.splinecode"
-```
-
-### Container Setup
-```jsx
-<div className="lg:w-full h-[600px]">
-  <Splite 
-    scene="[scene-url]"
-    className="w-full h-full"
-  />
-</div>
-```
-
-## Known Limitations
-
-### Current Implementation
-- Scene must be pre-configured for mouse tracking
-- Initial loading time dependent on model size
-- Requires client-side JavaScript
-
-### Future Considerations
-- Potential for event throttling
-- Mobile touch event support
-- Loading optimization strategies
+[//]: # (Cross-reference: systemPatterns.md#auth-architecture)
