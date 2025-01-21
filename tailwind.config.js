@@ -9,7 +9,7 @@ module.exports = {
   theme: {
   	extend: {
   		backgroundImage: {
-  			gradient: 'linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82)'
+  			gradient: 'linear-gradient(90deg, hsl(var(--color-1)), hsl(var(--color-5)), hsl(var(--color-3)), hsl(var(--color-4)), hsl(var(--color-2)))'
   		},
   		animation: {
   			opacity: 'opacity 0.25s ease-in-out',
@@ -17,7 +17,7 @@ module.exports = {
   			wiggle: 'wiggle 1.5s ease-in-out infinite',
   			popup: 'popup 0.25s ease-in-out',
   			shimmer: 'shimmer 3s ease-out infinite alternate',
-  			rainbow: 'rainbow var(--speed, 2s) infinite linear'
+  			rainbow: 'rainbow 4s linear infinite'
   		},
   		keyframes: {
   			opacity: {
@@ -82,10 +82,13 @@ module.exports = {
   			},
   			rainbow: {
   				'0%': {
-  					'background-position': '0%'
+  					'background-position': '0% 50%'
+  				},
+  				'50%': {
+  					'background-position': '100% 50%'
   				},
   				'100%': {
-  					'background-position': '200%'
+  					'background-position': '0% 50%'
   				}
   			}
   		},

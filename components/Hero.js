@@ -1,43 +1,64 @@
+'use client'
+
 import Image from "next/image";
-import TestimonialsAvatars from "./TestimonialsAvatars";
 import { RainbowButton } from "./ui/rainbow-button";
 import { Splite } from "./ui/splite";
 import { Play } from "lucide-react";
+import { TypeAnimation } from 'react-type-animation';
+import TestimonialsAvatars from "./TestimonialsAvatars";
 
 const Hero = () => {
   return (
     <section className="relative w-full overflow-hidden bg-base-100">
-      <div className="max-w-7xl mx-auto px-8 py-24">
-        <div className="flex flex-col lg:flex-row items-center justify-between">
+      <div className="max-w-[1200px] mx-auto px-2 py-12">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
           {/* Left content */}
           <div className="w-full lg:w-[600px] flex flex-col gap-8">
-            <div className="flex items-center gap-2 text-primary hover:text-primary/80">
+            {/*<div className="flex items-center gap-2 text-primary hover:text-primary/80">
               <Play className="w-4 h-4" />
               <a href="#" className="text-sm font-medium">Watch demo video</a>
-            </div>
+            </div> */}
             
-            <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight">
-              Find and Connect with Your Ideal LinkedIn Leads
+            <h1 className="font-extrabold text-5xl lg:text-7xl tracking-tight">
+              Find the right leads for {' '}
+              <span className="inline-block">
+                <TypeAnimation
+                  sequence={[
+                    2000,
+                    'internships',
+                    2000,
+                    'recruiting',
+                    2000,
+                    'job hunting', 
+                    2000, 
+                    'sales',
+                    2000,
+                  ]}
+                  wrapper="span"
+                  speed={50}
+                  repeat={Infinity}
+                  className="inline-block text-transparent bg-clip-text bg-gradient bg-[length:200%_auto] animate-rainbow"
+                />
+              </span>
             </h1>
-            <p className="text-lg opacity-80 leading-relaxed">
-              Automate your LinkedIn prospecting with AI-powered lead search, smart campaigns, 
-              and automated connection requests. Find the right leads in minutes, not hours.
+            <p className="text-xl opacity-80 leading-relaxed">
+              The simplest way to automate finding contacts with AI. Built without the ridiculous price tag.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-start">
-              <RainbowButton>
+              <RainbowButton className="text-base px-6 py-3">
                 Start Finding Leads
               </RainbowButton>
             </div>
 
-            <div className="mt-2">
-              <TestimonialsAvatars priority={true} />
+            <div className="mt-1">
+              {/* <TestimonialsAvatars priority={true} /> */}
             </div>
           </div>
 
           {/* Right content */}
-          <div className="w-full lg:w-[600px] h-[600px] lg:h-[700px]">
-            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full" />
+          <div className="w-full lg:w-[650px] h-[650px] lg:h-[750px] relative">
+            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full scale-110" />
           </div>
         </div>
       </div>

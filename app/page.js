@@ -23,7 +23,8 @@ import Problem from "@/components/Problem";
 // import TestimonialsAvatars from "@/components/TestimonialsAvatars";
 import WithWithout from "@/components/WithWithout";
 import Hero from "@/components/Hero";
-
+import OtherTools from "@/components/OtherTools";
+import CTA from "@/components/CTA";
 export default function Page() {
   return (
     <>
@@ -33,6 +34,7 @@ export default function Page() {
       <Header />
       <main>
         <Hero />
+        <OtherTools />
         {/* <ButtonAccount /> */}
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
@@ -50,8 +52,9 @@ export default function Page() {
         {/* <Testimonial1Small /> */}
         {/* <Testimonials3 /> */}
         {/* <TestimonialsAvatars /> */}
-        <WithWithout />
+        
         <FAQ />
+        <CTA />
         <Footer />
       </main>
     </>
