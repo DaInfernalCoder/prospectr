@@ -25,6 +25,7 @@ import WithWithout from "@/components/WithWithout";
 import Hero from "@/components/Hero";
 import OtherTools from "@/components/OtherTools";
 import CTA from "@/components/CTA";
+import ButtonLead from "@/components/ButtonLead";
 export default function Page() {
   return (
     <>
@@ -34,17 +35,18 @@ export default function Page() {
       <Header />
       <main>
         <Hero />
+        <Problem />
         <OtherTools />
         {/* <ButtonAccount /> */}
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
         {/* <ButtonCheckout /> */}
         {/* <ButtonGradient /> */}
-        {/* <ButtonLead /> */}
+        <ButtonLead /> 
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
         {/* <FeaturesListicle /> */}
-        <Problem />
+        {/* <Problem /> */}
         <Pricing />
         {/* <Testimonials11 /> */}
         {/* <Testimonial /> */}
