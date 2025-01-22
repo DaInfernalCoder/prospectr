@@ -7,6 +7,22 @@
 - Supabase Auth + Postgres
 - Unipile LinkedIn API
 
+## Design System
+- Dark theme primary (#0f172a)
+- White secondary (#ffffff)
+- Neutral grays for UI elements
+- Responsive dashboard grid
+- Shadcn UI components base
+- Icon-based navigation
+
+## Component Architecture
+- DashboardShell (layout wrapper)
+- Sidebar navigation system
+- Stats cards and metrics
+- Campaign management views
+- Analytics visualizations
+- Settings configuration panels
+
 ## Auth Implementation
 - Cookie-based sessions with JWT
 - Middleware-protected routes (/dashboard)
@@ -36,7 +52,10 @@
 {
   "@supabase/supabase-js": "^2.39.0",
   "@unipile/js-client": "^1.2.1",
+  "d3": "^7.8.5",
+  "lucide-react": "latest",
+  "framer-motion": "latest"
 }
 ```
 
-[//]: # (Cross-reference: systemPatterns.md#auth-architecture)
+[//]: # (Cross-reference: systemPatterns.md#dashboard-architecture)

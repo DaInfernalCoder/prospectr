@@ -9,7 +9,7 @@ import config from "@/config";
 // A simple button to sign in with our providers (Google & Magic Links).
 // It automatically redirects user to callbackUrl (config.auth.callbackUrl) after login, which is normally a private page for users to manage their accounts.
 // If the user is already logged in, it will show their profile picture & redirect them to callbackUrl immediately.
-const ButtonSignin = ({ text = "Get started", extraStyle }) => {
+const ButtonSignin = ({ text = "Log in ", extraStyle }) => {
   const supabase = createClientComponentClient();
   const [user, setUser] = useState(null);
 
@@ -27,7 +27,7 @@ const ButtonSignin = ({ text = "Get started", extraStyle }) => {
     return (
       <Link
         href={config.auth.callbackUrl}
-        className={`btn ${extraStyle ? extraStyle : ""}`}
+        className={`btn btn-primary rounded-xl w-4 ${extraStyle} no-underline`}
       >
         {user?.user_metadata?.avatar_url ? (
           <img
@@ -50,7 +50,7 @@ const ButtonSignin = ({ text = "Get started", extraStyle }) => {
 
   return (
     <Link
-      className={`btn ${extraStyle ? extraStyle : ""}`}
+      className={`btn btn-primary ${extraStyle}`}
       href={config.auth.loginUrl}
     >
       {text}

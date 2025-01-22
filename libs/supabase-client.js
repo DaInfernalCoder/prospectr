@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export const createClient = () => {
   return createClientComponentClient();
@@ -7,13 +7,16 @@ export const createClient = () => {
 // Helper function to get the current session
 export const getCurrentSession = async () => {
   const supabase = createClient();
-  const { data: { session }, error } = await supabase.auth.getSession();
-  
+  const {
+    data: { session },
+    error,
+  } = await supabase.auth.getSession();
+
   if (error) {
-    console.error('Error getting session:', error.message);
+    console.error("Error getting session:", error.message);
     return null;
   }
-  
+
   return session;
 };
 
@@ -27,9 +30,9 @@ export const getCurrentUser = async () => {
 export const signOut = async () => {
   const supabase = createClient();
   const { error } = await supabase.auth.signOut();
-  
+
   if (error) {
-    console.error('Error signing out:', error.message);
+    console.error("Error signing out:", error.message);
     throw error;
   }
-}; 
+};

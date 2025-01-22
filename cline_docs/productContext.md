@@ -7,25 +7,66 @@ Automate LinkedIn outreach for:
 - Job seekers seeking opportunities
 - Recruiters sourcing candidates
 
+## Current Status
+- Dashboard structure implemented
+- Core UI patterns established
+- Empty states ready for data
+- Auth temporarily deprioritized
+
 ## Key User Workflows
-1. AI-powered lead discovery through LinkedIn search
-2. Automated connection requests with personalized templates
-3. InMail campaign management with rate limiting
-4. Performance analytics for outreach efforts
+1. Campaign Management (In Progress)
+   - Create outreach campaigns
+   - Manage connection requests
+   - Track response rates
+   - Template system
+
+2. LinkedIn Integration (Next)
+   - Profile searching with AI
+   - Connection requests (20/day free)
+   - InMail messaging (30/day limit)
+   - Rate limiting and quotas
+
+3. Analytics & Reporting (Planned)
+   - Campaign performance
+   - Connection metrics
+   - Response tracking
+   - Daily/weekly reports
 
 ## Critical Launch Features
-1. LinkedIn API integration for:
-   - Profile searching (AI-enhanced)
-   - Connection requests (20/day free tier)
-   - InMail messaging (30/day limit)
-2. Supabase authentication for:
-   - B2B team accounts
-   - Individual job seekers
-3. Dashboard with campaign metrics
+1. LinkedIn API Integration
+   - Profile search
+   - Connection management
+   - Message templates
+   
+2. Campaign System
+   - Creation flow
+   - Template management
+   - Performance tracking
+
+3. Analytics Dashboard
+   - Real-time metrics
+   - Performance charts
+   - Export capabilities
 
 ## Roadmap
-1. Phase 1: Auth + Basic LinkedIn Integration
-2. Phase 2: AI Lead Scoring
-3. Phase 3: Team Collaboration Features
+1. Phase 1: Core Features ← We are here
+   - Dashboard structure ✓
+   - Campaign management
+   - LinkedIn integration
+   
+2. Phase 2: Enhancement
+   - AI Lead Scoring
+   - Advanced analytics
+   - Template optimization
 
-[//]: # (Cross-reference: See projectBoundaries.md for API rate limits)
+3. Phase 3: Scale
+   - Team collaboration
+   - Enterprise features
+   - Advanced automation
+
+4. Phase 4: Auth & Teams
+   - Supabase authentication
+   - Team management
+   - Role-based access
+
+[//]: # (Cross-reference: See systemPatterns.md for technical implementation)

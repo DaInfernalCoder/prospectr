@@ -1,6 +1,34 @@
 # System Patterns
 **Last Updated:** 2024-02-21
 
+## Dashboard Architecture
+```mermaid
+graph TD
+  A[DashboardShell] --> B[Navigation]
+  A --> C[Content Area]
+  B --> D[Sidebar]
+  C --> E[Dashboard Overview]
+  C --> F[Campaign Management]
+  C --> G[Analytics]
+  C --> H[Settings]
+  E --> I[Stats Cards]
+  E --> J[Recent Activity]
+  F --> K[Campaign List]
+  F --> L[Campaign Filters]
+  G --> M[Metrics Overview]
+  G --> N[Performance Charts]
+  H --> O[LinkedIn Integration]
+  H --> P[Notifications]
+```
+
+## Component Patterns
+- Dark theme container wrappers
+- Responsive grid layouts
+- Card-based content blocks
+- Real-time metric displays
+- Empty state patterns
+- Sidebar navigation with icons
+
 ## Auth Architecture
 ```mermaid
 graph TD
@@ -26,4 +54,4 @@ sequenceDiagram
   Server-->>-Client: Formatted Results
 ```
 
-[//]: # (Cross-reference: techContext.md#api-security)
+[//]: # (Cross-reference: techContext.md#design-system)

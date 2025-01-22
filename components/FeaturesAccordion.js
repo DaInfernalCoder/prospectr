@@ -15,9 +15,9 @@ const features = [
     title: "Smart Search",
     description:
       "AI-powered lead search that finds the perfect prospects based on your ideal customer profile. Filter by industry, role, company size, and more.",
-    type: "image",
+    /* type: "image",
     path: "/features/smart-search.png",
-    alt: "Smart search interface",
+    alt: "Smart search interface",*/ 
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -39,9 +39,9 @@ const features = [
     title: "Automated Campaigns",
     description:
       "Create personalized outreach campaigns that automatically send connection requests and follow-up messages. Stay within LinkedIn's limits while maximizing results.",
-    type: "image",
+    /* type: "image",
     path: "/features/campaigns.png",
-    alt: "Campaign automation interface",
+    alt: "Campaign automation interface",*/
     svg: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -118,12 +118,12 @@ const Item = ({ feature, isOpen, setFeatureSelected }) => {
         }}
         aria-expanded={isOpen}
       >
-        <span className={`duration-100 ${isOpen ? "text-primary" : ""}`}>
+        <span className={`duration-100 ${isOpen ? "text-red-500" : ""}`}>
           {svg}
         </span>
         <span
           className={`flex-1 text-base-content ${
-            isOpen ? "text-primary font-semibold" : ""
+            isOpen ? "text-red-500 font-bold" : ""
           }`}
         >
           <h3 className="inline">{title}</h3>
