@@ -1,57 +1,47 @@
 # System Patterns
-**Last Updated:** 2024-02-21
 
-## Dashboard Architecture
-```mermaid
-graph TD
-  A[DashboardShell] --> B[Navigation]
-  A --> C[Content Area]
-  B --> D[Sidebar]
-  C --> E[Dashboard Overview]
-  C --> F[Campaign Management]
-  C --> G[Analytics]
-  C --> H[Settings]
-  E --> I[Stats Cards]
-  E --> J[Recent Activity]
-  F --> K[Campaign List]
-  F --> L[Campaign Filters]
-  G --> M[Metrics Overview]
-  G --> N[Performance Charts]
-  H --> O[LinkedIn Integration]
-  H --> P[Notifications]
-```
+Last Updated: 1/21/2025
 
-## Component Patterns
-- Dark theme container wrappers
-- Responsive grid layouts
-- Card-based content blocks
-- Real-time metric displays
-- Empty state patterns
-- Sidebar navigation with icons
+## Architecture Overview
+- Next.js application with dashboard functionality
+- Client-side navigation using Next.js router
+- Component-based UI structure
 
-## Auth Architecture
-```mermaid
-graph TD
-  A[Client] --> B[Next.js Middleware]
-  B --> C[Supabase Auth]
-  C --> D[Session Cookie]
-  D --> E[Protected Routes]
-```
+## Core Technical Patterns
+- Sidebar navigation using Framer Motion for animations
+- Responsive design with mobile-first approach
+- Dark/light theme support using Tailwind CSS
 
-## API Rate Limiting
-- Redis-backed counters
-- Tier-based buckets (Free/Pro)
-- Client-side quota display
+## Data Flow
+- Dashboard data will be fetched from API endpoints
+- Real-time updates for campaign progress
+- Analytics data aggregation for replies section
 
-## LinkedIn Integration
-```mermaid
-sequenceDiagram
-  Client->>+Server: Campaign Request
-  Server->>+Unipile: API Call
-  Unipile->>+LinkedIn: Forward Request
-  LinkedIn-->>-Unipile: Response
-  Unipile-->>-Server: Normalized Data
-  Server-->>-Client: Formatted Results
-```
+## Key Technical Decisions
+- Using Framer Motion for smooth animations
+- Implementing black and white theme for clean UI
+- Modular component structure for easy maintenance
+- Mobile-responsive sidebar with collapsible menu
 
-[//]: # (Cross-reference: techContext.md#design-system)
+## UI/UX Patterns
+- Minimalist black and white theme
+- Responsive sidebar with hover animations
+- Clear visual hierarchy in dashboard
+- Campaign progress visualization
+- Replies section for engagement tracking
+
+## Component Structure
+- Sidebar: Collapsible navigation with animations
+- Dashboard: Main content area with analytics
+- Analytics: Campaign metrics and replies
+- Settings: User configuration and preferences
+
+## Error Handling
+- Graceful fallbacks for loading states
+- Clear error messages for failed operations
+- Automatic retry mechanisms for API calls
+
+## Performance Considerations
+- Optimized animations for smooth transitions
+- Lazy loading of dashboard components
+- Efficient state management

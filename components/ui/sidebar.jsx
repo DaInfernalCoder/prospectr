@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import React, { useState, createContext, useContext } from "react";
@@ -21,7 +21,7 @@ export const SidebarProvider = ({
   setOpen: setOpenProp,
   animate = true
 }) => {
-  const [openState, setOpenState] = useState(false);
+  const [openState, setOpenState] = useState(typeof window !== 'undefined' ? false : true);
 
   const open = openProp !== undefined ? openProp : openState;
   const setOpen = setOpenProp !== undefined ? setOpenProp : setOpenState;
@@ -61,8 +61,9 @@ export const DesktopSidebar = ({
   const { open, setOpen, animate } = useSidebar();
   return (
     (<motion.div
+      suppressHydrationWarning
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] flex-shrink-0",
+        "h-full px-4 py-4 hidden md:flex md:flex-col bg-white dark:bg-black w-[300px] flex-shrink-0 border-r border-neutral-200 dark:border-neutral-800",
         className
       )}
       animate={{
@@ -84,8 +85,9 @@ export const MobileSidebar = ({
   const { open, setOpen } = useSidebar();
   return (<>
     <div
+      suppressHydrationWarning
       className={cn(
-        "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-neutral-100 dark:bg-neutral-800 w-full"
+        "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-white dark:bg-black w-full border-b border-neutral-200 dark:border-neutral-800"
       )}
       {...props}>
       <div className="flex justify-end z-20 w-full">
@@ -104,7 +106,7 @@ export const MobileSidebar = ({
               ease: "easeInOut",
             }}
             className={cn(
-              "fixed h-full w-full inset-0 bg-white dark:bg-neutral-900 p-10 z-[100] flex flex-col justify-between",
+              "fixed h-full w-full inset-0 bg-white dark:bg-black p-10 z-[100] flex flex-col justify-between",
               className
             )}>
             <div
@@ -128,6 +130,7 @@ export const SidebarLink = ({
   const { open, animate } = useSidebar();
   return (
     (<Link
+      suppressHydrationWarning
       href={link.href}
       className={cn("flex items-center justify-start gap-2 group/sidebar py-2", className)}
       {...props}>

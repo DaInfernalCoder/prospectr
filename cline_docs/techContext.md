@@ -1,61 +1,55 @@
-# Tech Context  
-**Last Updated:** 2024-02-21
+# Technical Context
 
-## Core Stack
-- Next.js 14 (App Router)
-- Tailwind CSS + Shadcn UI
-- Supabase Auth + Postgres
-- Unipile LinkedIn API
+Last Updated: 1/21/2025
 
-## Design System
-- Dark theme primary (#0f172a)
-- White secondary (#ffffff)
-- Neutral grays for UI elements
-- Responsive dashboard grid
-- Shadcn UI components base
-- Icon-based navigation
+## Core Technologies
+- Next.js 14
+- React
+- Tailwind CSS
+- Framer Motion
+- Supabase
 
-## Component Architecture
-- DashboardShell (layout wrapper)
-- Sidebar navigation system
-- Stats cards and metrics
-- Campaign management views
-- Analytics visualizations
-- Settings configuration panels
+## Integration Patterns
+- Client-side navigation
+- Server-side rendering where needed
+- API routes for data operations
+- Real-time updates for campaign data
 
-## Auth Implementation
-- Cookie-based sessions with JWT
-- Middleware-protected routes (/dashboard)
-- Custom auth hooks using Zustand
-- Team role management system
-
-## API Security
-- Redis rate limiting (Supabase)
-- Request signing for LinkedIn API calls
-- Daily key rotation via Vault
-- Tier-based quotas (Free/Pro)
-
-## Monitoring & Analytics
-- Supabase Logflare integration
-- Custom quota tracking dashboard
-- Sentry error tracking
-- Campaign performance metrics
+## Technical Constraints
+- Must maintain mobile responsiveness
+- Performance optimization for animations
+- Accessibility compliance
+- Cross-browser compatibility
 
 ## Development Environment
-- Node.js v18.17+
-- Local Supabase CLI
-- VSCode with Prettier/ESLint
-- Postman for API testing
+- Node.js
+- npm/yarn package management
+- VSCode IDE
+- Git version control
 
-## Key Dependencies
-```json
-{
-  "@supabase/supabase-js": "^2.39.0",
-  "@unipile/js-client": "^1.2.1",
-  "d3": "^7.8.5",
-  "lucide-react": "latest",
-  "framer-motion": "latest"
-}
-```
+## Current Implementation Details
 
-[//]: # (Cross-reference: systemPatterns.md#dashboard-architecture)
+### UI Components
+- New sidebar implementation with Framer Motion
+- Black and white theme using Tailwind
+- Campaign progress visualization
+- Replies section in analytics
+- Mobile-responsive design patterns
+
+### Data Management
+- Campaign data structure
+- Analytics aggregation
+- User settings persistence
+- Real-time updates
+
+### API Integration
+- Campaign progress tracking
+- Reply management
+- User authentication
+- Analytics data fetching
+
+## Future Considerations
+- API implementation for campaign progress
+- Real-time updates for replies
+- Performance monitoring
+- Analytics data caching

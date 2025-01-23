@@ -21,11 +21,10 @@ export const metadata = getSEOTags();
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={font.className} suppressHydrationWarning>
-      {config.domainName && (
-        <head>
-          <PlausibleProvider domain={config.domainName} />
-        </head>
-      )}
+      <head>
+        <meta name="darkreader-lock" />
+        {config.domainName && <PlausibleProvider domain={config.domainName} />}
+      </head>
       <body data-theme={config.colors.theme}>
         {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
         <ClientLayout>{children}</ClientLayout>
