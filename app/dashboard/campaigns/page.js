@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Users, BarChart2 } from "lucide-react";
 
 export default function CampaignsPage() {
   return (
@@ -32,18 +33,106 @@ export default function CampaignsPage() {
         </Button>
       </div>
 
-      {/* Empty State */}
-      <div className="text-center py-12 bg-[#0C0C0C] rounded-lg border border-[#2A2A2A]">
-        <div className="max-w-sm mx-auto">
-          <h3 className="text-lg font-medium text-[#C9E5FF] mb-2">
-            No campaigns yet
-          </h3>
-          <p className="text-[#A3A3A3] mb-4">
-            Create your first campaign to start connecting with potential leads on LinkedIn
-          </p>
-          <Button variant="outline">
-            Create Campaign
-          </Button>
+      {/* Campaign List */}
+      <div className="space-y-4">
+        {/* Active Campaigns */}
+        <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A]">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-medium text-[#C9E5FF]">Active Campaigns</h3>
+                <p className="text-sm text-[#A3A3A3]">Currently running campaigns</p>
+              </div>
+              <Button variant="outline">View Details</Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#2A2A2A]">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#C9E5FF]" />
+                  </div>
+                  <div>
+                    <h4 className="text-[#C9E5FF] font-medium">Q1 Outreach</h4>
+                    <p className="text-sm text-[#A3A3A3]">250 prospects • 45% complete</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-sm text-[#C9E5FF]">42 replies</p>
+                    <p className="text-xs text-[#A3A3A3]">16.8% rate</p>
+                  </div>
+                  <Button variant="ghost" size="icon">
+                    <BarChart2 className="w-4 h-4 text-[#A3A3A3]" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Draft Campaigns */}
+        <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A]">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-medium text-[#C9E5FF]">Draft Campaigns</h3>
+                <p className="text-sm text-[#A3A3A3]">Campaigns in preparation</p>
+              </div>
+              <Button variant="outline">View Details</Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#2A2A2A]">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#C9E5FF]" />
+                  </div>
+                  <div>
+                    <h4 className="text-[#C9E5FF] font-medium">Tech Founders</h4>
+                    <p className="text-sm text-[#A3A3A3]">Draft • Last edited 2 days ago</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">Edit</Button>
+                  <Button variant="ghost" size="sm">Delete</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Completed Campaigns */}
+        <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A]">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-medium text-[#C9E5FF]">Completed</h3>
+                <p className="text-sm text-[#A3A3A3]">Past campaigns</p>
+              </div>
+              <Button variant="outline">View Details</Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#2A2A2A]">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#C9E5FF]" />
+                  </div>
+                  <div>
+                    <h4 className="text-[#C9E5FF] font-medium">December Outreach</h4>
+                    <p className="text-sm text-[#A3A3A3]">500 prospects • Completed</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-sm text-[#C9E5FF]">89 replies</p>
+                    <p className="text-xs text-[#A3A3A3]">17.8% rate</p>
+                  </div>
+                  <Button variant="ghost" size="icon">
+                    <BarChart2 className="w-4 h-4 text-[#A3A3A3]" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

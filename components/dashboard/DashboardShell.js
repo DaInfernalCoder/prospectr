@@ -37,8 +37,9 @@ export default function DashboardShell({ children }) {
       <div className="fixed inset-y-0 left-0 w-64 bg-black border-r border-neutral-800">
         <div className="flex flex-col h-full">
           <div className="p-6">
-            <Link href="/dashboard" className="flex items-center">
+            <Link href="/dashboard" className="flex items-center gap-3">
               <img src="/icon.png" alt="Prospectr" className="h-8 w-auto" />
+              <span className="text-[#C9E5FF] text-lg font-medium">Prospectr</span>
             </Link>
           </div>
 
@@ -75,11 +76,7 @@ export default function DashboardShell({ children }) {
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-medium">Dashboard</h1>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="px-2 py-1 text-sm text-neutral-400 hover:text-white">Feedback</button>
-            <button className="px-2 py-1 text-sm text-neutral-400 hover:text-white">Help</button>
-            <button className="px-2 py-1 text-sm text-neutral-400 hover:text-white">Docs</button>
-          </div>
+          <div></div>
         </header>
         <main className="p-6">{children}</main>
       </div>
