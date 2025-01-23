@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function SettingsPage() {
   return (
     <div className="space-y-6">
@@ -20,9 +22,9 @@ export default function SettingsPage() {
                 <p className="text-[#C9E5FF]">Connection Status</p>
                 <p className="text-sm text-[#A3A3A3]">Your LinkedIn account is not connected</p>
               </div>
-              <button className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#C9E5FF] px-4 py-2 rounded-md transition-colors border border-[#2A2A2A]">
+              <Button variant="outline">
                 Connect LinkedIn
-              </button>
+              </Button>
             </div>
             <div className="pt-4 border-t border-[#2A2A2A]">
               <p className="text-sm text-[#A3A3A3]">
@@ -43,7 +45,7 @@ export default function SettingsPage() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-[#2A2A2A] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2A2A2A] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#C9E5FF] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#C9E5FF] after:border after:border-[#2A2A2A] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0C0C0C]"></div>
+                <div className="w-11 h-6 bg-[#2A2A2A] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#2A2A2A] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#C9E5FF] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#C9E5FF] after:border after:border-[#2A2A2A] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0C0C0C]"></div>
               </label>
             </div>
             <div className="flex items-center justify-between pt-4 border-t border-[#2A2A2A]">
@@ -53,7 +55,7 @@ export default function SettingsPage() {
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-[#2A2A2A] peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#2A2A2A] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#C9E5FF] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#C9E5FF] after:border after:border-[#2A2A2A] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0C0C0C]"></div>
+                <div className="w-11 h-6 bg-[#2A2A2A] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#2A2A2A] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[#C9E5FF] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#C9E5FF] after:border after:border-[#2A2A2A] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0C0C0C]"></div>
               </label>
             </div>
           </div>
@@ -84,9 +86,9 @@ export default function SettingsPage() {
               />
             </div>
             <div className="pt-4 flex justify-end border-t border-[#2A2A2A]">
-              <button className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#C9E5FF] px-4 py-2 rounded-md transition-colors border border-[#2A2A2A]">
+              <Button variant="outline">
                 Save Changes
-              </button>
+              </Button>
             </div>
           </div>
         </div>

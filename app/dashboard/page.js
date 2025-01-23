@@ -36,10 +36,10 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <div className="flex gap-4">
-        <Button className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#C9E5FF] border border-[#2A2A2A]">
+        <Button variant="outline">
           New Campaign
         </Button>
-        <Button className="bg-[#0C0C0C] hover:bg-[#2A2A2A] text-[#C9E5FF] border border-[#2A2A2A]">
+        <Button variant="outline">
           Import Contacts
         </Button>
       </div>

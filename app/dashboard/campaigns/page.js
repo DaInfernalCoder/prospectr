@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function CampaignsPage() {
   return (
     <div className="space-y-6">
@@ -9,25 +11,25 @@ export default function CampaignsPage() {
           <h1 className="text-2xl font-bold text-[#C9E5FF]">Campaigns</h1>
           <p className="text-sm text-[#A3A3A3]">Manage your LinkedIn outreach campaigns</p>
         </div>
-        <button className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#C9E5FF] px-4 py-2 rounded-md transition-colors border border-[#2A2A2A]">
+        <Button variant="outline">
           New Campaign
-        </button>
+        </Button>
       </div>
 
       {/* Campaign Filters */}
       <div className="flex gap-4 pb-4 border-b border-[#2A2A2A]">
-        <button className="text-sm font-medium text-[#C9E5FF] border-b-2 border-[#C9E5FF] pb-4 px-2">
+        <Button variant="ghost" className="text-[#C9E5FF] border-b-2 border-[#C9E5FF] pb-4 px-2 rounded-none">
           All Campaigns
-        </button>
-        <button className="text-sm font-medium text-[#A3A3A3] hover:text-[#C9E5FF] pb-4 px-2">
+        </Button>
+        <Button variant="ghost" className="text-[#A3A3A3] hover:text-[#C9E5FF] pb-4 px-2 rounded-none">
           Active
-        </button>
-        <button className="text-sm font-medium text-[#A3A3A3] hover:text-[#C9E5FF] pb-4 px-2">
+        </Button>
+        <Button variant="ghost" className="text-[#A3A3A3] hover:text-[#C9E5FF] pb-4 px-2 rounded-none">
           Drafts
-        </button>
-        <button className="text-sm font-medium text-[#A3A3A3] hover:text-[#C9E5FF] pb-4 px-2">
+        </Button>
+        <Button variant="ghost" className="text-[#A3A3A3] hover:text-[#C9E5FF] pb-4 px-2 rounded-none">
           Completed
-        </button>
+        </Button>
       </div>
 
       {/* Empty State */}
@@ -39,9 +41,9 @@ export default function CampaignsPage() {
           <p className="text-[#A3A3A3] mb-4">
             Create your first campaign to start connecting with potential leads on LinkedIn
           </p>
-          <button className="bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#C9E5FF] px-6 py-2 rounded-md transition-colors border border-[#2A2A2A]">
+          <Button variant="outline">
             Create Campaign
-          </button>
+          </Button>
         </div>
       </div>
     </div>
