@@ -7,28 +7,78 @@ Last Updated: 1/23/2025
 - Fixing landing page using references
 - Implementing Stripe for payment
 - Setting up Supabase for auth
+- Get project ready to ship by fixing vercel errors
+
+## Unipile Integration Details
+
+- Account Tiers:
+  - Free: Limited to 20 connects/day
+  - Premium: Upgraded to 40 connects/day
+  - Sales Navigator: 40 connects/day + InMail capability
+
+## Implementation Status
+
+### Completed
+- Unipile service setup with rate limiting
+- LinkedIn accounts table schema with RLS
+- Account connection API routes
+- Settings page UI for account management
+- Authentication checkpoint handling
+- Account type management
+
+### In Progress
+- Campaign search functionality
+- Connection request implementation
+- Message sending capabilities
+- Analytics tracking
+
+### Next Steps
+1. Run Supabase migration for linkedin_accounts table
+2. Test account connection flow with both auth methods
+3. Implement campaign creation with connected accounts
+4. Add connection request functionality
+5. Implement message templates and sending
+6. Set up analytics tracking
 
 ## Recent Changes
-- Removed docs, feedback, help buttons from dashboard header
-- Added "Prospectr" text next to logo in sidebar
-- Updated analytics page to match campaigns color scheme:
-  - #C9E5FF for headers
-  - #A3A3A3 for secondary text
-  - #2A2A2A for borders
-  - #0C0C0C for backgrounds
-- Added campaign list UI with sections for:
-  - Active campaigns (showing progress and reply stats)
-  - Draft campaigns (with edit/delete actions)
-  - Completed campaigns (with final stats)
-- Implemented campaign filters (All, Active, Drafts, Completed)
+- Added Unipile integration service
+- Created LinkedIn accounts management
+- Updated settings page with account connection
+- Implemented authentication flows
+- Added checkpoint resolution handling
+- Set up rate limit tracking
 
 ## Active Files
-- components/dashboard/DashboardShell.js (dashboard layout)
-- app/dashboard/analytics/page.js (analytics page)
-- app/dashboard/campaigns/page.js (campaign list implementation)
+- libs/unipile.js (Unipile API integration)
+- models/LinkedInAccount.js (Supabase model)
+- app/api/linkedin/connect/route.js (Account connection API)
+- app/api/linkedin/accounts/route.js (Accounts listing API)
+- components/dashboard/LinkedInAccounts.js (Account management UI)
+- app/dashboard/settings/page.js (Settings page integration)
+- migrations/linkedin_accounts.sql (Database schema)
 
-## Next Steps
-1. Research and implement LinkedIn API integration using Unipile docs
-2. Gather landing page references and plan improvements
-3. Set up Stripe payment integration
-4. Implement Supabase authentication
+## Testing Requirements
+1. Account Connection:
+   - Test username/password flow
+   - Test cookie-based auth
+   - Verify checkpoint handling
+   - Check rate limit enforcement
+
+2. Account Management:
+   - Verify account listing
+   - Test disconnection
+   - Validate status updates
+   - Check daily limits
+
+3. Error Handling:
+   - Invalid credentials
+   - Connection timeouts
+   - Rate limit exceeded
+   - Checkpoint failures
+
+## Notes
+- Remember to space out LinkedIn actions by ~1 minute
+- Implement warmup period for new accounts
+- Monitor daily usage limits
+- Handle checkpoint timeouts (5 min limit)
+- Consider adding account health monitoring
