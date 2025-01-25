@@ -1,7 +1,7 @@
 "use client";
 
 import { Crisp } from "crisp-sdk-web";
-import config from "@/config";
+import config from "../config";
 
 // Use this button if chat is hidden on some routes. config.js has onlyShowOnRoutes set to ["/"] so it will be hidden on all routes except the home page.
 // If Crisp is not enable, it will open the support email in the default email client.

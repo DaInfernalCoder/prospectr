@@ -1,13 +1,18 @@
 # Active Context
 
-Last Updated: 1/23/2025
+Last Updated: 1/24/2025
 
 ## Current Focus
+Priority: Fixing Unipile integration
 - Implementing LinkedIn API through Unipile docs
-- Fixing landing page using references
-- Implementing Stripe for payment
-- Setting up Supabase for auth
-- Get project ready to ship by fixing vercel errors
+- Implementing Unipile service with rate limiting
+- Implementing LinkedIn accounts management
+- Implementing authentication checkpoint handling
+- Implementing account connection API routes
+- Implementing settings page UI for account management
+- Implementing authentication checkpoint handling
+- Implementing account type management
+
 
 ## Unipile Integration Details
 
@@ -19,12 +24,7 @@ Last Updated: 1/23/2025
 ## Implementation Status
 
 ### Completed
-- Unipile service setup with rate limiting
-- LinkedIn accounts table schema with RLS
-- Account connection API routes
-- Settings page UI for account management
-- Authentication checkpoint handling
-- Account type management
+
 
 ### In Progress
 - Campaign search functionality
@@ -33,20 +33,10 @@ Last Updated: 1/23/2025
 - Analytics tracking
 
 ### Next Steps
-1. Run Supabase migration for linkedin_accounts table
-2. Test account connection flow with both auth methods
-3. Implement campaign creation with connected accounts
-4. Add connection request functionality
-5. Implement message templates and sending
-6. Set up analytics tracking
+
 
 ## Recent Changes
-- Added Unipile integration service
-- Created LinkedIn accounts management
-- Updated settings page with account connection
-- Implemented authentication flows
-- Added checkpoint resolution handling
-- Set up rate limit tracking
+
 
 ## Active Files
 - libs/unipile.js (Unipile API integration)
