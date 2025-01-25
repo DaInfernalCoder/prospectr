@@ -42,7 +42,7 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-xl opacity-80 leading-relaxed">
-              The simplest way to automate finding contacts with AI. Built without the ridiculous price tag.
+              Your personal AI powered LinkedIn assistant, built without the ridiculous price tag.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">

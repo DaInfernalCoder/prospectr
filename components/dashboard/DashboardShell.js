@@ -37,8 +37,7 @@ export default function DashboardShell({ children }) {
       <div className="fixed inset-y-0 left-0 w-64 bg-black border-r border-neutral-800">
         <div className="flex flex-col h-full">
           <div className="p-6">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <img src="/icon.png" alt="Prospectr" className="h-8 w-auto" />
+            <Link href="/dashboard" className="flex items-center">
               <span className="text-[#C9E5FF] text-lg font-medium">Prospectr</span>
             </Link>
           </div>

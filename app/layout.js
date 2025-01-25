@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         <meta name="darkreader-lock" />
         {config.domainName && <PlausibleProvider domain={config.domainName} />}
       </head>
-      <body data-theme={config.colors.theme}>
+      <body data-theme={config.colors.theme} suppressHydrationWarning>
         {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
         <ClientLayout>{children}</ClientLayout>
       </body>
