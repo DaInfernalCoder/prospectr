@@ -21,20 +21,23 @@ export default function Login() {
 
     try {
       const { type, provider } = options;
-      const redirectURL = window.location.origin + "/api/auth/callback";
-
+      // For OAuth, we let Supabase handle the redirect automatically
       if (type === "oauth") {
         await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: redirectURL,
+            redirectTo: `${window.location.origin}/api/auth/callback`,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            }
           },
         });
       } else if (type === "magic_link") {
         await supabase.auth.signInWithOtp({
           email,
           options: {
-            emailRedirectTo: redirectURL,
+            emailRedirectTo: `${window.location.origin}/api/auth/callback`,
           },
         });
 
@@ -50,9 +53,9 @@ export default function Login() {
   };
 
   return (
-    <main className="p-8 md:p-24" data-theme={config.colors.theme}>
-      <div className="text-center mb-4">
-        <Link href="/" className="btn btn-ghost btn-sm">
+    <main className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-8 md:p-24" data-theme={config.colors.theme}>
+      <div className="text-center mb-5">
+        <Link href="/" className="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -68,13 +71,13 @@ export default function Login() {
           Home
         </Link>
       </div>
-      <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-center mb-12">
+      <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-center mb-12 bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
         Sign-in to {config.appName}{" "}
       </h1>
 
       <div className="space-y-8 max-w-xl mx-auto">
         <button
-          className="btn btn-block"
+          className="flex items-center justify-center w-full px-4 py-3 text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors"
           onClick={(e) =>
             handleSignup(e, { type: "oauth", provider: "google" })
           }
@@ -109,8 +112,13 @@ export default function Login() {
           Sign-up with Google
         </button>
 
-        <div className="divider text-xs text-base-content/50 font-medium">
-          OR
+        <div className="relative my-8">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-700"></div>
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="px-2 text-gray-400 bg-gradient-to-b from-gray-900 to-black">OR</span>
+          </div>
         </div>
 
         <form
@@ -123,12 +131,12 @@ export default function Login() {
             value={email}
             autoComplete="email"
             placeholder="tom@cruise.com"
-            className="input input-bordered w-full placeholder:opacity-60"
+            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent placeholder:text-gray-500"
             onChange={(e) => setEmail(e.target.value)}
           />
 
           <button
-            className="btn btn-primary btn-block"
+            className="w-full px-4 py-3 text-white bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
             disabled={isLoading || isDisabled}
             type="submit"
           >
@@ -138,6 +146,12 @@ export default function Login() {
             Send Magic Link
           </button>
         </form>
+        <p className="mt-8 text-center text-sm text-gray-400">
+          By signing in, you agree to our{" "}
+          <Link href="/tos" className="text-white hover:underline">Terms of Service</Link>
+          {" "}and{" "}
+          <Link href="/privacy-policy" className="text-white hover:underline">Privacy Policy</Link>
+        </p>
       </div>
     </main>
   );
