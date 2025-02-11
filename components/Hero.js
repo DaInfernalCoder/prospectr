@@ -6,8 +6,15 @@ import { Splite } from "./ui/splite";
 import { Play } from "lucide-react";
 import { TypeAnimation } from 'react-type-animation';
 import TestimonialsAvatars from "./TestimonialsAvatars";
+import { useRouter } from 'next/navigation';
 
 const Hero = () => {
+  const router = useRouter();
+
+  const handleStartFinding = () => {
+    router.push('/dashboard');
+  };
+
   return (
     <section className="relative w-full overflow-hidden bg-base-100">
       <div className="max-w-[1200px] mx-auto px-2 py-12">
@@ -46,7 +53,10 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
-              <RainbowButton className="text-lg font-semibold px-8 py-4 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out">
+              <RainbowButton 
+                onClick={handleStartFinding}
+                className="text-lg font-semibold px-8 py-4 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out"
+              >
                 Start Finding Leads
               </RainbowButton>
             </div>
