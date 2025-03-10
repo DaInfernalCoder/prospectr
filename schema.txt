@@ -1,0 +1,20 @@
+profiles (
+  id UUID   
+  user_id UUID REFERENCES auth.users NOT NULL, -- Supabase Auth user ID
+  linkedin_token TEXT, -- Encrypted LinkedIn token (using pgcrypto)
+  linkedin_status BOOLEAN DEFAULT FALSE, -- Is LinkedIn connected?
+  message_quota INT DEFAULT 50, -- Daily message limit
+  stripe_customer_id TEXT, -- Stripe customer ID
+  subscription_tier TEXT DEFAULT 'free', -- free/pro/premium
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+linkedin_connections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) NOT NULL,
+  profile_id TEXT, -- LinkedIn profile ID from Unipile
+  name TEXT,
+  headline TEXT,
+  connected_at TIMESTAMPTZ, -- When the connection was made
+  status TEXT -- pending/accepted/ignored
+);
