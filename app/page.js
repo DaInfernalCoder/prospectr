@@ -26,11 +26,14 @@ import Hero from "@/components/Hero";
 import OtherTools from "@/components/OtherTools";
 import CTA from "@/components/CTA";
 import ButtonLead from "@/components/ButtonLead";
+import { Suspense } from "react";
 
 export default function Page() {
   return (
     <>
-      <Header />
+      <Suspense fallback={<div className="w-full h-16"></div>}>
+        <Header />
+      </Suspense>
       <Hero />
       <main>
         <Problem />

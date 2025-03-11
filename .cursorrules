@@ -1,0 +1,72 @@
+# Cursor Configuration File
+
+# ESLint rules to ignore during development
+eslint.rules.ignore = [
+  "no-unused-vars",
+  "react/no-unescaped-entities",
+  "react-hooks/exhaustive-deps"
+]
+
+# Automatically format code and fix linting issues on save
+eslint.autofix = true
+
+# Prevent annoying or repetitive warnings
+suppress.warnings = [
+  "react/no-unescaped-entities", 
+  "no-unused-vars"
+]
+
+# Always use &apos; for apostrophes in JSX
+jsx.apostrophe.replacement = "&apos;"
+
+# ShipFast Boilerplate Stack Guidelines
+# --------------------------------------
+# Tech Stack: JavaScript, Node.js, React, Next.js App Router, Tailwind CSS, Supabase
+
+# Code Style and Structure
+# -----------------------
+# - Write concise, technical JavaScript code with accurate examples
+# - Use functional and declarative programming patterns; avoid classes
+# - Prefer iteration and modularization over code duplication
+# - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+# - Structure files: exported component, subcomponents, helpers, static content
+
+# Naming Conventions
+# -----------------
+# - Use kebab-case for directories
+# - Use camelCase for variables and functions
+# - Use PascalCase for components
+# - File names for components should be in PascalCase. Rest of the files in kebab-case
+# - Prefix component names with their type (e.g. ButtonAccount.jsx and ButtonSignin.jsx, 
+#   CardAnalyticsMain.jsx and CardAnalyticsData.jsx, etc.)
+
+# Syntax and Formatting
+# --------------------
+# - Use the "function" keyword for pure functions
+# - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
+# - Use declarative JSX
+# - IMPORTANT: Always escape apostrophes with &apos; to prevent build errors
+
+# UI and Styling
+# -------------
+# - Use DaisyUI and Tailwind CSS for components and styling
+# - Implement responsive design with Tailwind CSS; use a mobile-first approach
+
+# Performance Optimization
+# ----------------------
+# - Minimize 'use client', 'useState', and 'useEffect'; favor React Server Components (RSC)
+# - ALWAYS wrap components using client-side hooks (useSearchParams, usePathname, useRouter) in a Suspense boundary
+# - Example: <Suspense fallback={<div>Loading...</div>}><ComponentUsingHooks /></Suspense>
+# - Wrap client components in Suspense with fallback
+# - Use dynamic loading for non-critical components
+# - Optimize images: use Webp format, include size data, implement lazy loading
+
+# Key Conventions
+# --------------
+# - Optimize Web Vitals (LCP, CLS, FID)
+# - Limit 'use client':
+#   - Favor server components and Next.js SSR
+#   - Use only for Web API access in small components
+#   - Avoid for data fetching or state management
+
+# IMPORTANT: ALWAYS CHECK IF THERE ARE PREEXISTING .ENV.LOCAL FILES BEFORE CREATING MORE
