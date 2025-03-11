@@ -92,7 +92,7 @@ const Header = () => {
             <Link
               href={link.href}
               key={link.href}
-              className="link link-hover text-base font-medium"
+              className="text-white hover:text-white/80 transition-colors text-base font-medium"
               title={link.label}
             >
               {link.label}
@@ -107,7 +107,7 @@ const Header = () => {
       {/* Mobile menu, show/hide based on menu state. */}
       <div className={`relative z-50 ${isOpen ? "" : "hidden"}`}>
         <div
-          className={`fixed inset-y-0 right-0 z-10 w-full px-8 py-4 overflow-y-auto bg-base-200 sm:max-w-sm transform origin-right transition ease-in-out duration-300`}
+          className={`fixed inset-y-0 right-0 z-10 w-full px-8 py-4 overflow-y-auto bg-black sm:max-w-sm transform origin-right transition ease-in-out duration-300`}
         >
           {/* Your logo/name on small screens */}
           <div className="flex items-center justify-between">
@@ -125,7 +125,7 @@ const Header = () => {
                 width={32}
                 height={32}
               />
-              <span className="font-extrabold text-lg">{config.appName}</span>
+              <span className="font-extrabold text-lg text-white">{config.appName}</span>
             </Link>
             <button
               type="button"
@@ -139,7 +139,7 @@ const Header = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-6 h-6"
+                className="w-6 h-6 text-white"
               >
                 <path
                   strokeLinecap="round"
@@ -158,7 +158,7 @@ const Header = () => {
                   <Link
                     href={link.href}
                     key={link.href}
-                    className="link link-hover"
+                    className="text-white hover:text-white/80 transition-colors"
                     title={link.label}
                   >
                     {link.label}
@@ -166,7 +166,7 @@ const Header = () => {
                 ))}
               </div>
             </div>
-            <div className="divider"></div>
+            <div className="border-t border-zinc-800 my-4"></div>
             {/* Your CTA on small screens */}
             <div className="flex flex-col">{cta}</div>
           </div>

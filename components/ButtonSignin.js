@@ -27,7 +27,7 @@ const ButtonSignin = ({ text = "Log in ", extraStyle }) => {
     return (
       <Link
         href={config.auth.callbackUrl}
-        className={`btn btn-primary rounded-full ${extraStyle} no-underline flex items-center gap-2`}
+        className={`bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full ${extraStyle} no-underline flex items-center gap-2 transition-colors`}
       >
         {user?.user_metadata?.avatar_url ? (
           <img
@@ -39,7 +39,7 @@ const ButtonSignin = ({ text = "Log in ", extraStyle }) => {
             height={24}
           />
         ) : (
-          <span className="w-6 h-6 bg-base-300 flex justify-center items-center rounded-full shrink-0">
+          <span className="w-6 h-6 bg-zinc-800 flex justify-center items-center rounded-full shrink-0 text-white">
             {user?.user_metadata?.name?.charAt(0) || user?.email?.charAt(0)}
           </span>
         )}
@@ -50,7 +50,7 @@ const ButtonSignin = ({ text = "Log in ", extraStyle }) => {
 
   return (
     <Link
-      className={`btn btn-primary rounded-full flex items-center gap-2 ${extraStyle}`}
+      className={`bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors ${extraStyle}`}
       href={config.auth.loginUrl}
     >
       {text}

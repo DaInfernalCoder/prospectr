@@ -10,8 +10,8 @@ const CTA = () => {
         className="object-cover w-full"
         fill
       />
-      <div className="relative hero-overlay bg-neutral bg-opacity-70"></div>
-      <div className="relative hero-content text-center text-neutral-content p-8">
+      <div className="relative hero-overlay bg-black bg-opacity-80"></div>
+      <div className="relative hero-content text-center text-white p-8">
         <div className="flex flex-col items-center max-w-xl p-8 md:p-0">
           <h2 className="font-bold text-3xl md:text-5xl tracking-tight mb-8 md:mb-12">
             Automate your LinkedIn prospecting with AI
@@ -21,7 +21,7 @@ const CTA = () => {
             section...
           </p>
 
-          <button className="btn btn-primary btn-wide">
+          <button className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
             Get {config.appName}
           </button>
         </div>

@@ -23,7 +23,6 @@ import Problem from "@/components/Problem";
 // import TestimonialsAvatars from "@/components/TestimonialsAvatars";
 import WithWithout from "@/components/WithWithout";
 import Hero from "@/components/Hero";
-import OtherTools from "@/components/OtherTools";
 import CTA from "@/components/CTA";
 import ButtonLead from "@/components/ButtonLead";
 import { Suspense } from "react";
@@ -37,7 +36,7 @@ export default function Page() {
       <Hero />
       <main>
         <Problem />
-        <OtherTools />
+        
         {/* <ButtonAccount /> */}
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
