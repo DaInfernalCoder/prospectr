@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, BarChart2, Settings } from "lucide-react";
+import ButtonLinkedin from "@/components/ButtonLinkedin";
 
 const navigationLinks = [
   {
@@ -30,6 +31,24 @@ const navigationLinks = [
 
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
+  const [linkedinStatus, setLinkedinStatus] = useState(false);
+
+  // Check LinkedIn connection status
+  useEffect(() => {
+    const checkLinkedinStatus = async () => {
+      try {
+        const response = await fetch("/api/auths/linkedin/status");
+        if (response.ok) {
+          const data = await response.json();
+          setLinkedinStatus(data.connected);
+        }
+      } catch (error) {
+        console.error("Failed to check LinkedIn status:", error);
+      }
+    };
+
+    checkLinkedinStatus();
+  }, []);
 
   return (
     <div className="min-h-screen bg-black text-white" suppressHydrationWarning>
@@ -73,12 +92,31 @@ export default function DashboardShell({ children }) {
       <div className="pl-64">
         <header className="flex items-center justify-between h-16 px-6 border-b border-neutral-800">
           <div className="flex items-center gap-4">
-            <h1 className="text-lg font-medium">Dashboard</h1>
+            <h1 className="text-lg font-medium">{getPageTitle(pathname)}</h1>
           </div>
-          <div></div>
+          <div className="flex items-center gap-3">
+            {!linkedinStatus && pathname !== "/dashboard/settings" && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-amber-400">LinkedIn not connected</span>
+                <ButtonLinkedin variant="outline" text="Connect" className="btn-sm" />
+              </div>
+            )}
+          </div>
         </header>
         <main className="p-6">{children}</main>
       </div>
     </div>
   );
+}
+
+// Helper function to get page title based on pathname
+function getPageTitle(pathname) {
+  if (pathname === "/dashboard") return "Dashboard";
+  if (pathname === "/dashboard/campaigns") return "Campaigns";
+  if (pathname === "/dashboard/analytics") return "Analytics";
+  if (pathname === "/dashboard/settings") return "Settings";
+  
+  // Extract the last part of the pathname as a fallback
+  const segments = pathname.split("/");
+  return segments[segments.length - 1].charAt(0).toUpperCase() + segments[segments.length - 1].slice(1);
 }

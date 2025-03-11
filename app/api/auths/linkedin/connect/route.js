@@ -14,13 +14,18 @@ export async function GET(request) {
 
     const supabase = await createClient();
 
-    // REMOVE COMMENTS THIS LATER BECAUSE WITH NGROK WILL NEED COMPLEX EDITING
-
-    // const {
-    //   data: { user },
-    // } = await supabase.auth.getUser();
-    // if (!user)
-    //   return NextResponse.json({ status: 404, message: "There is no user" });
+    // Get the current authenticated user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
 
     const client = new UnipileClient(BASE_URL, ACCESS_TOKEN);
 
@@ -30,9 +35,11 @@ export async function GET(request) {
       providers: ["LINKEDIN"],
       api_url: BASE_URL,
       expiresOn: new Date(Date.now() + 3600 * 1000),
-      // IM NOW HARDCODED THE USER_ID BECAUSE WE USER CONNECTED IN ORDER TO GET THE ID BUT NOW LETS LEAVE IT LIKE THAT OR YOU CAN TRY WITH YOUR URER_ID
-      name: "fa8bcc3f-8a0f-4e40-8f16-eb70ed6dcd83",
+      // Use current user's ID
+      name: user.id,
       notify_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/unipile/webhooks`,
+      success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
     });
 
     return NextResponse.redirect(response.url);

@@ -1,8 +1,35 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import ButtonLinkedin from "@/components/ButtonLinkedin";
 
 export default function SettingsPage() {
+  const [linkedinStatus, setLinkedinStatus] = useState({
+    connected: false,
+    lastConnected: null
+  });
+
+  // Fetch LinkedIn connection status
+  useEffect(() => {
+    const checkLinkedinStatus = async () => {
+      try {
+        const response = await fetch("/api/auths/linkedin/status");
+        if (response.ok) {
+          const data = await response.json();
+          setLinkedinStatus({
+            connected: data.connected,
+            lastConnected: data.last_connected
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch LinkedIn status:", error);
+      }
+    };
+
+    checkLinkedinStatus();
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -20,11 +47,16 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[#C9E5FF]">Connection Status</p>
-                <p className="text-sm text-[#A3A3A3]">Your LinkedIn account is not connected</p>
+                <p className="text-sm text-[#A3A3A3]">
+                  {linkedinStatus.connected 
+                    ? `Your LinkedIn account is connected${linkedinStatus.lastConnected ? ` (Last updated: ${new Date(linkedinStatus.lastConnected).toLocaleDateString()})` : ''}` 
+                    : "Your LinkedIn account is not connected"}
+                </p>
               </div>
-              <Button variant="outline">
-                Connect LinkedIn
-              </Button>
+              <ButtonLinkedin 
+                variant="outline" 
+                text={linkedinStatus.connected ? "Reconnect LinkedIn" : "Connect LinkedIn"} 
+              />
             </div>
             <div className="pt-4 border-t border-[#2A2A2A]">
               <p className="text-sm text-[#A3A3A3]">
