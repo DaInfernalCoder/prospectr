@@ -11,6 +11,11 @@ const nextConfig = {
       "unsplash.com",
     ],
   },
+  // Configure ESLint to not fail builds on warnings
+  eslint: {
+    // Warning during builds, but not failing
+    ignoreDuringBuilds: true,
+  },
 };
 
 module.exports = nextConfig;

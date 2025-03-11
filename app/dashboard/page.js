@@ -12,7 +12,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold text-[#C9E5FF]">Welcome back!</h1>
           <p className="text-sm text-[#A3A3A3]">
-            Here's what's happening with your campaigns
+            Here&apos;s what&apos;s happening with your campaigns
           </p>
         </div>
         <ButtonAccount />

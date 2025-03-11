@@ -37,15 +37,15 @@ const Header = () => {
   }, [searchParams]);
 
   return (
-    <header>
+    <header className="absolute w-full z-50">
       <nav
-        className=" container flex items-center justify-between px-8 py-4 mx-auto"
+        className="container flex items-center justify-between px-8 py-6 mx-auto bg-transparent"
         aria-label="Global"
       >
         {/* Your logo/name on large screens */}
         <div className="flex lg:flex-1">
           <Link
-            className="flex items-center gap-2 shrink-0 "
+            className="flex items-center gap-2 shrink-0"
             href="/"
             title={`${config.appName} hompage`}
           >
@@ -92,7 +92,7 @@ const Header = () => {
             <Link
               href={link.href}
               key={link.href}
-              className="link link-hover"
+              className="link link-hover text-base font-medium"
               title={link.label}
             >
               {link.label}
@@ -112,7 +112,7 @@ const Header = () => {
           {/* Your logo/name on small screens */}
           <div className="flex items-center justify-between">
             <Link
-              className="flex items-center gap-2 shrink-0 "
+              className="flex items-center gap-2 shrink-0"
               title={`${config.appName} hompage`}
               href="/"
             >
