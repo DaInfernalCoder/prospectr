@@ -26,15 +26,13 @@ import Hero from "@/components/Hero";
 import OtherTools from "@/components/OtherTools";
 import CTA from "@/components/CTA";
 import ButtonLead from "@/components/ButtonLead";
+
 export default function Page() {
   return (
     <>
-      {/* <header className="p-4 flex justify-end max-w-7xl mx-auto">
-        <ButtonSignin text="Login" />
-      </header> */}
       <Header />
+      <Hero />
       <main>
-        <Hero />
         <Problem />
         <OtherTools />
         {/* <ButtonAccount /> */}

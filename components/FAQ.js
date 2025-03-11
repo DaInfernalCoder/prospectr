@@ -10,7 +10,7 @@ const faqList = [
     question: "How does Prospectr work with LinkedIn's connection limits?",
     answer: (
       <p>
-        Prospectr respects LinkedIn's daily connection limit of 50 requests per day. Our smart campaign scheduling ensures you stay within these limits while maximizing your outreach effectiveness.
+        Prospectr respects LinkedIn&apos;s daily connection limit of 50 requests per day. Our smart campaign scheduling ensures you stay within these limits while maximizing your outreach effectiveness.
       </p>
     ),
   },
@@ -18,7 +18,7 @@ const faqList = [
     question: "Is this compliant with LinkedIn's terms of service?",
     answer: (
       <p>
-        Yes! Prospectr uses LinkedIn's official API and follows all their guidelines. We maintain strict compliance to ensure your account's safety and good standing.
+        Yes! Prospectr uses LinkedIn&apos;s official API and follows all their guidelines. We maintain strict compliance to ensure your account&apos;s safety and good standing.
       </p>
     ),
   },
