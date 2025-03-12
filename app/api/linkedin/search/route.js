@@ -139,16 +139,16 @@ export async function POST(request) {
     const formattedResults = results.items.map((profile) => ({
       id: profile.id,
       name: profile.name,
+      identifier: profile.public_identifier,
       headline: profile.headline,
       location: profile.location,
-      profile_url:
-        profile.profile_url ||
-        (profile.public_identifier
-          ? `https://linkedin.com/in/${profile.public_identifier}`
-          : null),
+      profile_url: profile.profile_url,
+      profile_picture: profile.profile_picture_url,
+      profile_picture_large: profile.profile_picture_url_large,
       network_distance: profile.network_distance,
       current_position: profile.current_positions?.[0]?.role || null,
       company: profile.current_positions?.[0]?.company || null,
+      shared_connections_count: profile.shared_connections_count,
     }));
 
     return NextResponse.json(formattedResults);
