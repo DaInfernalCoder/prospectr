@@ -1,3 +1,5 @@
+import { sendReconnectionEmail } from "@/utils/email/reconnectionEmail";
+import { getUser } from "@/utils/supabase/getUser";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
@@ -7,6 +9,7 @@ export async function POST(request) {
 
   try {
     const payload = await request.json();
+    console.log({ payload });
 
     // Validate payload
     if (!payload.account_id || !payload.name) {

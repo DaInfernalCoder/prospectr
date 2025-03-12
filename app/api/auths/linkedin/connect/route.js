@@ -1,6 +1,6 @@
 import { UnipileClient } from "unipile-node-sdk";
-import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import { getUser } from "@/utils/supabase/getUser";
 
 export async function GET(request) {
   try {
@@ -12,20 +12,10 @@ export async function GET(request) {
       throw new Error("Missing Unipile configuration in .env");
     }
 
-    const supabase = await createClient();
-
-    // Get the current authenticated user
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
+    // REMOVE COMMENTS THIS LATER BECAUSE WITH NGROK WILL NEED COMPLEX EDITING
+    // const user = await getUser();
+    // if (!user)
+    //   return NextResponse.json({ status: 404, message: "There is no user" });
 
     const client = new UnipileClient(BASE_URL, ACCESS_TOKEN);
 

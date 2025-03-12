@@ -46,7 +46,7 @@ const Problem = () => {
         <h2 className="max-w-3xl mx-auto font-extrabold text-4xl md:text-5xl tracking-tight mb-6 md:mb-8 text-white">
           Manual LinkedIn networking is killing your productivity
         </h2>
-        <p className="max-w-xl mx-auto text-lg opacity-90 leading-relaxed mb-12 md:mb-20 text-white">
+        <p className="max-w-xl mx-auto text-lg opacity-90 leading-relaxed mb-12 md:mb-20">
           Searching profiles, sending connection requests, tracking responses... It&apos;s overwhelming and time-consuming.
         </p>
 
