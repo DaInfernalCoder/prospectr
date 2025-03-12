@@ -16,6 +16,20 @@ const nextConfig = {
     // Warning during builds, but not failing
     ignoreDuringBuilds: true,
   },
+  // Exclude Supabase Edge Functions from webpack compilation
+  webpack: (config) => {
+    // Add the supabase functions directory to ignored modules
+    config.watchOptions = config.watchOptions || {};
+    config.watchOptions.ignored = config.watchOptions.ignored || [];
+    
+    if (Array.isArray(config.watchOptions.ignored)) {
+      config.watchOptions.ignored.push('**/supabase/functions/**');
+    } else {
+      config.watchOptions.ignored = ['**/supabase/functions/**'];
+    }
+    
+    return config;
+  },
 };
 
 module.exports = nextConfig;
