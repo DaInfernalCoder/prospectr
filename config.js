@@ -10,7 +10,7 @@ const config = {
   domainName: "prospectr.ai",
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (mailgun.supportEmail) otherwise customer support won't work.
-    id: "",
+    id: "4001a365-4a61-4b7e-a71e-01af4dc2ce52",
     // Hide Crisp by default, except on route "/". Crisp is toggled with <ButtonSupport/>. If you want to show Crisp on every routes, just remove this below
     onlyShowOnRoutes: ["/"],
   },
