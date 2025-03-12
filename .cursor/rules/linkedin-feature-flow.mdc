@@ -1,0 +1,177 @@
+---
+description: LinkedIn Search and Connection Request Feature Flow
+globs: ["app/api/linkedin/**", "app/dashboard/campaigns/**", "components/dashboard/LinkedIn*"]
+---
+
+# LinkedIn Search and Connection Request Flow
+
+## Feature Architecture
+
+```mermaid
+flowchart TD
+    A[User] --> B[LinkedIn Search]
+    B --> C[Search Results]
+    C --> D[Select Profiles]
+    D --> E[Create Campaign]
+    E --> F[Message Editor]
+    F --> G[Send Connection Requests]
+    G --> H[Track Campaign]
+    H --> I[Analytics]
+    
+    subgraph "Backend Integration"
+    J[Search API] <--> K[Unipile Client]
+    L[Connection API] <--> K
+    M[Campaign API] <--> K
+    end
+    
+    B <--> J
+    G <--> L
+    H <--> M
+```
+
+## User Interface Components
+
+### Search Interface
+- Search form with multiple filter options:
+  - Job title/role input field
+  - Company name filter
+  - Location selector
+  - Industry dropdown
+  - Connection degree filter
+  - Additional filters (exclude profiles without photos, etc.)
+- Search results display with:
+  - Profile information
+  - Selection checkboxes
+  - Pagination controls
+  - "Create Campaign" button
+
+### Campaign Message Editor
+- Template selection dropdown
+- Rich text editor with variable insertion
+- Character counter (300 char limit)
+- Variable buttons (firstName, lastName, company, etc.)
+- Auto follow-up message toggle
+- Follow-up message editor
+- Scheduling options
+
+### Campaign Management
+- Campaign list with status indicators
+- Progress tracking
+- Connection status monitoring
+- Response rate analytics
+- Campaign editing capabilities
+
+## API Implementation
+
+### Search API
+- Endpoint: `/api/linkedin/search`
+- Method: POST
+- Parameters:
+  - Search keywords
+  - Filter options
+  - Pagination settings
+- Response:
+  - Profile list
+  - Pagination metadata
+  - Search statistics
+
+### Connection Request API
+- Endpoint: `/api/auths/linkedin/connect`
+- Method: POST
+- Parameters:
+  - Profile IDs
+  - Connection message
+  - Follow-up configuration
+  - Spacing settings
+- Response:
+  - Request status
+  - Error handling
+  - Rate limit information
+
+## Data Models
+
+### Search History
+```javascript
+{
+  id: uuid,
+  userId: string,
+  query: string,
+  filters: object,
+  resultCount: number,
+  createdAt: timestamp,
+  savedSearch: boolean
+}
+```
+
+### Campaign
+```javascript
+{
+  id: uuid,
+  userId: string,
+  name: string,
+  searchId: uuid,
+  profileIds: string[],
+  message: string,
+  followUp: {
+    enabled: boolean,
+    message: string,
+    delay: number
+  },
+  status: 'draft' | 'active' | 'completed' | 'paused',
+  stats: {
+    sent: number,
+    accepted: number,
+    replied: number
+  },
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
+```
+
+### Connection Request
+```javascript
+{
+  id: uuid,
+  campaignId: uuid,
+  profileId: string,
+  message: string,
+  status: 'pending' | 'sent' | 'accepted' | 'failed',
+  sentAt: timestamp,
+  acceptedAt: timestamp,
+  errorMessage: string
+}
+```
+
+## Rate Limiting Implementation
+- Account tier-based limits:
+  - Free: ~15 invitations/week
+  - Premium: 80-100 invitations/day
+  - Sales Navigator: 80-100 invitations/day + InMail
+- Time spacing between requests (~1 minute)
+- Daily quota tracking
+- Error handling for rate limit violations
+
+## Testing Scenarios
+1. Search functionality:
+   - Test with various filter combinations
+   - Verify result accuracy
+   - Check pagination
+   - Test empty results handling
+
+2. Connection requests:
+   - Test single connection request
+   - Test batch connection requests
+   - Verify message templating
+   - Check rate limit enforcement
+
+3. Campaign management:
+   - Test campaign creation
+   - Verify status updates
+   - Check analytics tracking
+   - Test campaign editing
+
+4. Error handling:
+   - Test invalid search parameters
+   - Test connection request failures
+   - Check rate limit exceeded scenarios
+   - Verify error message display

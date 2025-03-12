@@ -3,8 +3,11 @@
 import { Button } from "@/components/ui/button";
 import ButtonAccount from "@/components/ButtonAccount";
 import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function Dashboard() {
+  const router = useRouter();
+  
   return (
     <div className="space-y-6" suppressHydrationWarning>
       {/* Header Section */}
@@ -45,8 +48,12 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <div className="flex gap-4">
-        <Button variant="outline">New Campaign</Button>
-        <Button variant="outline">Import Contacts</Button>
+        <Button 
+          variant="outline"
+          onClick={() => router.push('/dashboard/campaigns/new/leads')}
+        >
+          New Campaign
+        </Button>
       </div>
 
       {/* Recent Activity */}
@@ -60,6 +67,7 @@ export default function Dashboard() {
             <Button
               variant="link"
               className="mt-4 text-[#C9E5FF] hover:text-[#A3A3A3]"
+              onClick={() => router.push('/dashboard/campaigns/new/leads')}
             >
               Start your first campaign
             </Button>

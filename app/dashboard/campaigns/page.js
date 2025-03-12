@@ -50,7 +50,10 @@ export default function CampaignsPage() {
           <h1 className="text-2xl font-bold text-[#C9E5FF]">Campaigns</h1>
           <p className="text-sm text-[#A3A3A3]">Manage your LinkedIn outreach campaigns</p>
         </div>
-        <Button variant="outline">
+        <Button 
+          variant="outline"
+          onClick={() => router.push('/dashboard/campaigns/new/leads')}
+        >
           New Campaign
         </Button>
       </div>

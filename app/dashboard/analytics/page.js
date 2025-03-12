@@ -1,6 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 export default function AnalyticsPage() {
+  const router = useRouter();
+  
   return (
     <div className="space-y-6">
       {/* Header Section */}
@@ -101,7 +105,10 @@ export default function AnalyticsPage() {
         <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">Campaign Performance</h3>
         <div className="text-center py-8">
           <p className="text-[#A3A3A3]">No campaign data available</p>
-          <button className="mt-4 text-sm text-[#C9E5FF] hover:underline">
+          <button 
+            className="mt-4 text-sm text-[#C9E5FF] hover:underline"
+            onClick={() => router.push('/dashboard/campaigns/new/leads')}
+          >
             Create your first campaign
           </button>
         </div>
