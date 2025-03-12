@@ -1,6 +1,7 @@
 ---
 description: Prospectr - LinkedIn Lead Generation Tool
-globs:
+globs: 
+alwaysApply: false
 ---
 
 # Prospectr Project Overview
