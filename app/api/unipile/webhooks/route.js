@@ -1,9 +1,7 @@
-import { sendReconnectionEmail } from "@/utils/email/reconnectionEmail";
 import { getUser } from "@/utils/supabase/getUser";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
-// app/api/unipile/webhooks/route.ts
 export async function POST(request) {
   console.log("=== WEBHOOK STARTED ===");
 
@@ -11,7 +9,6 @@ export async function POST(request) {
     const payload = await request.json();
     console.log({ payload });
 
-    // Validate payload
     if (!payload.account_id || !payload.name) {
       return NextResponse.json({ error: "Bad request" }, { status: 400 });
     }

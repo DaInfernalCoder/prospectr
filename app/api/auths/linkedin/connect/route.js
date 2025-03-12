@@ -12,10 +12,9 @@ export async function GET(request) {
       throw new Error("Missing Unipile configuration in .env");
     }
 
-    // REMOVE COMMENTS THIS LATER BECAUSE WITH NGROK WILL NEED COMPLEX EDITING
-    // const user = await getUser();
-    // if (!user)
-    //   return NextResponse.json({ status: 404, message: "There is no user" });
+    const user = await getUser();
+    if (!user)
+      return NextResponse.json({ status: 404, message: "There is no user" });
 
     const client = new UnipileClient(BASE_URL, ACCESS_TOKEN);
 
