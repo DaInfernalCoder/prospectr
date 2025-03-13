@@ -30,6 +30,11 @@ const nextConfig = {
     
     return config;
   },
+  // Enable Turbopack for development
+  experimental: {
+    // Enable Turbopack
+    turbo: {},
+  },
 };
 
 module.exports = nextConfig;
