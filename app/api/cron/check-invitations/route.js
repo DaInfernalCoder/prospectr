@@ -17,15 +17,16 @@ export async function GET(request) {
   console.log("next...");
   try {
     // Get all users with active invitation jobs
-    const { data: activeJobs } = await supabase
+    const { data: activeJobs, errorActiveJobs } = await supabase
       .from("invitation_jobs")
       .select("user_id")
       .in("status", ["active", "completed"])
-      .order("updated_at", { ascending: false });
+      .order("created_at", { ascending: false });
 
     console.log({ activeJobs });
+    console.log({ errorActiveJobs });
 
-    if (!activeJobs || activeJobs.length === 0) {
+    if (!activeJobs) {
       return NextResponse.json({ message: "No active invitation jobs" });
     }
 
