@@ -5,6 +5,9 @@ function Test() {
   const [data, setData] = useState([]);
   console.log(data);
 
+  const recipients = ["moussa-gbamou-72443b308", "oussama-labchari"].map(
+    (identifier) => ({ identifier: identifier })
+  );
   useEffect(() => {
     async function testFetch() {
       const res = await fetch("/api/linkedin/invitations/send", {
@@ -13,9 +16,8 @@ function Test() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          identifier: "sunny-datta-mba-cbi-84b69622",
-          message:
-            "Hi Sunny Datta, MBA, CBI, I just send you an invitation from the backend",
+          recipients: recipients,
+          // message: message,
         }),
       });
       const data = await res.json();
@@ -24,6 +26,7 @@ function Test() {
 
     testFetch();
   }, []);
+
   // useEffect(() => {
   //   async function testFetch() {
   //     const res = await fetch("/api/linkedin/search", {
@@ -32,8 +35,8 @@ function Test() {
   //         "Content-Type": "application/json",
   //       },
   //       body: JSON.stringify({
-  //         name: "Sunny Datta, MBA, CBI ",
-  //         jobTitle: "",
+  //         name: "",
+  //         jobTitle: "full stack",
   //         //   location not work for now
   //         location: "",
   //         company: "",
@@ -54,6 +57,27 @@ function Test() {
 
   //   testFetch();
   // }, []);
+
+  // useEffect(() => {
+  //   async function testFetch() {
+  //     const res = await fetch("/api/linkedin/invitations/send", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         identifier: "sunny-datta-mba-cbi-84b69622",
+  //         message:
+  //           "Hi Sunny Datta, MBA, CBI, I just send you an invitation from the backend",
+  //       }),
+  //     });
+  //     const data = await res.json();
+  //     setData(data);
+  //   }
+
+  //   testFetch();
+  // }, []);
+
   return <div>Test</div>;
 }
 
