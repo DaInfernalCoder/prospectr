@@ -18,6 +18,7 @@ export async function GET(request) {
       .select("unipile_account_id")
       .eq("user_id", user.id)
       .single();
+    console.log({ id: profile.unipile_account_id }, "1");
 
     if (!profile?.unipile_account_id) {
       return NextResponse.json(
@@ -27,7 +28,7 @@ export async function GET(request) {
     }
 
     // Get pending invitations from our database
-    const { data: pendingInvitations } = await supabase
+    const { data: pendingInvitations, error } = await supabase
       .from("invitation_users")
       .select(
         `
@@ -40,8 +41,8 @@ export async function GET(request) {
       )
       .eq("invitation_status", "pending")
       .eq("invitation_jobs.user_id", user.id);
-
-    console.log({ pendingInvitations });
+    console.log(error, "error");
+    console.log({ pendingInvitations }, "2");
     if (!pendingInvitations || pendingInvitations.length === 0) {
       return NextResponse.json({ message: "No pending invitations to check" });
     }
@@ -54,7 +55,7 @@ export async function GET(request) {
       limit: 100, // Get most recent connections first
     });
 
-    console.log({ relations });
+    console.log({ relations }, "3");
 
     // Create a map of LinkedIn public identifiers for quick lookup
     const relationMap = new Map();
