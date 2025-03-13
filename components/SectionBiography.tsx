@@ -49,7 +49,7 @@ function SectionBiography() {
           {/* Biography Content */}
           <div className="space-y-8 max-w-2xl">
             <h2 className="text-4xl font-bold tracking-tighter text-white">
-              hey! I&apos;m the founder of <span className="text-red-500">Prospectr</span>
+              hey! I&apos;m Sumit, the founder of <span className="text-red-500">Prospectr</span>
             </h2>
             <div className="space-y-6 text-lg text-gray-400">
               <p>

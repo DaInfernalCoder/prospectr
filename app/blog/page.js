@@ -19,7 +19,7 @@ export default async function Blog() {
   return (
     <div className="min-h-screen bg-base-100">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-primary to-secondary text-white py-20">
+      <section className="relative bg-black from-primary to-secondary text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <h1 className="font-extrabold text-4xl lg:text-6xl tracking-tight mb-6">

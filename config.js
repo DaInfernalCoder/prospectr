@@ -18,71 +18,57 @@ const config = {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
     plans: [
       {
-        // REQUIRED — we use this to find the plan in the webhook (for instance if you want to update the user's credits based on the plan)
         priceId:
           process.env.NODE_ENV === "development"
             ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
             : "price_456",
-        //  REQUIRED - Name of the plan, displayed on the pricing page
-        name: "free",
-        // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
-        description: "Perfect for small projects",
-        // The price you want to display, the one user will be charged on Stripe.
-        price: 79,
-        // If you have an anchor price (i.e. $29) that you want to display crossed out, put it here. Otherwise, leave it empty
-        priceAnchor: 99,
+        name: "Basic",
+        description: "Perfect for getting started with LinkedIn automation",
+        price: 20,
+        priceDetails: "/month",
         features: [
           {
-            name: "NextJS boilerplate",
+            name: "1 active campaign",
           },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
+          { name: "Automatic connection requests" },
+          { name: "Basic Auto Reply capabilities" },
         ],
       },
       {
-        // REQUIRED — we use this to find the plan in the webhook (for instance if you want to update the user's credits based on the plan)
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_1Niyy5AxyNprDp7iZIqEyD2h_starter"
-            : "price_456",
-        //  REQUIRED - Name of the plan, displayed on the pricing page
-        name: "Starter",
-        // A friendly description of the plan, displayed on the pricing page. Tip: explain why this plan and not others
-        description: "Perfect for small projects",
-        // The price you want to display, the one user will be charged on Stripe.
-        price: 79,
-        // If you have an anchor price (i.e. $29) that you want to display crossed out, put it here. Otherwise, leave it empty
-        priceAnchor: 99,
-        features: [
-          {
-            name: "NextJS boilerplate",
-          },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
-        ],
-      },
-      {
-        // This plan will look different on the pricing page, it will be highlighted. You can only have one plan with isFeatured: true
         isFeatured: true,
         priceId:
           process.env.NODE_ENV === "development"
             ? "price_1O5KtcAxyNprDp7iftKnrrpw"
             : "price_456",
-        name: "Advanced",
-        description: "You need more power",
-        price: 99,
-        priceAnchor: 149,
+        name: "Pro",
+        description: "Advanced features for serious networkers",
+        price: 50,
+        priceDetails: "/month",
         features: [
           {
-            name: "NextJS boilerplate",
+            name: "Unlimited campaigns",
           },
-          { name: "User oauth" },
-          { name: "Database" },
-          { name: "Emails" },
-          { name: "1 year of updates" },
-          { name: "24/7 support" },
+          { name: "Automatic connection requests" },
+          { name: "Sales Navigator support" },
+          { name: "Automatic send message to inbox, inmail" },
+        ],
+      },
+      {
+        priceId:
+          process.env.NODE_ENV === "development"
+            ? "price_1Niyy5AxyNprDp7iZIqEyD2h_team"
+            : "price_456",
+        name: "Team",
+        description: "Perfect for teams and agencies",
+        price: 30,
+        priceDetails: "/user/month",
+        features: [
+          {
+            name: "Volume Discounts",
+          },
+          { name: "Advanced Team Settings" },
+          { name: "Team Inbox Management" },
+          { name: "All prices are per user, per month" },
         ],
       },
     ],
