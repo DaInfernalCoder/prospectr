@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(request) {
   const supabase = await createClient();
-
+  console.log("/check route");
   try {
     const user = await getUser();
 
@@ -41,6 +41,7 @@ export async function GET(request) {
       .eq("invitation_status", "pending")
       .eq("invitation_jobs.user_id", user.id);
 
+    console.log({ pendingInvitations });
     if (!pendingInvitations || pendingInvitations.length === 0) {
       return NextResponse.json({ message: "No pending invitations to check" });
     }
@@ -53,6 +54,8 @@ export async function GET(request) {
       limit: 100, // Get most recent connections first
     });
 
+    console.log({ relations });
+
     // Create a map of LinkedIn public identifiers for quick lookup
     const relationMap = new Map();
     if (relations && relations.items) {
@@ -64,6 +67,7 @@ export async function GET(request) {
               account_id: profile.unipile_account_id,
               identifier: relation.public_identifier,
             });
+            console.log({ userProfile }, "/check route");
 
             if (userProfile && userProfile.provider_id) {
               relationMap.set(userProfile.provider_id, {
@@ -71,6 +75,7 @@ export async function GET(request) {
                 provider_id: userProfile.provider_id,
               });
             }
+            console.log({ relationMap }, "1");
           } catch (error) {
             console.error(
               `Error getting profile for ${relation.public_identifier}:`,
@@ -85,9 +90,11 @@ export async function GET(request) {
     // Check status of each pending invitation
     const updatedInvitations = [];
 
+    console.log({ relationMap }, "2");
     for (const invitation of pendingInvitations) {
       // Check if the user is now a connection (invitation accepted)
       if (relationMap.has(invitation.linkedin_user_id)) {
+        console.log("has user_id_linkedin");
         const updatedInvitation = await updateInvitationStatus(
           invitation.id,
           "accepted",

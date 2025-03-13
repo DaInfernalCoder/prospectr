@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(request) {
+  console.log("/check-inviations");
   // Verify the request is from Vercel Cron
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -13,7 +14,7 @@ export async function GET(request) {
   }
 
   const supabase = await createClient();
-
+  console.log("next...");
   try {
     // Get all users with active invitation jobs
     const { data: activeJobs } = await supabase
@@ -22,13 +23,15 @@ export async function GET(request) {
       .in("status", ["active", "completed"])
       .order("updated_at", { ascending: false });
 
+    console.log({ activeJobs });
+
     if (!activeJobs || activeJobs.length === 0) {
       return NextResponse.json({ message: "No active invitation jobs" });
     }
 
     // Get unique user IDs
     const userIds = [...new Set(activeJobs.map((job) => job.user_id))];
-
+    console.log({ userIds });
     // For each user, call the check and follow-up endpoints
     const results = [];
 
