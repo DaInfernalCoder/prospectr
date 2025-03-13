@@ -1,6 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { unipileClient } from "@/utils/unipileClient";
+import {
+  updateInvitationStatus,
+  markFollowUpSent,
+} from "@/lib/invitation-service";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -53,35 +57,104 @@ export async function GET(request) {
           continue;
         }
 
-        // Check invitation statuses
-        const checkResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_APP_URL}/api/linkedin/invitations/check`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Cookie: await generateAuthCookie(userId, supabase),
-            },
-          }
-        );
+        // Get pending invitations for this user
+        const { data: pendingInvitations } = await supabase
+          .from("invitation_users")
+          .select(
+            `
+            *,
+            invitation_jobs(
+              user_id,
+              template_id,
+              invitation_templates(follow_up_message)
+            )
+          `
+          )
+          .eq("invitation_status", "pending")
+          .eq("invitation_jobs.user_id", userId);
 
-        // Send follow-up messages
-        const followUpResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_APP_URL}/api/linkedin/invitations/follow-up`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Cookie: await generateAuthCookie(userId, supabase),
-            },
+        const client = unipileClient();
+
+        // Get list of relations from Unipile
+        const relations = await client.users.getAllRelations({
+          account_id: profile.unipile_account_id,
+          limit: 100,
+        });
+
+        // Create a map of LinkedIn provider IDs
+        const relationMap = new Map();
+        if (relations?.items) {
+          for (const relation of relations.items) {
+            if (relation.public_identifier) {
+              try {
+                const userProfile = await client.users.getProfile({
+                  account_id: profile.unipile_account_id,
+                  identifier: relation.public_identifier,
+                });
+
+                if (userProfile?.provider_id) {
+                  relationMap.set(userProfile.provider_id, {
+                    ...relation,
+                    provider_id: userProfile.provider_id,
+                  });
+                }
+              } catch (error) {
+                console.error(`Error getting profile: ${error.message}`);
+                continue;
+              }
+            }
           }
-        );
+        }
+
+        // Check and update invitation statuses
+        const updatedInvitations = [];
+        for (const invitation of pendingInvitations || []) {
+          if (relationMap.has(invitation.linkedin_user_id)) {
+            const updatedInvitation = await updateInvitationStatus(
+              invitation.id,
+              "accepted",
+              new Date().toISOString()
+            );
+            updatedInvitations.push(updatedInvitation);
+
+            // If there's a follow-up message template, send it
+            if (
+              invitation.invitation_jobs?.invitation_templates
+                ?.follow_up_message
+            ) {
+              try {
+                const templateMessage =
+                  invitation.invitation_jobs.invitation_templates
+                    .follow_up_message;
+                const personalizedMessage = templateMessage
+                  .replace(/{{name}}/g, invitation.name || "there")
+                  .replace(
+                    /{{first_name}}/g,
+                    invitation.name?.split(" ")[0] || "there"
+                  );
+
+                console.log({ templateMessage });
+
+                const msg = await client.messaging.sendMessage({
+                  account_id: profile.unipile_account_id,
+                  provider: "LINKEDIN",
+                  recipient_id: invitation.linkedin_user_id,
+                  text: personalizedMessage,
+                });
+                console.log({ msg });
+
+                await markFollowUpSent(invitation.id);
+              } catch (error) {
+                console.error(`Error sending follow-up: ${error.message}`);
+              }
+            }
+          }
+        }
 
         results.push({
           userId,
           status: "processed",
-          checkStatus: checkResponse.status,
-          followUpStatus: followUpResponse.status,
+          updatedCount: updatedInvitations.length,
         });
       } catch (error) {
         console.error(`Error processing user ${userId}:`, error);
@@ -100,18 +173,4 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
-
-// Helper function to generate auth JWT for a user
-async function generateAuthCookie(userId, supabase) {
-  // Create a JWT token for the user
-  const payload = {
-    sub: userId, // subject (user id)
-    role: "authenticated",
-    exp: Math.floor(Date.now() / 1000) + 300, // 5 minutes expiry
-  };
-
-  const token = jwt.sign(payload, process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-  return `sb-access-token=${token}`;
 }
