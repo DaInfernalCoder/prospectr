@@ -5,9 +5,18 @@ function Test() {
   const [data, setData] = useState([]);
   console.log(data);
 
-  const recipients = ["author-flows-170a59355"].map((identifier) => ({
-    identifier: identifier,
-  }));
+  const recipients = [
+    {
+      identifier: "author-flows-170a59355",
+      name: "Author Flows",
+      profile_url: "https://www.linkedin.com/in/author-flows-170a59355/",
+    },
+    {
+      identifier: "aya-assad",
+      name: "Aya Assad",
+      profile_url: "https://www.linkedin.com/in/aya-assad/",
+    },
+  ];
   useEffect(() => {
     async function testFetch() {
       const res = await fetch("/api/linkedin/invitations/send", {
@@ -16,11 +25,7 @@ function Test() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          recipients: [{}].map((profile) => ({
-            identifier: "author-flows-170a59355",
-            name: "Author Flows",
-            profile_url: "https://www.linkedin.com/in/author-flows-170a59355/",
-          })),
+          recipients: recipients,
           message: "Hi, I'd like to connect!",
           templateName: "My Follow-up Template",
           followUpMessage:

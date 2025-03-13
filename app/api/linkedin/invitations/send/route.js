@@ -181,6 +181,8 @@ export async function POST(request) {
       );
     }
 
+    console.log({ formattedRecipients });
+
     // Generate a unique job ID
     const jobId = `inv_${Date.now()}_${Math.random()
       .toString(36)
