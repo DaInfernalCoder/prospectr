@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -107,7 +108,6 @@ async function generateAuthCookie(userId, supabase) {
     exp: Math.floor(Date.now() / 1000) + 300, // 5 minutes expiry
   };
 
-  const jwt = require("jsonwebtoken");
   const token = jwt.sign(payload, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   return `sb-access-token=${token}`;
