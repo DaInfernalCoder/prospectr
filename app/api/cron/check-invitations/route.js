@@ -67,7 +67,7 @@ export async function GET(request) {
 
         // Send follow-up messages
         const followUpResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_SITE_URL}/api/linkedin/invitations/follow-up`,
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/linkedin/invitations/follow-up`,
           {
             method: "GET",
             headers: {
