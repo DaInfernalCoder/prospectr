@@ -5,9 +5,9 @@ function Test() {
   const [data, setData] = useState([]);
   console.log(data);
 
-  const recipients = ["moussa-gbamou-72443b308", "oussama-labchari"].map(
-    (identifier) => ({ identifier: identifier })
-  );
+  const recipients = ["author-flows-170a59355"].map((identifier) => ({
+    identifier: identifier,
+  }));
   useEffect(() => {
     async function testFetch() {
       const res = await fetch("/api/linkedin/invitations/send", {
@@ -16,8 +16,15 @@ function Test() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          recipients: recipients,
-          // message: message,
+          recipients: [{}].map((profile) => ({
+            identifier: "author-flows-170a59355",
+            name: "Author Flows",
+            profile_url: "https://www.linkedin.com/in/author-flows-170a59355/",
+          })),
+          message: "Hi, I'd like to connect!",
+          templateName: "My Follow-up Template",
+          followUpMessage:
+            "Thanks for connecting {{name}}! I'd love to discuss, haha it works...",
         }),
       });
       const data = await res.json();
