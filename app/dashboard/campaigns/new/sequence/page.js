@@ -47,7 +47,7 @@ export default function SetSequencePage() {
           </div>
           <div className="w-8 h-0.5 bg-[#2A2A2A]"></div>
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-[#C9E5FF] text-black flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-bold">
               2
             </div>
             <span className="ml-2 text-white font-medium">Set Sequence</span>

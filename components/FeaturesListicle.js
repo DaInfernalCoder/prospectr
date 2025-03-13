@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { HeroVideoDialog } from "./ui/hero-video-dialog";
+import { motion } from "framer-motion";
 
 // List of features to display:
 // - name: name of the feature
 // - description: description of the feature (can be any JSX)
 // - svg: icon of the feature
+// - video: video content for the feature
 const features = [
   {
     name: "Emails",
@@ -30,7 +33,6 @@ const features = [
                   clipRule="evenodd"
                 />
               </svg>
-
               {item}
             </li>
           ))}
@@ -67,6 +69,10 @@ const features = [
         />
       </svg>
     ),
+    video: {
+      thumbnailSrc: "/features/email-feature.webp",
+      videoSrc: "https://www.youtube.com/embed/your-email-video-id",
+    },
   },
   {
     name: "Payments",
@@ -91,7 +97,6 @@ const features = [
                   clipRule="evenodd"
                 />
               </svg>
-
               {item}
             </li>
           ))}
@@ -129,6 +134,10 @@ const features = [
         />
       </svg>
     ),
+    video: {
+      thumbnailSrc: "/features/payments-feature.webp",
+      videoSrc: "https://www.youtube.com/embed/your-payments-video-id",
+    },
   },
   {
     name: "Login",
@@ -154,7 +163,6 @@ const features = [
                   clipRule="evenodd"
                 />
               </svg>
-
               {item}
             </li>
           ))}
@@ -192,6 +200,10 @@ const features = [
         />
       </svg>
     ),
+    video: {
+      thumbnailSrc: "/features/login-feature.webp",
+      videoSrc: "https://www.youtube.com/embed/your-login-video-id",
+    },
   },
   {
     name: "Database",
@@ -213,7 +225,6 @@ const features = [
                     clipRule="evenodd"
                   />
                 </svg>
-
                 {item}
               </li>
             )
@@ -252,6 +263,10 @@ const features = [
         />
       </svg>
     ),
+    video: {
+      thumbnailSrc: "/features/database-feature.webp",
+      videoSrc: "https://www.youtube.com/embed/your-database-video-id",
+    },
   },
   {
     name: "SEO",
@@ -278,7 +293,6 @@ const features = [
                   clipRule="evenodd"
                 />
               </svg>
-
               {item}
             </li>
           ))}
@@ -316,6 +330,10 @@ const features = [
         />
       </svg>
     ),
+    video: {
+      thumbnailSrc: "/features/seo-feature.webp",
+      videoSrc: "https://www.youtube.com/embed/your-seo-video-id",
+    },
   },
   {
     name: "Style",
@@ -340,7 +358,6 @@ const features = [
                   clipRule="evenodd"
                 />
               </svg>
-
               {item}
             </li>
           ))}
@@ -378,126 +395,68 @@ const features = [
         />
       </svg>
     ),
+    video: {
+      thumbnailSrc: "/features/style-feature.webp",
+      videoSrc: "https://www.youtube.com/embed/your-style-video-id",
+    },
   },
 ];
 
-// A list of features with a listicle style.
-// - Click on a feature to display its description.
-// - Good to use when multiples features are available.
-// - Autoscroll the list of features (optional).
+// A list of features with a vertical layout and video content
 const FeaturesListicle = () => {
-  const featuresEndRef = useRef(null);
   const [featureSelected, setFeatureSelected] = useState(features[0].name);
   const [hasClicked, setHasClicked] = useState(false);
 
-  // (Optional) Autoscroll the list of features so user know it's interactive.
-  // Stop scrolling when user scroll after the featuresEndRef element (end of section)
-  // emove useEffect is not needed.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!hasClicked) {
-        const index = features.findIndex(
-          (feature) => feature.name === featureSelected
-        );
-        const nextIndex = (index + 1) % features.length;
-        setFeatureSelected(features[nextIndex].name);
-      }
-    }, 5000);
-
-    try {
-      // stop the interval when the user scroll after the featuresRef element
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            console.log("STOP AUTO CHANGE");
-            clearInterval(interval);
-          }
-        },
-        {
-          root: null,
-          rootMargin: "0px",
-          threshold: 0.5,
-        }
-      );
-      if (featuresEndRef.current) {
-        observer.observe(featuresEndRef.current);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-
-    return () => clearInterval(interval);
-  }, [featureSelected, hasClicked]);
-
   return (
     <section className="py-24" id="features">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-base-100 max-md:px-8 max-w-3xl">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="text-center mb-16">
           <p className="text-accent font-medium text-sm font-mono mb-3">
             const launch_time = &quot;Today&quot;;
           </p>
           <h2 className="font-extrabold text-3xl lg:text-5xl tracking-tight mb-8">
-            {/* 💡 COPY TIP: Remind visitors about the value of your product. Why do they need it? */}
             Supercharge your app instantly, launch faster, make $
           </h2>
-          <div className="text-base-content/80 leading-relaxed mb-8 lg:text-lg">
-            {/* 💡 COPY TIP: Explain how your product delivers what you promise in the headline. */}
+          <div className="text-base-content/80 leading-relaxed mb-8 lg:text-lg max-w-3xl mx-auto">
             Login users, process payments and send emails at lightspeed. Spend
             your time building your startup, not integrating APIs. ShipFast
             provides you with the boilerplate code you need to launch, FAST.
           </div>
         </div>
-      </div>
 
-      <div>
-        <div className="grid grid-cols-4 md:flex justify-start gap-4 md:gap-12 max-md:px-8 max-w-3xl mx-auto mb-8">
-          {features.map((feature) => (
-            <span
+        <div className="space-y-24">
+          {features.map((feature, index) => (
+            <motion.div
               key={feature.name}
-              onClick={() => {
-                if (!hasClicked) setHasClicked(true);
-                setFeatureSelected(feature.name);
-              }}
-              className={`flex flex-col items-center justify-center gap-3 select-none cursor-pointer p-2 duration-200 group`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className={`flex flex-col ${
+                index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+              } gap-12 items-center`}
             >
-              <span
-                className={`duration-100 ${
-                  featureSelected === feature.name
-                    ? "text-primary"
-                    : "text-base-content/30 group-hover:text-base-content/50"
-                }`}
-              >
-                {feature.svg}
-              </span>
-              <span
-                className={`font-semibold text-sm ${
-                  featureSelected === feature.name
-                    ? "text-primary"
-                    : "text-base-content/50"
-                }`}
-              >
-                {feature.name}
-              </span>
-            </span>
+              <div className="w-full md:w-1/2 space-y-6">
+                <div className="flex items-center gap-4">
+                  <span className="text-primary">{feature.svg}</span>
+                  <h3 className="text-2xl font-bold">{feature.name}</h3>
+                </div>
+                <div className="text-base-content/80">{feature.description}</div>
+              </div>
+              
+              <div className="w-full md:w-1/2">
+                <HeroVideoDialog
+                  videoSrc={feature.video.videoSrc}
+                  thumbnailSrc={feature.video.thumbnailSrc}
+                  thumbnailAlt={`${feature.name} feature demo`}
+                  className="w-full aspect-video rounded-xl overflow-hidden"
+                  animationStyle="from-bottom"
+                />
+              </div>
+            </motion.div>
           ))}
         </div>
-        <div className="bg-base-200">
-          <div className="max-w-3xl mx-auto flex flex-col md:flex-row justify-center md:justify-start md:items-center gap-12">
-            <div
-              className="text-base-content/80 leading-relaxed space-y-4 px-12 md:px-0 py-12 max-w-xl animate-opacity"
-              key={featureSelected}
-            >
-              <h3 className="font-semibold text-base-content text-lg">
-                {features.find((f) => f.name === featureSelected)["name"]}
-              </h3>
-
-              {features.find((f) => f.name === featureSelected)["description"]}
-            </div>
-          </div>
-        </div>
       </div>
-      {/* Just used to know it's the end of the autoscroll feature (optional, see useEffect) */}
-      <p className="opacity-0" ref={featuresEndRef}></p>
     </section>
   );
 };

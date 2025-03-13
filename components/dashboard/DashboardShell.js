@@ -53,11 +53,11 @@ export default function DashboardShell({ children }) {
   return (
     <div className="min-h-screen bg-black text-white" suppressHydrationWarning>
       {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 w-64 bg-black border-r border-neutral-800">
+      <div className="fixed inset-y-0 left-0 w-64 bg-[#0F0F0F] border-r border-[#1A1A1A]">
         <div className="flex flex-col h-full">
           <div className="p-6">
             <Link href="/dashboard" className="flex items-center">
-              <span className="text-[#C9E5FF] text-lg font-medium">Prospectr</span>
+              <span className="text-white text-lg font-medium tracking-tight">Prospectr</span>
             </Link>
           </div>
 
@@ -69,7 +69,7 @@ export default function DashboardShell({ children }) {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                    isActive ? "bg-neutral-800 text-white" : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+                    isActive ? "bg-[#1A1A1A] text-white" : "text-[#A1A1AA] hover:text-white hover:bg-[#1A1A1A]"
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
@@ -79,9 +79,9 @@ export default function DashboardShell({ children }) {
             })}
           </nav>
 
-          <div className="p-4 border-t border-neutral-800">
-            <div className="flex items-center gap-3 px-3 py-2 text-sm text-neutral-400">
-              <div className="w-8 h-8 rounded-full bg-neutral-800" />
+          <div className="p-4 border-t border-[#1A1A1A]">
+            <div className="flex items-center gap-3 px-3 py-2 text-sm text-[#A1A1AA]">
+              <div className="w-8 h-8 rounded-full bg-[#1A1A1A]" />
               <div className="flex-1 truncate">user@example.com</div>
             </div>
           </div>
@@ -90,20 +90,20 @@ export default function DashboardShell({ children }) {
 
       {/* Main Content */}
       <div className="pl-64">
-        <header className="flex items-center justify-between h-16 px-6 border-b border-neutral-800">
+        <header className="flex items-center justify-between h-16 px-6 border-b border-[#1A1A1A]">
           <div className="flex items-center gap-4">
-            <h1 className="text-lg font-medium">{getPageTitle(pathname)}</h1>
+            <h1 className="text-lg font-medium tracking-tight">{getPageTitle(pathname)}</h1>
           </div>
           <div className="flex items-center gap-3">
             {!linkedinStatus && pathname !== "/dashboard/settings" && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-amber-400">LinkedIn not connected</span>
-                <ButtonLinkedin variant="outline" text="Connect" className="btn-sm" />
+                <ButtonLinkedin variant="outline" text="Connect" className="btn-sm rounded-md" />
               </div>
             )}
           </div>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="p-6 max-w-7xl mx-auto">{children}</main>
       </div>
     </div>
   );

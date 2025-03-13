@@ -13,8 +13,8 @@ export default function Dashboard() {
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-[#C9E5FF]">Welcome back!</h1>
-          <p className="text-sm text-[#A3A3A3]">
+          <h1 className="text-2xl font-bold text-white">Welcome back!</h1>
+          <p className="text-sm text-[#A1A1AA]">
             Here&apos;s what&apos;s happening with your campaigns
           </p>
         </div>
@@ -23,24 +23,24 @@ export default function Dashboard() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#0C0C0C] p-6 rounded-lg border border-[#2A2A2A]">
-          <h3 className="text-lg font-medium text-[#C9E5FF]">
+        <div className="bg-[#0F0F0F] p-6 rounded-lg border border-[#1A1A1A]">
+          <h3 className="text-lg font-medium text-white">
             Total Connections
           </h3>
-          <p className="text-3xl font-bold mt-2 text-[#C9E5FF]">0</p>
-          <p className="text-sm text-[#A3A3A3] mt-1">From all campaigns</p>
+          <p className="text-3xl font-bold mt-2 text-white">0</p>
+          <p className="text-sm text-[#A1A1AA] mt-1">From all campaigns</p>
         </div>
-        <div className="bg-[#0C0C0C] p-6 rounded-lg border border-[#2A2A2A]">
-          <h3 className="text-lg font-medium text-[#C9E5FF]">
+        <div className="bg-[#0F0F0F] p-6 rounded-lg border border-[#1A1A1A]">
+          <h3 className="text-lg font-medium text-white">
             Active Campaigns
           </h3>
-          <p className="text-3xl font-bold mt-2 text-[#C9E5FF]">0</p>
-          <p className="text-sm text-[#A3A3A3] mt-1">Currently running</p>
+          <p className="text-3xl font-bold mt-2 text-white">0</p>
+          <p className="text-sm text-[#A1A1AA] mt-1">Currently running</p>
         </div>
-        <div className="bg-[#0C0C0C] p-6 rounded-lg border border-[#2A2A2A]">
-          <h3 className="text-lg font-medium text-[#C9E5FF]">Response Rate</h3>
-          <p className="text-3xl font-bold mt-2 text-[#C9E5FF]">0%</p>
-          <p className="text-sm text-[#A3A3A3] mt-1">
+        <div className="bg-[#0F0F0F] p-6 rounded-lg border border-[#1A1A1A]">
+          <h3 className="text-lg font-medium text-white">Response Rate</h3>
+          <p className="text-3xl font-bold mt-2 text-white">0%</p>
+          <p className="text-sm text-[#A1A1AA] mt-1">
             Average across campaigns
           </p>
         </div>
@@ -58,15 +58,15 @@ export default function Dashboard() {
 
       {/* Recent Activity */}
       <div>
-        <h2 className="text-xl font-semibold text-[#C9E5FF] mb-4">
+        <h2 className="text-xl font-semibold text-white mb-4">
           Recent Activity
         </h2>
-        <div className="bg-[#0C0C0C] rounded-lg p-6 border border-[#2A2A2A]">
+        <div className="bg-[#0F0F0F] rounded-lg p-6 border border-[#1A1A1A]">
           <div className="text-center py-8">
-            <p className="text-[#A3A3A3]">No recent activity</p>
+            <p className="text-[#A1A1AA]">No recent activity</p>
             <Button
               variant="link"
-              className="mt-4 text-[#C9E5FF] hover:text-[#A3A3A3]"
+              className="mt-4 text-white hover:text-[#A1A1AA]"
               onClick={() => router.push('/dashboard/campaigns/new/leads')}
             >
               Start your first campaign

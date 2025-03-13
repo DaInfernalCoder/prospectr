@@ -57,39 +57,75 @@ const TOS = () => {
           className="leading-relaxed whitespace-pre-wrap"
           style={{ fontFamily: "sans-serif" }}
         >
-          {`Last Updated: September 26, 2023
+          {`Last Updated: March 13, 2024
 
-Welcome to ShipFast!
+Welcome to Prospectr!
 
-These Terms of Service ("Terms") govern your use of the ShipFast website at https://shipfa.st ("Website") and the services provided by ShipFast. By using our Website and services, you agree to these Terms.
+These Terms of Service ("Terms") govern your use of Prospectr's services and website ("Service"). By using our Service, you agree to these Terms.
 
-1. Description of ShipFast
+1. Service Description
 
-ShipFast is a platform that offers a JavaScript code boilerplate to assist entrepreneurs in launching their startups more efficiently.
+Prospectr is a professional prospecting and lead generation platform that helps businesses connect with potential clients and grow their network effectively.
 
-2. Ownership and Usage Rights
+2. User Account and Responsibilities
 
-When you purchase a package from ShipFast, you gain the right to download and use the code provided for creating applications. You own the code you create but do not have the right to resell it. We offer a full refund within 7 days of purchase, as specified in our refund policy.
+2.1. You must provide accurate and complete information when creating an account.
+2.2. You are responsible for maintaining the security of your account credentials.
+2.3. You agree to use the Service in compliance with all applicable laws and regulations.
 
-3. User Data and Privacy
+3. Subscription and Payments
 
-We collect and store user data, including name, email, and payment information, as necessary to provide our services. For details on how we handle your data, please refer to our Privacy Policy at https://shipfa.st/privacy-policy.
+3.1. Access to Prospectr's features requires a paid subscription.
+3.2. Subscription fees are billed in advance on a recurring basis.
+3.3. We offer a 7-day refund policy for new subscriptions.
+3.4. Cancellations will take effect at the end of the current billing period.
 
-4. Non-Personal Data Collection
+4. Acceptable Use
 
-We use web cookies to collect non-personal data for the purpose of improving our services and user experience.
+4.1. You agree not to:
+- Use the Service for any illegal purposes
+- Violate any third-party rights
+- Attempt to gain unauthorized access to the Service
+- Use the Service to send spam or unsolicited messages
+- Reverse engineer or attempt to extract the source code of our software
 
-5. Governing Law
+5. Data and Privacy
 
-These Terms are governed by the laws of France.
+5.1. We collect and process user data as described in our Privacy Policy.
+5.2. You retain ownership of your data, but grant us license to use it to provide the Service.
+5.3. We use cookies and similar technologies to enhance user experience.
 
-6. Updates to the Terms
+6. Intellectual Property
 
-We may update these Terms from time to time. Users will be notified of any changes via email.
+6.1. The Service, including all related software, designs, and content, is owned by Prospectr.
+6.2. You may not copy, modify, or create derivative works of our Service or its content.
 
-For any questions or concerns regarding these Terms of Service, please contact us at marc@shipfa.st.
+7. Limitation of Liability
 
-Thank you for using ShipFast!`}
+7.1. The Service is provided "as is" without any warranties.
+7.2. We are not liable for any indirect, incidental, or consequential damages.
+7.3. Our total liability shall not exceed the amount paid by you for the Service in the past 12 months.
+
+8. Termination
+
+8.1. We may suspend or terminate your access to the Service for violations of these Terms.
+8.2. You may terminate your account at any time by canceling your subscription.
+
+9. Changes to Terms
+
+9.1. We may modify these Terms at any time.
+9.2. We will notify users of significant changes via email.
+9.3. Continued use of the Service after changes constitutes acceptance of the new Terms.
+
+10. Governing Law
+
+These Terms are governed by the laws of the jurisdiction in which Prospectr is registered, without regard to its conflict of law provisions.
+
+11. Contact Information
+
+For questions about these Terms, please contact us through our website or support channels.
+
+Thank you for using Prospectr!`}
         </pre>
       </div>
     </main>

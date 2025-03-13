@@ -19,7 +19,7 @@ function SectionBiography() {
             >
               <Image
                 src="/founder-image.jpg"
-                alt="Sumit"
+                alt="Founder"
                 className="object-cover"
                 fill
                 sizes="160px"
@@ -35,13 +35,13 @@ function SectionBiography() {
                 Building in Public
               </div>
               <a 
-                href="https://x.com/InfernalSumit" 
+                href="https://x.com/ProspectrApp" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
               >
                 <Twitter className="w-4 h-4" />
-                @InfernalSumit
+                @ProspectrApp
               </a>
             </div>
           </div>
@@ -49,7 +49,7 @@ function SectionBiography() {
           {/* Biography Content */}
           <div className="space-y-8 max-w-2xl">
             <h2 className="text-4xl font-bold tracking-tighter text-white">
-              hey! I&apos;m Sumit <span className="text-white">(the founder of Prospectr)</span>
+              hey! I&apos;m the founder of <span className="text-red-500">Prospectr</span>
             </h2>
             <div className="space-y-6 text-lg text-gray-400">
               <p>
@@ -107,4 +107,4 @@ function SectionBiography() {
   )
 }
 
-export default SectionBiography 
+export default SectionBiography
