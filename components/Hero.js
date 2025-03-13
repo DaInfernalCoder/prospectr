@@ -27,11 +27,10 @@ const Hero = () => {
             </div> */}
             
             <h1 className="font-extrabold text-5xl lg:text-7xl tracking-tight">
-              Find the right leads for {' '}
-              <span className="inline-block pb-2">
+              Find the right leads for{' '}
+              <div className="inline-block w-[180px] md:w-[220px]">
                 <TypeAnimation
                   sequence={[
-                    2000,
                     'internships',
                     2000,
                     'recruiting',
@@ -42,14 +41,15 @@ const Hero = () => {
                     2000,
                   ]}
                   wrapper="span"
-                  speed={50}
+                  speed={40}
                   repeat={Infinity}
-                  className="inline-block text-transparent bg-gradient bg-[length:300%_auto] animate-rainbow min-h-[1.2em]"
+                  className="inline-block text-transparent bg-clip-text bg-gradient bg-[length:300%_auto] animate-rainbow"
+                  style={{ display: 'inline-block' }}
                 />
-              </span>
+              </div>
             </h1>
             <p className="text-lg lg:text-xl opacity-80 leading-relaxed max-w-2xl">
-              Your personal AI powered LinkedIn assistant, allowing you to send messages and get new connections on autopilot
+              Your personal AI powered LinkedIn assistant for busy founders, allowing you to send messages and get new connections on autopilot
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">

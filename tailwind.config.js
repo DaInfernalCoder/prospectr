@@ -17,7 +17,8 @@ module.exports = {
   			wiggle: 'wiggle 1.5s ease-in-out infinite',
   			popup: 'popup 0.25s ease-in-out',
   			shimmer: 'shimmer 3s ease-out infinite alternate',
-  			rainbow: 'rainbow 4s linear infinite'
+  			rainbow: 'rainbow 4s linear infinite',
+        gradient: 'gradient 8s ease infinite'
   		},
   		keyframes: {
   			opacity: {
@@ -90,7 +91,12 @@ module.exports = {
   				'100%': {
   					'background-position': '0% 50%'
   				}
-  			}
+  			},
+        gradient: {
+          '0%': { 'background-position': '0% 50%' },
+          '50%': { 'background-position': '100% 50%' },
+          '100%': { 'background-position': '0% 50%' }
+        }
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
