@@ -110,7 +110,6 @@ export async function POST(request) {
 
   try {
     const user = await getUser();
-
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -129,7 +128,7 @@ export async function POST(request) {
 
     // Get data from request
     const body = await request.json();
-    const { recipients, message } = body;
+    const { recipients, message, templateName, followUpMessage } = body;
 
     // Validate request
     if (!recipients) {
@@ -139,9 +138,32 @@ export async function POST(request) {
       );
     }
 
-    // Format for processing
-    let formattedRecipients = [];
+    // First, create or get the template
+    let templateId;
+    if (followUpMessage) {
+      const { data: template, error: templateError } = await supabase
+        .from("invitation_templates")
+        .insert({
+          user_id: user.id,
+          name: templateName || `Template ${new Date().toISOString()}`,
+          follow_up_message: followUpMessage,
+        })
+        .select()
+        .single();
 
+      if (templateError) {
+        console.error("Failed to create template:", templateError);
+        return NextResponse.json(
+          { error: "Failed to create template" },
+          { status: 500 }
+        );
+      }
+
+      templateId = template.id;
+    }
+
+    // Format recipients for processing
+    let formattedRecipients = [];
     if (Array.isArray(recipients)) {
       if (typeof recipients[0] === "string") {
         formattedRecipients = recipients.map((id) => ({ identifier: id }));
@@ -159,8 +181,6 @@ export async function POST(request) {
       );
     }
 
-    console.log(formattedRecipients, "formated reciepents");
-
     // Generate a unique job ID
     const jobId = `inv_${Date.now()}_${Math.random()
       .toString(36)
@@ -170,9 +190,11 @@ export async function POST(request) {
     const { error } = await supabase.from("invitation_jobs").insert({
       job_id: jobId,
       user_id: user.id,
+      template_id: templateId, // Link to the template if one was created
       status: "queued",
       total_invitations: formattedRecipients.length,
       invitations_sent: 0,
+      message: message, // Store the initial connection message
       created_at: new Date().toISOString(),
     });
 
@@ -185,13 +207,13 @@ export async function POST(request) {
     }
 
     // Start processing in background without awaiting
-    // This allows the API to return immediately while processing continues
     processInvitations({
       accountId: profile.unipile_account_id,
       recipients: formattedRecipients,
       message,
       userId: user.id,
       jobId,
+      templateId,
     }).catch((error) => {
       console.error("Error in background processing:", error);
 
@@ -210,6 +232,7 @@ export async function POST(request) {
       success: true,
       message: `${formattedRecipients.length} invitation(s) queued for processing`,
       jobId,
+      templateId,
     });
   } catch (error) {
     console.error("Error in invitation API:", error);
