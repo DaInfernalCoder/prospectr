@@ -119,8 +119,6 @@ export async function POST(request) {
       .eq("user_id", user.id)
       .single();
 
-    console.log({ profile_id: profile.unipile_account_id });
-
     if (!profile?.unipile_account_id) {
       return NextResponse.json(
         { error: "LinkedIn not connected" },
@@ -132,7 +130,6 @@ export async function POST(request) {
     const body = await request.json();
     const { recipients, message, templateName, followUpMessage } = body;
 
-    console.log({ recipients }, "start 1");
     // Validate request
     if (!recipients) {
       return NextResponse.json(
@@ -167,7 +164,6 @@ export async function POST(request) {
 
     // Format recipients for processing
     let formattedRecipients = [];
-    console.log("a");
     if (Array.isArray(recipients)) {
       if (typeof recipients[0] === "string") {
         formattedRecipients = recipients.map((id) => ({ identifier: id }));
@@ -184,8 +180,6 @@ export async function POST(request) {
         { status: 400 }
       );
     }
-
-    console.log({ formattedRecipients });
 
     // Generate a unique job ID
     const jobId = `inv_${Date.now()}_${Math.random()
