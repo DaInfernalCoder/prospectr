@@ -49,7 +49,7 @@ const Hero = () => {
               </div>
             </h1>
             <p className="text-lg lg:text-xl opacity-80 leading-relaxed max-w-2xl">
-              Your personal AI powered LinkedIn assistant for busy founders, allowing you to send messages and get new connections on autopilot
+              Your personal AI powered LinkedIn assistant for business owners, allowing you to send messages and get new connections on autopilot
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
