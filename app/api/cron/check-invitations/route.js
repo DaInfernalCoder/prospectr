@@ -24,7 +24,6 @@ export async function GET(request) {
       .order("created_at", { ascending: false });
 
     console.log({ activeJobs });
-    console.log({ errorActiveJobs });
 
     if (!activeJobs) {
       return NextResponse.json({ message: "No active invitation jobs" });
@@ -56,7 +55,7 @@ export async function GET(request) {
 
         // Check invitation statuses
         const checkResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_SITE_URL}/api/linkedin/invitations/check`,
+          `${process.env.NEXT_PUBLIC_APP_URL}/api/linkedin/invitations/check`,
           {
             method: "GET",
             headers: {
