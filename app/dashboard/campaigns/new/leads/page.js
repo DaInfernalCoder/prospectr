@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronRight, ChevronDown, ArrowRight, Search, ChevronLeft, AlertCircle, LinkIcon } from "lucide-react";
 
 export default function AddLeadsPage() {
   const router = useRouter();
@@ -17,10 +17,29 @@ export default function AddLeadsPage() {
     premiumUsersOnly: false,
     includeLeadsFromOtherCampaigns: false
   });
+
+  // Search and Pagination State
   const [isLoading, setIsLoading] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewResults, setPreviewResults] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const resultsPerPage = 10;
+  
+  // Advanced search parameters
+  const [advancedSearch, setAdvancedSearch] = useState({
+    company: "",
+    location: "",
+    industry: "",
+    school: "",
+    networkDistance: [],
+    sortBy: "relevance"
+  });
+
+  const [linkedInStatus, setLinkedInStatus] = useState({
+    checked: false,
+    connected: true
+  });
 
   // Toggle section expansion
   const toggleSection = (section) => {
@@ -38,8 +57,49 @@ export default function AddLeadsPage() {
     }));
   };
 
-  // Handle preview sample results
-  const handlePreviewResults = async () => {
+  // Handle advanced search parameter changes
+  const handleAdvancedSearchChange = (field, value) => {
+    setAdvancedSearch(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Check LinkedIn connection status on component mount
+  useEffect(() => {
+    const checkLinkedInStatus = async () => {
+      try {
+        const response = await fetch('/api/linkedin/status', {
+          method: 'GET'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setLinkedInStatus({
+            checked: true,
+            connected: data.connected
+          });
+        } else {
+          // If we can't check the status, assume disconnected for safety
+          setLinkedInStatus({
+            checked: true,
+            connected: false
+          });
+        }
+      } catch (error) {
+        console.error("Error checking LinkedIn status:", error);
+        setLinkedInStatus({
+          checked: true,
+          connected: false
+        });
+      }
+    };
+    
+    checkLinkedInStatus();
+  }, []);
+
+  // Perform LinkedIn search
+  const performSearch = async (page = 1) => {
     if (!searchQuery.trim()) {
       setError("Please enter a search query");
       return;
@@ -49,33 +109,103 @@ export default function AddLeadsPage() {
     setError(null);
     
     try {
-      // Prepare search parameters based on form values
+      // Prepare search parameters based on form values - simplify to reduce potential issues
       const searchParams = {
-        name: searchQuery,
-        jobTitle: searchQuery,
-        // Add other parameters as they're implemented
+        keywords: searchQuery,  // Use keywords instead of name/jobTitle for consistency
       };
       
-      // Call the existing LinkedIn search API
+      // Only add parameters if they have values to avoid undefined issues
+      if (advancedSearch.company) {
+        searchParams.company = advancedSearch.company;
+      }
+      
+      if (advancedSearch.location) {
+        searchParams.location = advancedSearch.location;
+      }
+      
+      if (advancedSearch.industry) {
+        searchParams.industry = advancedSearch.industry;
+      }
+      
+      if (advancedSearch.school) {
+        searchParams.school = advancedSearch.school;
+      }
+      
+      // Only add network distance if there are options selected
+      if (advancedSearch.networkDistance.length > 0) {
+        searchParams.networkDistance = advancedSearch.networkDistance;
+      }
+      
+      // Apply exclusions
+      if (exclusions.excludeFirstDegreeConnections && !searchParams.networkDistance) {
+        searchParams.networkDistance = ['SECOND_DEGREE', 'THIRD_DEGREE_AND_BEYOND'];
+      }
+      
+      if (advancedSearch.sortBy) {
+        searchParams.sortBy = advancedSearch.sortBy;
+      }
+      
+      console.log('Search parameters:', searchParams); // Debugging
+      
+      // Call the LinkedIn search API
       const response = await fetch('/api/linkedin/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(searchParams)
       });
       
+      // Handle potential error responses
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Search failed');
+        
+        // Special handling for LinkedIn not connected error
+        if (errorData.error === "LinkedIn not connected") {
+          throw new Error("LinkedIn account not connected. Please connect your LinkedIn account in settings.");
+        }
+        
+        // If we have detailed error info, show it
+        if (errorData.details) {
+          throw new Error(`${errorData.error}: ${errorData.details}`);
+        }
+        
+        throw new Error(errorData.error || `Search failed: ${response.status} ${response.statusText}`);
       }
       
       const results = await response.json();
-      setPreviewResults(results);
-      setShowPreview(true);
+      
+      if (!results || !Array.isArray(results)) {
+        throw new Error("Invalid response format from search API");
+      }
+      
+      setSearchResults(results);
+      setTotalResults(results.length);
+      setCurrentPage(page);
     } catch (error) {
+      console.error("Search error:", error);
       setError(error.message);
+      setSearchResults([]);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Handle search form submission
+  const handleSearch = (e) => {
+    e?.preventDefault();
+    performSearch(1); // Reset to first page when performing a new search
+  };
+
+  // Change page
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > Math.ceil(totalResults / resultsPerPage)) return;
+    setCurrentPage(newPage);
+  };
+
+  // Get current page results
+  const getCurrentPageResults = () => {
+    const startIndex = (currentPage - 1) * resultsPerPage;
+    const endIndex = startIndex + resultsPerPage;
+    return searchResults.slice(startIndex, endIndex);
   };
 
   // Navigate to next step
@@ -85,14 +215,131 @@ export default function AddLeadsPage() {
 
   // Filter sections
   const filterSections = [
-    { id: 'connections', title: 'Connections' },
-    { id: 'industries', title: 'Industries' },
-    { id: 'keywords', title: 'Specify keywords' },
-    { id: 'currentCompanies', title: 'Current companies' },
-    { id: 'pastCompanies', title: 'Past companies' },
-    { id: 'profileLanguages', title: 'Profile languages' },
-    { id: 'schools', title: 'Schools' },
-    { id: 'locations', title: 'Locations' }
+    { 
+      id: 'connections', 
+      title: 'Connections',
+      content: (
+        <div className="space-y-2">
+          <div className="flex flex-col space-y-1">
+            <label className="text-[#A3A3A3] text-sm">Network Distance</label>
+            <div className="flex flex-wrap gap-2">
+              {['FIRST_DEGREE', 'SECOND_DEGREE', 'THIRD_DEGREE_AND_BEYOND'].map((distance) => {
+                const distLabel = distance === 'FIRST_DEGREE' ? '1st connections' : 
+                                  distance === 'SECOND_DEGREE' ? '2nd connections' : 
+                                  '3rd+ connections';
+                return (
+                  <div key={distance} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={`distance-${distance}`}
+                      checked={advancedSearch.networkDistance.includes(distance)}
+                      onChange={() => {
+                        if (advancedSearch.networkDistance.includes(distance)) {
+                          handleAdvancedSearchChange('networkDistance', 
+                            advancedSearch.networkDistance.filter(d => d !== distance)
+                          );
+                        } else {
+                          handleAdvancedSearchChange('networkDistance', 
+                            [...advancedSearch.networkDistance, distance]
+                          );
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-[#2A2A2A] bg-black text-blue-600"
+                    />
+                    <label htmlFor={`distance-${distance}`} className="ml-2 text-[#A3A3A3] text-sm">
+                      {distLabel}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    { 
+      id: 'companies', 
+      title: 'Companies', 
+      content: (
+        <div className="space-y-3">
+          <div>
+            <label className="block text-[#A3A3A3] text-sm mb-1">Current Company</label>
+            <Input
+              type="text"
+              value={advancedSearch.company}
+              onChange={(e) => handleAdvancedSearchChange('company', e.target.value)}
+              placeholder="Enter company name"
+              className="bg-black border-[#2A2A2A] text-white"
+            />
+          </div>
+        </div>
+      )
+    },
+    { 
+      id: 'locations', 
+      title: 'Locations',
+      content: (
+        <div>
+          <label className="block text-[#A3A3A3] text-sm mb-1">Location</label>
+          <Input
+            type="text"
+            value={advancedSearch.location}
+            onChange={(e) => handleAdvancedSearchChange('location', e.target.value)}
+            placeholder="Enter location"
+            className="bg-black border-[#2A2A2A] text-white"
+          />
+        </div>
+      )
+    },
+    { 
+      id: 'industries', 
+      title: 'Industries',
+      content: (
+        <div>
+          <label className="block text-[#A3A3A3] text-sm mb-1">Industry</label>
+          <Input
+            type="text"
+            value={advancedSearch.industry}
+            onChange={(e) => handleAdvancedSearchChange('industry', e.target.value)}
+            placeholder="Enter industry"
+            className="bg-black border-[#2A2A2A] text-white"
+          />
+        </div>
+      )
+    },
+    { 
+      id: 'schools', 
+      title: 'Schools',
+      content: (
+        <div>
+          <label className="block text-[#A3A3A3] text-sm mb-1">School</label>
+          <Input
+            type="text"
+            value={advancedSearch.school}
+            onChange={(e) => handleAdvancedSearchChange('school', e.target.value)}
+            placeholder="Enter school name"
+            className="bg-black border-[#2A2A2A] text-white"
+          />
+        </div>
+      )
+    },
+    { 
+      id: 'sortOptions', 
+      title: 'Sort Options',
+      content: (
+        <div>
+          <label className="block text-[#A3A3A3] text-sm mb-1">Sort By</label>
+          <select
+            value={advancedSearch.sortBy}
+            onChange={(e) => handleAdvancedSearchChange('sortBy', e.target.value)}
+            className="w-full p-2 bg-black border border-[#2A2A2A] rounded-md text-white"
+          >
+            <option value="relevance">Relevance</option>
+            <option value="date">Date</option>
+          </select>
+        </div>
+      )
+    }
   ];
 
   return (
@@ -129,33 +376,60 @@ export default function AddLeadsPage() {
         </Button>
       </div>
 
-      {/* Main Content */}
-      <div className="space-y-6">
-        {/* Search Query */}
-        <div className="space-y-2">
-          <label className="block text-white font-medium">
-            Who would you like to find? (eg. Job title, company name, etc.)
-          </label>
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="eg. project manager OR manager OR senior project manager"
-            className="bg-black border-[#2A2A2A] text-white"
-          />
-        </div>
-
-        {/* Preview Button */}
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            onClick={handlePreviewResults}
-            disabled={isLoading}
-            className="text-white border-[#2A2A2A]"
+      {/* LinkedIn Connection Warning */}
+      {linkedInStatus.checked && !linkedInStatus.connected && (
+        <div className="p-4 bg-yellow-900/20 border border-yellow-800 rounded-md text-yellow-200 mb-6 flex items-center">
+          <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium">LinkedIn account not connected</p>
+            <p className="text-sm mt-1">You need to connect your LinkedIn account to search for leads.</p>
+          </div>
+          <Button 
+            className="bg-yellow-600 hover:bg-yellow-700 text-white ml-4"
+            onClick={() => router.push('/dashboard/settings/')}
           >
-            {isLoading ? "Loading..." : "Preview sample results"} <ArrowRight className="ml-2 h-4 w-4" />
+            <LinkIcon className="h-4 w-4 mr-2" />
+            Connect LinkedIn
           </Button>
         </div>
+      )}
+
+      {/* Main Content */}
+      <div className="space-y-6">
+        {/* Search Form */}
+        <form onSubmit={handleSearch} className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-white font-medium">
+              Who would you like to find? (eg. Job title, company name, etc.)
+            </label>
+            <div className="relative">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="eg. project manager OR manager OR senior project manager"
+                className="bg-black border-[#2A2A2A] text-white pr-10"
+              />
+              <button 
+                type="submit" 
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#A3A3A3] hover:text-white"
+                disabled={isLoading}
+              >
+                <Search className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isLoading ? "Searching..." : "Search LinkedIn"} <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </form>
 
         {/* Error Message */}
         {error && (
@@ -164,45 +438,125 @@ export default function AddLeadsPage() {
           </div>
         )}
 
-        {/* Preview Results */}
-        {showPreview && previewResults.length > 0 && (
-          <div className="mt-4 p-4 bg-[#0C0C0C] border border-[#2A2A2A] rounded-lg">
-            <h3 className="text-white font-medium mb-3">Preview Results</h3>
-            <div className="space-y-3">
-              {previewResults.slice(0, 5).map((profile) => (
-                <div key={profile.id} className="p-3 bg-black border border-[#2A2A2A] rounded-md">
-                  <div className="flex justify-between">
-                    <div>
-                      <h4 className="text-white font-medium">{profile.name}</h4>
-                      <p className="text-[#A3A3A3] text-sm">{profile.headline}</p>
-                      <div className="flex items-center mt-1">
-                        <span className="text-[#A3A3A3] text-xs">{profile.location}</span>
-                        {profile.company && (
-                          <>
-                            <span className="mx-1 text-[#A3A3A3]">•</span>
-                            <span className="text-[#A3A3A3] text-xs">{profile.company}</span>
-                          </>
-                        )}
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div className="mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-white text-lg font-medium">Search Results</h3>
+              <span className="text-[#A3A3A3]">{totalResults} leads found</span>
+            </div>
+            
+            <div className="space-y-4">
+              {getCurrentPageResults().map((profile) => (
+                <div key={profile.id} className="p-4 bg-[#0C0C0C] border border-[#2A2A2A] rounded-lg hover:border-[#3A3A3A] transition-colors">
+                  <div className="flex">
+                    {profile.profile_picture && (
+                      <div className="mr-4 flex-shrink-0">
+                        <img 
+                          src={profile.profile_picture} 
+                          alt={profile.name} 
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
                       </div>
-                    </div>
-                    <div className="text-xs text-[#A3A3A3]">
-                      {profile.network_distance === 'SECOND_DEGREE' ? '2nd' : 
-                       profile.network_distance === 'THIRD_DEGREE' ? '3rd' : 
-                       profile.network_distance}
+                    )}
+                    <div className="flex-1">
+                      <div className="flex justify-between">
+                        <div>
+                          <h4 className="text-white font-medium">{profile.name}</h4>
+                          <p className="text-[#A3A3A3] text-sm">{profile.headline}</p>
+                          <div className="flex items-center mt-1">
+                            <span className="text-[#A3A3A3] text-xs">{profile.location}</span>
+                            {profile.company && (
+                              <>
+                                <span className="mx-1 text-[#A3A3A3]">•</span>
+                                <span className="text-[#A3A3A3] text-xs">{profile.company}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <div className="text-xs px-2 py-1 bg-[#1A1A1A] rounded-full text-[#A3A3A3]">
+                            {profile.network_distance === 'FIRST_DEGREE' ? '1st' : 
+                             profile.network_distance === 'SECOND_DEGREE' ? '2nd' : 
+                             profile.network_distance === 'THIRD_DEGREE_AND_BEYOND' ? '3rd+' : 
+                             profile.network_distance}
+                          </div>
+                          {profile.shared_connections_count > 0 && (
+                            <span className="text-xs text-[#A3A3A3] mt-1">
+                              {profile.shared_connections_count} shared connection{profile.shared_connections_count !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {profile.profile_url && (
+                        <div className="mt-2">
+                          <a 
+                            href={profile.profile_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-400 hover:underline"
+                          >
+                            View LinkedIn Profile
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-            {previewResults.length > 5 && (
-              <div className="mt-3 text-center text-[#A3A3A3] text-sm">
-                Showing 5 of {previewResults.length} results
+
+            {/* Pagination */}
+            {totalResults > resultsPerPage && (
+              <div className="flex justify-center items-center mt-6 space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: Math.min(5, Math.ceil(totalResults / resultsPerPage)) }, (_, i) => {
+                    const pageNumber = i + 1;
+                    return (
+                      <Button
+                        key={pageNumber}
+                        variant={currentPage === pageNumber ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handlePageChange(pageNumber)}
+                        className={currentPage === pageNumber 
+                          ? "bg-blue-600 text-white" 
+                          : "border-[#2A2A2A] text-[#A3A3A3] hover:text-white"}
+                      >
+                        {pageNumber}
+                      </Button>
+                    );
+                  })}
+                  
+                  {Math.ceil(totalResults / resultsPerPage) > 5 && (
+                    <span className="text-[#A3A3A3]">...</span>
+                  )}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === Math.ceil(totalResults / resultsPerPage)}
+                  className="border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             )}
           </div>
         )}
 
-        {/* Want to be more precise? */}
+        {/* Advanced Filters */}
         <div className="mt-6">
           <h3 className="text-white font-medium mb-4">Want to be more precise?</h3>
           
@@ -214,6 +568,7 @@ export default function AddLeadsPage() {
                 className="border border-[#2A2A2A] rounded-md overflow-hidden"
               >
                 <button
+                  type="button"
                   className="w-full p-3 flex items-center justify-between bg-[#0C0C0C] text-left"
                   onClick={() => toggleSection(section.id)}
                 >
@@ -227,11 +582,21 @@ export default function AddLeadsPage() {
                 
                 {expandedSections[section.id] && (
                   <div className="p-3 bg-black border-t border-[#2A2A2A]">
-                    <p className="text-[#A3A3A3]">Filter options for {section.title} will be implemented here</p>
+                    {section.content}
                   </div>
                 )}
               </div>
             ))}
+          </div>
+          
+          {/* Apply Filters Button */}
+          <div className="mt-4 flex justify-end">
+            <Button
+              onClick={handleSearch}
+              className="bg-[#2A2A2A] hover:bg-[#3A3A3A] text-white"
+            >
+              Apply Filters
+            </Button>
           </div>
         </div>
 
