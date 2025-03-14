@@ -16,6 +16,20 @@ const nextConfig = {
     // Warning during builds, but not failing
     ignoreDuringBuilds: true,
   },
+  // Add headers for Open Graph images
+  async headers() {
+    return [
+      {
+        source: '/:all*(opengraph-image|twitter-image).png',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, max-age=0',
+          },
+        ],
+      },
+    ]
+  },
   // Exclude Supabase Edge Functions from webpack compilation
   webpack: (config) => {
     // Add the supabase functions directory to ignored modules

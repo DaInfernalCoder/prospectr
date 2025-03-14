@@ -17,14 +17,7 @@ function SectionBiography() {
               transition={{ duration: 0.5 }}
               className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-primary/20 shadow-xl"
             >
-              <Image
-                src="/founder-image.jpg"
-                alt="Founder"
-                className="object-cover"
-                fill
-                sizes="160px"
-                priority
-              />
+              
             </motion.div>
             <div className="flex flex-col items-center gap-3">
               <div className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/10 text-red-500 font-medium">
