@@ -26,6 +26,7 @@ import Hero from "@/components/Hero";
 import CTA from "@/components/CTA";
 import ButtonLead from "@/components/ButtonLead";
 import { Suspense } from "react";
+import SectionBiography from "@/components/SectionBiography";
 
 export default function Page() {
   return (
@@ -48,6 +49,7 @@ export default function Page() {
         {/* <FeaturesListicle /> */}
         {/* <Problem /> */}
         <Pricing />
+        <SectionBiography />
         {/* <Testimonials11 /> */}
         {/* <Testimonial /> */}
         

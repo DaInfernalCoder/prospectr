@@ -34,6 +34,10 @@ const features = [
         />
       </svg>
     ),
+    stats: [
+      { label: "Success Rate", value: "95%" },
+      { label: "Time Saved", value: "4h/day" }
+    ]
   },
   {
     title: "Automated Campaigns",
@@ -58,6 +62,10 @@ const features = [
         />
       </svg>
     ),
+    stats: [
+      { label: "Response Rate", value: "40%" },
+      { label: "Automation", value: "100%" }
+    ]
   },
   {
     title: "Lead Management",
@@ -79,6 +87,10 @@ const features = [
         />
       </svg>
     ),
+    stats: [
+      { label: "Organization", value: "100%" },
+      { label: "Efficiency", value: "3x" }
+    ]
   },
   {
     title: "Analytics",
@@ -100,30 +112,34 @@ const features = [
         />
       </svg>
     ),
+    stats: [
+      { label: "Data Points", value: "50+" },
+      { label: "Insights", value: "Real-time" }
+    ]
   },
 ];
 
 // An SEO-friendly accordion component including the title and a description (when clicked.)
 const Item = ({ feature, isOpen, setFeatureSelected }) => {
   const accordion = useRef(null);
-  const { title, description, svg } = feature;
+  const { title, description, svg, stats } = feature;
 
   return (
-    <li>
+    <li className="group">
       <button
-        className="relative flex gap-2 items-center w-full py-5 text-base font-medium text-left md:text-lg"
+        className="relative flex gap-2 items-center w-full py-5 text-base font-medium text-left md:text-lg transition-all duration-300"
         onClick={(e) => {
           e.preventDefault();
           setFeatureSelected();
         }}
         aria-expanded={isOpen}
       >
-        <span className={`duration-100 ${isOpen ? "text-red-500" : "text-white"}`}>
+        <span className={`duration-300 transform ${isOpen ? "text-red-500 scale-110" : "text-white group-hover:text-red-400"}`}>
           {svg}
         </span>
         <span
-          className={`flex-1 ${
-            isOpen ? "text-red-500 font-bold" : "text-white"
+          className={`flex-1 transition-all duration-300 ${
+            isOpen ? "text-red-500 font-bold translate-x-2" : "text-white group-hover:text-red-400"
           }`}
         >
           <h3 className="inline">{title}</h3>
@@ -132,14 +148,28 @@ const Item = ({ feature, isOpen, setFeatureSelected }) => {
 
       <div
         ref={accordion}
-        className={`transition-all duration-300 ease-in-out text-white/70 overflow-hidden`}
+        className={`transition-all duration-500 ease-in-out text-white/70 overflow-hidden`}
         style={
           isOpen
             ? { maxHeight: accordion?.current?.scrollHeight, opacity: 1 }
             : { maxHeight: 0, opacity: 0 }
         }
       >
-        <div className="pb-5 leading-relaxed">{description}</div>
+        <div className="pb-5 space-y-4">
+          <p className="leading-relaxed">{description}</p>
+          
+          <div className="grid grid-cols-2 gap-4 pt-4">
+            {stats.map((stat, index) => (
+              <div 
+                key={stat.label} 
+                className="bg-zinc-800/50 rounded-lg p-4 backdrop-blur-sm border border-zinc-700/30"
+              >
+                <div className="text-2xl font-bold text-red-500">{stat.value}</div>
+                <div className="text-sm text-white/60">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </li>
   );
@@ -192,19 +222,34 @@ const FeaturesAccordion = () => {
 
   return (
     <section
-      className="py-24 md:py-32 space-y-24 md:space-y-32 max-w-7xl mx-auto bg-black"
+      className="py-24 md:py-32 space-y-24 md:space-y-32 max-w-7xl mx-auto bg-black relative overflow-hidden"
       id="features"
     >
-      <div className="px-8">
-        <h2 className="font-extrabold text-4xl lg:text-6xl tracking-tight mb-12 md:mb-24 text-white">
-          We have everything you need to
-          <span className="bg-zinc-800 text-white px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
-            scale your outreach
-          </span>
-        </h2>
+      {/* Background gradient effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-r from-red-500/20 to-transparent rounded-full blur-3xl transform rotate-12 opacity-30"></div>
+        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-l from-red-500/20 to-transparent rounded-full blur-3xl transform -rotate-12 opacity-30"></div>
+      </div>
+
+      <div className="px-8 relative">
+        <div className="flex flex-col items-center text-center mb-16">
+          <h2 className="font-extrabold text-4xl lg:text-6xl tracking-tight mb-8 text-white">
+            We have everything you need to
+            <div className="relative inline-block">
+              <span className="relative z-10 bg-gradient-to-r from-red-500 to-red-700 text-transparent bg-clip-text px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
+                scale your outreach
+              </span>
+              <div className="absolute inset-0 bg-zinc-800 transform -skew-x-12"></div>
+            </div>
+          </h2>
+          <p className="text-white/60 max-w-2xl text-lg">
+            Powerful features designed to help you find, connect, and convert leads efficiently while staying within LinkedIn&apos;s guidelines
+          </p>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-12 md:gap-24">
           <div className="grid grid-cols-1 items-stretch gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-20">
-            <ul className="w-full">
+            <ul className="w-full divide-y divide-zinc-800">
               {features.map((feature, i) => (
                 <Item
                   key={feature.title}

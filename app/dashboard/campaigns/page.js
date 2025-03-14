@@ -47,8 +47,8 @@ export default function CampaignsPage() {
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-[#C9E5FF]">Campaigns</h1>
-          <p className="text-sm text-[#A3A3A3]">Manage your LinkedIn outreach campaigns</p>
+          <h1 className="text-2xl font-bold text-white">Campaigns</h1>
+          <p className="text-sm text-[#A1A1AA]">Manage your LinkedIn outreach campaigns</p>
         </div>
         <Button 
           variant="outline"
@@ -59,13 +59,13 @@ export default function CampaignsPage() {
       </div>
 
       {/* Campaign Filters */}
-      <div className="flex gap-4 pb-4 border-b border-[#2A2A2A]">
+      <div className="flex gap-4 pb-4 border-b border-[#1A1A1A]">
         <Button 
           variant="ghost" 
           className={`pb-4 px-2 rounded-none ${
             activeTab === "all" 
-              ? "text-[#C9E5FF] border-b-2 border-[#C9E5FF]" 
-              : "text-[#A3A3A3] hover:text-[#C9E5FF]"
+              ? "text-white border-b-2 border-white" 
+              : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("all")}
         >
@@ -75,8 +75,8 @@ export default function CampaignsPage() {
           variant="ghost" 
           className={`pb-4 px-2 rounded-none ${
             activeTab === "active" 
-              ? "text-[#C9E5FF] border-b-2 border-[#C9E5FF]" 
-              : "text-[#A3A3A3] hover:text-[#C9E5FF]"
+              ? "text-white border-b-2 border-white" 
+              : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("active")}
         >
@@ -86,8 +86,8 @@ export default function CampaignsPage() {
           variant="ghost" 
           className={`pb-4 px-2 rounded-none ${
             activeTab === "drafts" 
-              ? "text-[#C9E5FF] border-b-2 border-[#C9E5FF]" 
-              : "text-[#A3A3A3] hover:text-[#C9E5FF]"
+              ? "text-white border-b-2 border-white" 
+              : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("drafts")}
         >
@@ -97,8 +97,8 @@ export default function CampaignsPage() {
           variant="ghost" 
           className={`pb-4 px-2 rounded-none ${
             activeTab === "completed" 
-              ? "text-[#C9E5FF] border-b-2 border-[#C9E5FF]" 
-              : "text-[#A3A3A3] hover:text-[#C9E5FF]"
+              ? "text-white border-b-2 border-white" 
+              : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("completed")}
         >
@@ -110,33 +110,33 @@ export default function CampaignsPage() {
       <div className="space-y-4">
         {/* Active Campaigns */}
         {(activeTab === "all" || activeTab === "active") && mockCampaigns.active.length > 0 && (
-          <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A]">
+          <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-medium text-[#C9E5FF]">Active Campaigns</h3>
-                  <p className="text-sm text-[#A3A3A3]">Currently running campaigns</p>
+                  <h3 className="text-lg font-medium text-white">Active Campaigns</h3>
+                  <p className="text-sm text-[#A1A1AA]">Currently running campaigns</p>
                 </div>
                 <Button variant="outline" onClick={() => handleViewDetails(mockCampaigns.active[0].id)}>View Details</Button>
               </div>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#2A2A2A]">
+                <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center">
-                      <Users className="w-5 h-5 text-[#C9E5FF]" />
+                    <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="text-[#C9E5FF] font-medium">Q1 Outreach</h4>
-                      <p className="text-sm text-[#A3A3A3]">250 prospects • 45% complete</p>
+                      <h4 className="text-white font-medium">Q1 Outreach</h4>
+                      <p className="text-sm text-[#A1A1AA]">250 prospects • 45% complete</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-sm text-[#C9E5FF]">42 replies</p>
-                      <p className="text-xs text-[#A3A3A3]">16.8% rate</p>
+                      <p className="text-sm text-white">42 replies</p>
+                      <p className="text-xs text-[#A1A1AA]">16.8% rate</p>
                     </div>
                     <Button variant="ghost" size="icon">
-                      <BarChart2 className="w-4 h-4 text-[#A3A3A3]" />
+                      <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
                     </Button>
                   </div>
                 </div>
@@ -148,24 +148,24 @@ export default function CampaignsPage() {
 
         {/* Draft Campaigns */}
         {(activeTab === "all" || activeTab === "drafts") && mockCampaigns.drafts.length > 0 && (
-          <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A]">
+          <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-medium text-[#C9E5FF]">Draft Campaigns</h3>
-                  <p className="text-sm text-[#A3A3A3]">Campaigns in preparation</p>
+                  <h3 className="text-lg font-medium text-white">Draft Campaigns</h3>
+                  <p className="text-sm text-[#A1A1AA]">Campaigns in preparation</p>
                 </div>
                 <Button variant="outline" onClick={() => handleViewDetails(mockCampaigns.drafts[0].id)}>View Details</Button>
               </div>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#2A2A2A]">
+                <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center">
-                      <Users className="w-5 h-5 text-[#C9E5FF]" />
+                    <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="text-[#C9E5FF] font-medium">Tech Founders</h4>
-                      <p className="text-sm text-[#A3A3A3]">Draft • Last edited 2 days ago</p>
+                      <h4 className="text-white font-medium">Tech Founders</h4>
+                      <p className="text-sm text-[#A1A1AA]">Draft • Last edited 2 days ago</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -181,33 +181,33 @@ export default function CampaignsPage() {
 
         {/* Completed Campaigns */}
         {(activeTab === "all" || activeTab === "completed") && mockCampaigns.completed.length > 0 && (
-          <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A]">
+          <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-medium text-[#C9E5FF]">Completed</h3>
-                  <p className="text-sm text-[#A3A3A3]">Past campaigns</p>
+                  <h3 className="text-lg font-medium text-white">Completed</h3>
+                  <p className="text-sm text-[#A1A1AA]">Past campaigns</p>
                 </div>
                 <Button variant="outline" onClick={() => handleViewDetails(mockCampaigns.completed[0].id)}>View Details</Button>
               </div>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#2A2A2A]">
+                <div className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-[#2A2A2A] rounded-full flex items-center justify-center">
-                      <Users className="w-5 h-5 text-[#C9E5FF]" />
+                    <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="text-[#C9E5FF] font-medium">December Outreach</h4>
-                      <p className="text-sm text-[#A3A3A3]">500 prospects • Completed</p>
+                      <h4 className="text-white font-medium">December Outreach</h4>
+                      <p className="text-sm text-[#A1A1AA]">500 prospects • Completed</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-sm text-[#C9E5FF]">89 replies</p>
-                      <p className="text-xs text-[#A3A3A3]">17.8% rate</p>
+                      <p className="text-sm text-white">89 replies</p>
+                      <p className="text-xs text-[#A1A1AA]">17.8% rate</p>
                     </div>
                     <Button variant="ghost" size="icon">
-                      <BarChart2 className="w-4 h-4 text-[#A3A3A3]" />
+                      <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
                     </Button>
                   </div>
                 </div>

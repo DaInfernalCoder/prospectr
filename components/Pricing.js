@@ -12,7 +12,7 @@ const Pricing = () => {
         <div className="flex flex-col text-center w-full mb-20">
           <p className="font-medium text-red-500 mb-8">Pricing</p>
           <h2 className="font-bold text-3xl lg:text-5xl tracking-tight text-white">
-            Save hours of repetitive code and ship faster!
+            Start automating LinkedIn marketing today
           </h2>
         </div>
 
@@ -46,9 +46,9 @@ const Pricing = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-end">
                   {plan.priceAnchor && (
-                    <div className="flex flex-col justify-end mb-[4px] text-lg ">
+                    <div className="flex flex-col justify-end mb-[4px] text-lg">
                       <p className="relative">
                         <span className="absolute bg-white h-[1.5px] inset-x-0 top-[53%]"></span>
                         <span className="text-white/80">
@@ -61,8 +61,8 @@ const Pricing = () => {
                     ${plan.price}
                   </p>
                   <div className="flex flex-col justify-end mb-[4px]">
-                    <p className="text-xs text-white/60 uppercase font-semibold">
-                      USD
+                    <p className="text-sm text-white/60 uppercase font-semibold">
+                      {plan.priceDetails || "USD/month"}
                     </p>
                   </div>
                 </div>

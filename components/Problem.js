@@ -1,7 +1,7 @@
 const Arrow = ({ extraStyle }) => {
   return (
     <svg
-      className={`shrink-0 w-12 fill-white opacity-70 ${extraStyle}`}
+      className={`shrink-0 w-12 fill-red-500/70 ${extraStyle}`}
       viewBox="0 0 138 138"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -21,11 +21,14 @@ const Arrow = ({ extraStyle }) => {
     </svg>
   );
 };
+
 const Step = ({ emoji, text }) => {
   return (
-    <div className="w-full md:w-48 flex flex-col gap-2 items-center justify-center text-white">
-      <span className="text-4xl">{emoji}</span>
-      <h3 className="font-bold">{text}</h3>
+    <div className="w-full md:w-48 flex flex-col gap-4 items-center justify-center">
+      <span className="text-5xl">{emoji}</span>
+      <div className="bg-red-500/10 px-6 py-3 rounded-full">
+        <h3 className="font-medium text-red-500">{text}</h3>
+      </div>
     </div>
   );
 };
@@ -41,25 +44,50 @@ const Step = ({ emoji, text }) => {
 // - Features: "ShipFast has user auth, Stripe, emails all set up for you"
 const Problem = () => {
   return (
-    <section className="bg-black">
-      <div className="max-w-7xl mx-auto px-8 py-16 md:py-32 text-center">
-        <h2 className="max-w-3xl mx-auto font-extrabold text-4xl md:text-5xl tracking-tight mb-6 md:mb-8 text-white">
-          Manual LinkedIn networking is killing your productivity
+    <section className="bg-gradient-to-b from-black to-base-100">
+      <div className="max-w-4xl mx-auto px-8 py-16 md:py-32 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/10 text-red-500 font-medium mb-8">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          </span>
+          The Problem
+        </div>
+
+        <h2 className="max-w-3xl mx-auto font-bold text-4xl md:text-5xl tracking-tight mb-6 md:mb-8 text-white">
+          Traditional marketing is burning your cash with <span className="text-red-500">zero guarantees</span>
         </h2>
-        <p className="max-w-xl mx-auto text-lg opacity-90 leading-relaxed mb-12 md:mb-20">
-          Searching profiles, sending connection requests, tracking responses... It&apos;s overwhelming and time-consuming.
+        
+        <p className="max-w-xl mx-auto text-lg text-gray-400 leading-relaxed mb-16 md:mb-24">
+          Watching your budget disappear into ads that don&apos;t convert, waiting months for SEO to work, while your competitors race ahead... The clock is ticking on your runway.
         </p>
 
-        <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-6">
-          <Step emoji="🔍" text="Hours searching profiles" />
-
+        <div className="flex flex-col md:flex-row justify-center items-center md:items-start gap-8 md:gap-6 mb-20">
+          <Step emoji="💸" text="Thousands wasted on ads" />
           <Arrow extraStyle="max-md:-scale-x-100 md:-rotate-90" />
-
-          <Step emoji="⏰" text="50 requests per day limit" />
-
+          <Step emoji="⏳" text="12+ months for SEO results" />
           <Arrow extraStyle="md:-scale-x-100 md:-rotate-90" />
+          <Step emoji="📉" text="Zero predictable revenue" />
+        </div>
 
-          <Step emoji="😫" text="Low response rates" />
+        <div className="flex flex-col items-center gap-4">
+          <svg
+            className="w-6 h-6 text-red-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
+          <p className="text-xl font-medium text-gray-400">
+            There&apos;s a <span className="text-white">better way</span>
+          </p>
         </div>
       </div>
     </section>

@@ -1,6 +1,11 @@
 import Image from "next/image";
-import marcImg from "@/app/blog/_assets/images/authors/marc.png";
-import introducingSupabaseImg from "@/public/blog/introducing-supabase/header.png";
+import authorImg from "@/app/blog/_assets/images/authors/author.png";
+
+// Import blog post header images
+import prospectingStrategiesImg from "@/public/blog/prospecting-strategies/header.jpg";
+import linkedinTipsImg from "@/public/blog/linkedin-tips/header.jpg";
+import emailOutreachImg from "@/public/blog/email-outreach/header.jpg";
+import salesAutomationImg from "@/public/blog/sales-automation/header.jpg";
 
 // ==================================================================================================================================================================
 // BLOG CATEGORIES 🏷️
@@ -8,33 +13,50 @@ import introducingSupabaseImg from "@/public/blog/introducing-supabase/header.pn
 
 // These slugs are used to generate pages in the /blog/category/[categoryI].js. It's a way to group articles by category.
 const categorySlugs = {
-  feature: "feature",
+  strategy: "strategy",
   tutorial: "tutorial",
+  insights: "insights",
+  automation: "automation",
 };
 
 // All the blog categories data display in the /blog/category/[categoryI].js pages.
 export const categories = [
   {
     // The slug to use in the URL, from the categorySlugs object above.
-    slug: categorySlugs.feature,
+    slug: categorySlugs.strategy,
     // The title to display the category title (h1), the category badge, the category filter, and more. Less than 60 characters.
-    title: "New Features",
+    title: "Prospecting Strategies",
     // A short version of the title above, display in small components like badges. 1 or 2 words
-    titleShort: "Features",
+    titleShort: "Strategies",
     // The description of the category to display in the category page. Up to 160 characters.
     description:
-      "Here are the latest features we've added to ShipFast. I'm constantly improving our product to help you ship faster.",
+      "Learn effective B2B prospecting strategies to identify and connect with your ideal customers.",
     // A short version of the description above, only displayed in the <Header /> on mobile. Up to 60 characters.
-    descriptionShort: "Latest features added to ShipFast.",
+    descriptionShort: "Effective B2B prospecting strategies.",
   },
   {
     slug: categorySlugs.tutorial,
-    title: "How Tos & Tutorials",
+    title: "How-To Guides",
     titleShort: "Tutorials",
     description:
-      "Learn how to use ShipFast with these step-by-step tutorials. I'll show you how to ship faster and save time.",
-    descriptionShort:
-      "Learn how to use ShipFast with these step-by-step tutorials.",
+      "Step-by-step tutorials on using Prospectr and implementing successful prospecting techniques.",
+    descriptionShort: "Learn how to prospect effectively with our guides.",
+  },
+  {
+    slug: categorySlugs.insights,
+    title: "Industry Insights",
+    titleShort: "Insights",
+    description:
+      "Stay updated with the latest trends, best practices, and insights in B2B prospecting and lead generation.",
+    descriptionShort: "Latest trends in B2B prospecting.",
+  },
+  {
+    slug: categorySlugs.automation,
+    title: "Sales Automation",
+    titleShort: "Automation",
+    description:
+      "Discover how to automate your prospecting workflow and scale your outreach efforts efficiently.",
+    descriptionShort: "Automate your prospecting workflow.",
   },
 ];
 
@@ -95,39 +117,34 @@ const socialIcons = {
 
 // These slugs are used to generate pages in the /blog/author/[authorId].js. It's a way to show all articles from an author.
 const authorSlugs = {
-  marc: "marc",
+  main: "prospectr-team",
 };
 
 // All the blog authors data display in the /blog/author/[authorId].js pages.
 export const authors = [
   {
     // The slug to use in the URL, from the authorSlugs object above.
-    slug: authorSlugs.marc,
+    slug: authorSlugs.main,
     // The name to display in the author's bio. Up to 60 characters.
-    name: "Marc Lou",
+    name: "Prospectr Team",
     // The job to display in the author's bio. Up to 60 characters.
-    job: "Maker of ByeDispute",
+    job: "B2B Prospecting Experts",
     // The description of the author to display in the author's bio. Up to 160 characters.
     description:
-      "Marc is a developer and an entrepreneur. He's built 20 startups in the last 3 years. 6 were profitable and 3 were acquired. He's currently building ByeDispute, the #1 Stripe Chargebacks Protection tool.",
+      "The Prospectr team consists of experienced B2B sales professionals and growth experts who have helped thousands of businesses improve their prospecting and lead generation efforts.",
     // The avatar of the author to display in the author's bio and avatar badge. It's better to use a local image, but you can also use an external image (https://...)
-    avatar: marcImg,
+    avatar: authorImg,
     // A list of social links to display in the author's bio.
     socials: [
       {
         name: socialIcons.twitter.name,
         icon: socialIcons.twitter.svg,
-        url: "https://twitter.com/marc_louvion",
+        url: "https://twitter.com/prospectr",
       },
       {
         name: socialIcons.linkedin.name,
         icon: socialIcons.linkedin.svg,
-        url: "https://www.linkedin.com/in/marclouvion/",
-      },
-      {
-        name: socialIcons.github.name,
-        icon: socialIcons.github.svg,
-        url: "https://github.com/Marc-Lou-Org/ship-fast",
+        url: "https://www.linkedin.com/company/prospectr",
       },
     ],
   },
@@ -141,9 +158,9 @@ export const authors = [
 const styles = {
   h2: "text-2xl lg:text-4xl font-bold tracking-tight mb-4 text-base-content",
   h3: "text-xl lg:text-2xl font-bold tracking-tight mb-2 text-base-content",
-  p: "text-base-content/90 leading-relaxed",
-  ul: "list-inside list-disc text-base-content/90 leading-relaxed",
-  li: "list-item",
+  p: "text-base-content/90 leading-relaxed mb-6",
+  ul: "list-inside list-disc text-base-content/90 leading-relaxed mb-6",
+  li: "list-item mb-2",
   // Altnernatively, you can use the library react-syntax-highlighter to display code snippets.
   code: "text-sm font-mono bg-neutral text-neutral-content p-6 rounded-box my-4 overflow-x-scroll select-all",
   codeInline:
@@ -154,89 +171,175 @@ const styles = {
 export const articles = [
   {
     // The unique slug to use in the URL. It's also used to generate the canonical URL.
-    slug: "introducing-supabase",
+    slug: "effective-prospecting-strategies-2024",
     // The title to display in the article page (h1). Less than 60 characters. It's also used to generate the meta title.
-    title: "Introducing Supabase to ShipFast",
+    title: "10 Effective B2B Prospecting Strategies for 2024",
     // The description of the article to display in the article page. Up to 160 characters. It's also used to generate the meta description.
     description:
-      "Supabase is an open-source Firebase alternative. It's a great tool for building a backend for your app. It's now integrated with ShipFast!",
+      "Discover the most effective B2B prospecting strategies that will help you identify, connect with, and convert high-quality leads in 2024.",
     // An array of categories of the article. It's used to generate the category badges, the category filter, and more.
     categories: [
-      categories.find((category) => category.slug === categorySlugs.feature),
+      categories.find((category) => category.slug === categorySlugs.strategy),
     ],
     // The author of the article. It's used to generate a link to the author's bio page.
-    author: authors.find((author) => author.slug === authorSlugs.marc),
+    author: authors.find((author) => author.slug === authorSlugs.main),
     // The date of the article. It's used to generate the meta date.
-    publishedAt: "2023-11-20",
+    publishedAt: "2024-03-13",
     image: {
       // The image to display in <CardArticle /> components.
-      src: introducingSupabaseImg,
+      src: prospectingStrategiesImg,
       // The relative URL of the same image to use in the Open Graph meta tags & the Schema Markup JSON-LD.
-      urlRelative: "/blog/introducing-supabase/header.jpg",
-      alt: "Supabase and ShipFast logo combined",
+      urlRelative: "/blog/prospecting-strategies/header.jpg",
+      alt: "B2B Prospecting Strategies Illustration",
     },
     // The actual content of the article that will be shown under the <h1> title in the article page.
     content: (
       <>
         <Image
-          src={introducingSupabaseImg}
-          alt="Supabase and ShipFast logo combined"
+          src={prospectingStrategiesImg}
+          alt="B2B Prospecting Strategies Illustration"
           width={700}
           height={500}
           priority={true}
-          className="rounded-box"
+          className="rounded-box mb-8"
           placeholder="blur"
         />
         <section>
-          <h2 className={styles.h2}>Introduction</h2>
+          <h2 className={styles.h2}>The Evolution of B2B Prospecting</h2>
           <p className={styles.p}>
-            Supabase is an open-source Firebase alternative. It&apos;s a great
-            tool for building a backend for your app. It&apos;s now integrated
-            with ShipFast!
+            As we move further into 2024, B2B prospecting continues to evolve with new technologies, 
+            changing buyer behaviors, and emerging best practices. This guide will help you stay ahead 
+            of the curve with proven strategies that deliver results.
           </p>
         </section>
 
         <section>
-          <h3 className={styles.h3}>1. Create a supabase account</h3>
+          <h2 className={styles.h2}>Top 10 Prospecting Strategies</h2>
+          
+          <h3 className={styles.h3}>1. Data-Driven Prospect Identification</h3>
           <p className={styles.p}>
-            First, go to{" "}
-            <a href="https://supabase.com/" className="link link-primary">
-              Supabase
-            </a>{" "}
-            and create an account. It&apos;s free for up to 10,000 rows per
-            table.
-            <br />
-            Then create a new project and a new table. You can use the following
-            SQL schema:
+            Use advanced data analytics and AI to identify prospects that match your ideal customer profile. 
+            Focus on companies showing buying signals and growth indicators.
           </p>
 
-          <pre className={styles.code}>
-            <code>
-              {`CREATE TABLE public.users (
-  id bigint NOT NULL DEFAULT nextval('users_id_seq'::regclass),
-  email text NOT NULL,
-  password text NOT NULL,
-  created_at timestamp with time zone NOT NULL DEFAULT now(),
-  updated_at timestamp with time zone NOT NULL DEFAULT now(),
-  CONSTRAINT users_pkey PRIMARY KEY (id)
-);`}
-            </code>
-          </pre>
+          <h3 className={styles.h3}>2. Multi-Channel Outreach</h3>
+          <p className={styles.p}>
+            Combine LinkedIn, email, and phone outreach in a coordinated sequence to increase response rates 
+            and engagement.
+          </p>
+
+          <h3 className={styles.h3}>3. Personalized Value Propositions</h3>
+          <p className={styles.p}>
+            Craft tailored messages that address specific pain points and challenges of each prospect segment.
+          </p>
         </section>
-
+      </>
+    ),
+  },
+  {
+    slug: "linkedin-prospecting-tips",
+    title: "LinkedIn Prospecting: A Complete Guide",
+    description:
+      "Master LinkedIn prospecting with our comprehensive guide. Learn how to find, connect with, and engage potential clients effectively.",
+    categories: [
+      categories.find((category) => category.slug === categorySlugs.tutorial),
+    ],
+    author: authors.find((author) => author.slug === authorSlugs.main),
+    publishedAt: "2024-03-12",
+    image: {
+      src: linkedinTipsImg,
+      urlRelative: "/blog/linkedin-tips/header.jpg",
+      alt: "LinkedIn Prospecting Guide",
+    },
+    content: (
+      <>
+        <Image
+          src={linkedinTipsImg}
+          alt="LinkedIn Prospecting Guide"
+          width={700}
+          height={500}
+          priority={true}
+          className="rounded-box mb-8"
+          placeholder="blur"
+        />
         <section>
-          <h3 className={styles.h3}>2. Add your credentials to ShipFast</h3>
+          <h2 className={styles.h2}>Why LinkedIn is Essential for B2B Prospecting</h2>
           <p className={styles.p}>
-            Copy the <span className={styles.codeInline}>API URL</span> and{" "}
-            <span className={styles.codeInline}>API Key</span> from your
-            Supabase project settings and add them to your ShipFast project
-            settings. Add these files to your project:
+            LinkedIn has become the go-to platform for B2B prospecting, offering unparalleled access to 
+            decision-makers and valuable business insights.
           </p>
-
-          <ul className={styles.ul}>
-            <li className={styles.li}>.env.local</li>
-            <li className={styles.li}>.env.production</li>
-          </ul>
+        </section>
+      </>
+    ),
+  },
+  {
+    slug: "email-outreach-best-practices",
+    title: "Email Outreach Best Practices That Get Responses",
+    description:
+      "Learn how to craft compelling email sequences that engage prospects and drive responses. Includes templates and real-world examples.",
+    categories: [
+      categories.find((category) => category.slug === categorySlugs.strategy),
+    ],
+    author: authors.find((author) => author.slug === authorSlugs.main),
+    publishedAt: "2024-03-11",
+    image: {
+      src: emailOutreachImg,
+      urlRelative: "/blog/email-outreach/header.jpg",
+      alt: "Email Outreach Strategies",
+    },
+    content: (
+      <>
+        <Image
+          src={emailOutreachImg}
+          alt="Email Outreach Strategies"
+          width={700}
+          height={500}
+          priority={true}
+          className="rounded-box mb-8"
+          placeholder="blur"
+        />
+        <section>
+          <h2 className={styles.h2}>The Art of Email Prospecting</h2>
+          <p className={styles.p}>
+            Email remains one of the most effective channels for B2B prospecting when done right. 
+            Learn how to cut through the noise and get responses.
+          </p>
+        </section>
+      </>
+    ),
+  },
+  {
+    slug: "sales-automation-guide",
+    title: "The Complete Guide to Sales Automation",
+    description:
+      "Discover how to automate your sales processes without losing the personal touch. Learn about tools, workflows, and best practices.",
+    categories: [
+      categories.find((category) => category.slug === categorySlugs.automation),
+    ],
+    author: authors.find((author) => author.slug === authorSlugs.main),
+    publishedAt: "2024-03-10",
+    image: {
+      src: salesAutomationImg,
+      urlRelative: "/blog/sales-automation/header.jpg",
+      alt: "Sales Automation Guide",
+    },
+    content: (
+      <>
+        <Image
+          src={salesAutomationImg}
+          alt="Sales Automation Guide"
+          width={700}
+          height={500}
+          priority={true}
+          className="rounded-box mb-8"
+          placeholder="blur"
+        />
+        <section>
+          <h2 className={styles.h2}>Automating Your Sales Process</h2>
+          <p className={styles.p}>
+            Learn how to leverage automation to scale your prospecting efforts while maintaining 
+            personalization and quality of engagement.
+          </p>
         </section>
       </>
     ),

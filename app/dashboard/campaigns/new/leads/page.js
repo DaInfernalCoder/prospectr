@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronRight, ChevronDown, ArrowRight, Search, ChevronLeft, AlertCircle, LinkIcon } from "lucide-react";
+import { useLinkedIn } from "@/components/contexts/LinkedInContext";
 
 export default function AddLeadsPage() {
   const router = useRouter();
+  const { linkedInStatus } = useLinkedIn();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSections, setExpandedSections] = useState({});
   const [maxLeads, setMaxLeads] = useState(0);
@@ -36,11 +38,6 @@ export default function AddLeadsPage() {
     sortBy: "relevance"
   });
 
-  const [linkedInStatus, setLinkedInStatus] = useState({
-    checked: false,
-    connected: true
-  });
-
   // Toggle section expansion
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -65,43 +62,16 @@ export default function AddLeadsPage() {
     }));
   };
 
-  // Check LinkedIn connection status on component mount
-  useEffect(() => {
-    const checkLinkedInStatus = async () => {
-      try {
-        const response = await fetch('/api/linkedin/status', {
-          method: 'GET'
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          setLinkedInStatus({
-            checked: true,
-            connected: data.connected
-          });
-        } else {
-          // If we can't check the status, assume disconnected for safety
-          setLinkedInStatus({
-            checked: true,
-            connected: false
-          });
-        }
-      } catch (error) {
-        console.error("Error checking LinkedIn status:", error);
-        setLinkedInStatus({
-          checked: true,
-          connected: false
-        });
-      }
-    };
-    
-    checkLinkedInStatus();
-  }, []);
-
   // Perform LinkedIn search
   const performSearch = async (page = 1) => {
     if (!searchQuery.trim()) {
       setError("Please enter a search query");
+      return;
+    }
+
+    // Check LinkedIn status before performing search
+    if (!linkedInStatus.connected) {
+      setError("LinkedIn account not connected. Please connect your LinkedIn account in settings.");
       return;
     }
 

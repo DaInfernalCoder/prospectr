@@ -18,7 +18,7 @@ const links = [
 ];
 
 const cta = (
-  <ButtonSignin text="Prevent disputes" extraStyle="btn-primary md:btn-sm" />
+  <ButtonSignin text="Get Cooking" extraStyle="btn-primary md:btn-sm" />
 );
 
 const ButtonPopoverCategories = () => {

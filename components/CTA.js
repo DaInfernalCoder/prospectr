@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import config from "@/config";
+import { useRouter } from "next/navigation";
 
 const CTA = () => {
+  const router = useRouter();
+  
   return (
     <section className="relative hero overflow-hidden min-h-screen">
       <Image
@@ -21,7 +26,10 @@ const CTA = () => {
             section...
           </p>
 
-          <button className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+          <button 
+            onClick={() => router.push('/signin')}
+            className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+          >
             Get {config.appName}
           </button>
         </div>
