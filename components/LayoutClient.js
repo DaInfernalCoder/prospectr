@@ -1,6 +1,5 @@
 "use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Crisp } from "crisp-sdk-web";
@@ -8,13 +7,15 @@ import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "react-hot-toast";
 import { Tooltip } from "react-tooltip";
 import config from "@/config";
+import { LinkedInProvider } from "@/components/contexts/LinkedInContext";
+import { createClient } from "@/utils/supabase/client";
 
 // Crisp customer chat support:
 // This component is separated from ClientLayout because it needs to be wrapped with <SessionProvider> to use useSession() hook
 const CrispChat = () => {
   const pathname = usePathname();
 
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const [data, setData] = useState(null);
 
   // This is used to get the user data from Supabase Auth (if logged in) => user ID is used to identify users in Crisp
@@ -29,7 +30,7 @@ const CrispChat = () => {
       }
     };
     getUser();
-  }, [supabase.auth]);
+  }, []);
 
   useEffect(() => {
     if (config?.crisp?.id) {
@@ -65,14 +66,18 @@ const CrispChat = () => {
 // 2. Toaster: Show Success/Error messages anywhere from the app with toast()
 // 3. Tooltip: Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content=""
 // 4. CrispChat: Set Crisp customer chat support (see above)
+// 5. LinkedInProvider: Manage LinkedIn connection status throughout the app
 const ClientLayout = ({ children }) => {
   return (
     <>
       {/* Show a progress bar at the top when navigating between pages */}
       <NextTopLoader color={config.colors.main} showSpinner={false} />
 
-      {/* Content inside app/page.js files  */}
-      {children}
+      {/* LinkedIn context provider for managing connection status */}
+      <LinkedInProvider>
+        {/* Content inside app/page.js files  */}
+        {children}
+      </LinkedInProvider>
 
       {/* Show Success/Error messages anywhere from the app with toast() */}
       <Toaster

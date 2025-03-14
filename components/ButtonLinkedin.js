@@ -1,33 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLinkedIn } from "@/components/contexts/LinkedInContext";
 
 const ButtonLinkedin = ({ className = "", variant = "default", text = "Connect LinkedIn" }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [lastConnected, setLastConnected] = useState(null);
   const router = useRouter();
-  const supabase = createClient();
-
-  // Check LinkedIn connection status
-  useEffect(() => {
-    const checkConnectionStatus = async () => {
-      try {
-        const response = await fetch("/api/auths/linkedin/status");
-        if (response.ok) {
-          const data = await response.json();
-          setIsConnected(data.connected);
-          setLastConnected(data.last_connected);
-        }
-      } catch (error) {
-        console.error("Failed to check LinkedIn status:", error);
-      }
-    };
-
-    checkConnectionStatus();
-  }, []);
+  const { linkedInStatus, refreshLinkedInStatus } = useLinkedIn();
 
   const handleConnectLinkedin = async () => {
     try {
@@ -38,6 +18,24 @@ const ButtonLinkedin = ({ className = "", variant = "default", text = "Connect L
       console.error("LinkedIn connection error:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRefreshStatus = async (e) => {
+    // If the user is already connected, they might want to refresh the status
+    // rather than reconnect, so we'll prevent the default action
+    if (linkedInStatus.connected) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      try {
+        setIsLoading(true);
+        await refreshLinkedInStatus();
+      } catch (error) {
+        console.error("Failed to refresh LinkedIn status:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -59,9 +57,12 @@ const ButtonLinkedin = ({ className = "", variant = "default", text = "Connect L
     <button
       className={buttonStyle}
       onClick={handleConnectLinkedin}
+      onDoubleClick={handleRefreshStatus}
       disabled={isLoading}
       data-tooltip-id="tooltip"
-      data-tooltip-content={isConnected ? "LinkedIn account connected" : "Connect your LinkedIn account"}
+      data-tooltip-content={linkedInStatus.connected 
+        ? `LinkedIn account connected${linkedInStatus.lastChecked ? ` (Last checked: ${new Date(linkedInStatus.lastChecked).toLocaleString()})` : ''}`
+        : "Connect your LinkedIn account"}
     >
       {isLoading ? (
         <span className="loading loading-spinner loading-xs"></span>

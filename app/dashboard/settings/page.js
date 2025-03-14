@@ -1,34 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ButtonLinkedin from "@/components/ButtonLinkedin";
+import { useLinkedIn } from "@/components/contexts/LinkedInContext";
 
 export default function SettingsPage() {
-  const [linkedinStatus, setLinkedinStatus] = useState({
-    connected: false,
-    lastConnected: null
-  });
-
-  // Fetch LinkedIn connection status
-  useEffect(() => {
-    const checkLinkedinStatus = async () => {
-      try {
-        const response = await fetch("/api/auths/linkedin/status");
-        if (response.ok) {
-          const data = await response.json();
-          setLinkedinStatus({
-            connected: data.connected,
-            lastConnected: data.last_connected
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch LinkedIn status:", error);
-      }
-    };
-
-    checkLinkedinStatus();
-  }, []);
+  const { linkedInStatus, refreshLinkedInStatus } = useLinkedIn();
 
   return (
     <div className="space-y-6">
@@ -48,15 +26,28 @@ export default function SettingsPage() {
               <div>
                 <p className="text-white">Connection Status</p>
                 <p className="text-sm text-[#A1A1AA]">
-                  {linkedinStatus.connected 
-                    ? `Your LinkedIn account is connected${linkedinStatus.lastConnected ? ` (Last updated: ${new Date(linkedinStatus.lastConnected).toLocaleDateString()})` : ''}` 
+                  {linkedInStatus.connected 
+                    ? `Your LinkedIn account is connected${linkedInStatus.lastChecked ? ` (Last checked: ${new Date(linkedInStatus.lastChecked).toLocaleString()})` : ''}` 
                     : "Your LinkedIn account is not connected"}
                 </p>
               </div>
-              <ButtonLinkedin 
-                variant="outline" 
-                text={linkedinStatus.connected ? "Reconnect LinkedIn" : "Connect LinkedIn"} 
-              />
+              <div className="flex items-center gap-2">
+                {linkedInStatus.checked && (
+                  <button 
+                    onClick={refreshLinkedInStatus}
+                    className="btn btn-sm btn-ghost"
+                    title="Refresh status"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+                )}
+                <ButtonLinkedin 
+                  variant="outline" 
+                  text={linkedInStatus.connected ? "Reconnect LinkedIn" : "Connect LinkedIn"} 
+                />
+              </div>
             </div>
             <div className="pt-4 border-t border-[#1A1A1A]">
               <p className="text-sm text-[#A1A1AA]">

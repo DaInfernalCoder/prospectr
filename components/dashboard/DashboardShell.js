@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, BarChart2, Settings } from "lucide-react";
 import ButtonLinkedin from "@/components/ButtonLinkedin";
+import { useLinkedIn } from "@/components/contexts/LinkedInContext";
 
 const navigationLinks = [
   {
@@ -31,24 +32,7 @@ const navigationLinks = [
 
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
-  const [linkedinStatus, setLinkedinStatus] = useState(false);
-
-  // Check LinkedIn connection status
-  useEffect(() => {
-    const checkLinkedinStatus = async () => {
-      try {
-        const response = await fetch("/api/auths/linkedin/status");
-        if (response.ok) {
-          const data = await response.json();
-          setLinkedinStatus(data.connected);
-        }
-      } catch (error) {
-        console.error("Failed to check LinkedIn status:", error);
-      }
-    };
-
-    checkLinkedinStatus();
-  }, []);
+  const { linkedInStatus } = useLinkedIn();
 
   return (
     <div className="min-h-screen bg-black text-white" suppressHydrationWarning>
@@ -95,7 +79,7 @@ export default function DashboardShell({ children }) {
             <h1 className="text-lg font-medium tracking-tight">{getPageTitle(pathname)}</h1>
           </div>
           <div className="flex items-center gap-3">
-            {!linkedinStatus && pathname !== "/dashboard/settings" && (
+            {!linkedInStatus.connected && pathname !== "/dashboard/settings" && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-amber-400">LinkedIn not connected</span>
                 <ButtonLinkedin variant="outline" text="Connect" className="btn-sm rounded-md" />
