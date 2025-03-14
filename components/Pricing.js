@@ -12,7 +12,7 @@ const Pricing = () => {
         <div className="flex flex-col text-center w-full mb-20">
           <p className="font-medium text-red-500 mb-8">Pricing</p>
           <h2 className="font-bold text-3xl lg:text-5xl tracking-tight text-white">
-            Save hours of repetitive code and ship faster!
+            Start automating LinkedIn marketing today
           </h2>
         </div>
 
