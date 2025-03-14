@@ -110,6 +110,7 @@ export async function GET(request) {
           const template = invitation.invitation_jobs?.invitation_templates;
           if (template?.follow_up_message) {
             try {
+              console.log(template.follow_up_message, "template");
               const personalizedMessage = template.follow_up_message
                 .replace(/{{name}}/g, userProfile.name || "there")
                 .replace(/{{first_name}}/g, userProfile.first_name || "there");
