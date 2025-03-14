@@ -33,24 +33,33 @@ function Test() {
   ];
   // useEffect(() => {
   //   async function testFetch() {
-  //     const res = await fetch("/api/linkedin/invitations/send", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         recipients: recipients,
-  //         message: "Hi, I'd like to connect!",
-  //         templateName: "My Follow-up Template",
-  //         followUpMessage: "Thanks for connecting {{name}}! ...",
-  //       }),
-  //     });
+  //     const res = await fetch("/api/cron/check-invitations");
   //     const data = await res.json();
   //     setData(data);
   //   }
-
   //   testFetch();
   // }, []);
+
+  useEffect(() => {
+    async function testFetch() {
+      const res = await fetch("/api/linkedin/invitations/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipients: recipients,
+          message: "Hi, I'd like to connect!",
+          templateName: "My Follow-up Template",
+          followUpMessage: "Thanks for connecting {{name}}! ...",
+        }),
+      });
+      const data = await res.json();
+      setData(data);
+    }
+
+    testFetch();
+  }, []);
 
   // useEffect(() => {
   //   async function testFetch() {

@@ -10,160 +10,188 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(request) {
-  console.log("/check-inviations");
+  console.log("/check-invitations");
   // Verify the request is from Vercel Cron
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  //   const authHeader = request.headers.get("authorization");
+  //   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  //     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  //   }
 
   const supabase = await createClient();
   console.log("next...");
   try {
-    // Get all users with active invitation jobs
-    const { data: activeJobs, errorActiveJobs } = await supabase
-      .from("invitation_jobs")
-      .select("user_id")
-      .in("status", ["active", "completed"])
-      .order("created_at", { ascending: false });
+    // Get all pending invitations with their associated data through proper joins
+    const { data: pendingInvitations, error } = await supabase
+      .from("invitation_users")
+      .select(
+        `
+        *,
+        invitation_jobs(
+          job_id,
+          user_id,
+          template_id,
+          invitation_templates(
+            follow_up_message
+          )
+        )
+      `
+      )
+      .eq("invitation_status", "pending");
 
-    console.log({ activeJobs });
-
-    if (!activeJobs) {
-      return NextResponse.json({ message: "No active invitation jobs" });
+    if (error) {
+      console.error("Error fetching pending invitations:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch pending invitations" },
+        { status: 500 }
+      );
     }
 
-    // Get unique user IDs
-    const userIds = [...new Set(activeJobs.map((job) => job.user_id))];
-    console.log({ userIds });
-    // For each user, call the check and follow-up endpoints
+    if (!pendingInvitations?.length) {
+      return NextResponse.json({ message: "No pending invitations to check" });
+    }
+
+    const client = unipileClient();
     const results = [];
 
-    for (const userId of userIds) {
+    // Process each pending invitation
+    for (const invitation of pendingInvitations) {
       try {
-        // Get user's unipile account ID
-        const { data: profile } = await supabase
+        // Get the user's unipile_account_id from profiles table
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("unipile_account_id")
-          .eq("user_id", userId)
+          .eq("user_id", invitation.invitation_jobs.user_id)
           .single();
 
-        if (!profile?.unipile_account_id) {
-          results.push({
-            userId,
-            status: "skipped",
-            reason: "No LinkedIn account",
-          });
+        if (profileError || !profileData?.unipile_account_id) {
+          console.error(
+            `No unipile account found for user ${invitation.invitation_jobs.user_id}:`,
+            profileError
+          );
           continue;
         }
 
-        // Get pending invitations for this user
-        const { data: pendingInvitations } = await supabase
-          .from("invitation_users")
-          .select(
-            `
-            *,
-            invitation_jobs(
-              user_id,
-              template_id,
-              invitation_templates(follow_up_message)
-            )
-          `
-          )
-          .eq("invitation_status", "pending")
-          .eq("invitation_jobs.user_id", userId);
+        // Extract LinkedIn identifier from profile URL
+        const identifier = new URL(invitation.linkedin_profile_url).pathname
+          .split("/")
+          .filter(Boolean)
+          .pop();
 
-        const client = unipileClient();
-
-        // Get list of relations from Unipile
-        const relations = await client.users.getAllRelations({
-          account_id: profile.unipile_account_id,
-          limit: 100,
+        console.log({
+          identifier,
+          unipile_account_id: profileData.unipile_account_id,
         });
 
-        // Create a map of LinkedIn provider IDs
-        const relationMap = new Map();
-        if (relations?.items) {
-          for (const relation of relations.items) {
-            if (relation.public_identifier) {
-              try {
-                const userProfile = await client.users.getProfile({
-                  account_id: profile.unipile_account_id,
-                  identifier: relation.public_identifier,
-                });
+        // Try to get the user's profile
+        const userProfile = await client.users.getProfile({
+          account_id: profileData.unipile_account_id,
+          provider_id: invitation.linkedin_user_id,
+          identifier: identifier,
+        });
+        console.log({ userProfile });
 
-                if (userProfile?.provider_id) {
-                  relationMap.set(userProfile.provider_id, {
-                    ...relation,
-                    provider_id: userProfile.provider_id,
-                  });
-                }
-              } catch (error) {
-                console.error(`Error getting profile: ${error.message}`);
+        console.log(
+          "Comparing provider_ids:",
+          userProfile.provider_id,
+          invitation.linkedin_user_id
+        );
+
+        // If we get a profile with provider_id matching our invitation, they've accepted
+        if (
+          userProfile &&
+          userProfile.provider_id === invitation.linkedin_user_id
+        ) {
+          results.push({
+            id: invitation.id,
+            status: "accepted",
+          });
+
+          // Send follow-up if template exists
+          const template = invitation.invitation_jobs?.invitation_templates;
+          if (template?.follow_up_message) {
+            try {
+              const personalizedMessage = template.follow_up_message
+                .replace(/{{name}}/g, userProfile.name || "there")
+                .replace(/{{first_name}}/g, userProfile.first_name || "there");
+
+              console.log("Sending follow-up message:", {
+                personalizedMessage,
+              });
+
+              // Get all chats to find the one with this user
+              const { items: chats } = await client.messaging.getAllChats({
+                account_id: profileData.unipile_account_id,
+                provider: "LINKEDIN",
+              });
+
+              // Find the chat with this user using attendee_provider_id
+              const chat = chats.find(
+                (chat) =>
+                  chat.attendee_provider_id === invitation.linkedin_user_id
+              );
+
+              if (!chat?.id) {
+                console.error(
+                  "No chat found with user:",
+                  invitation.linkedin_user_id
+                );
+                results[results.length - 1].followUp = "failed_no_chat";
                 continue;
               }
-            }
-          }
-        }
 
-        // Check and update invitation statuses
-        const updatedInvitations = [];
-        for (const invitation of pendingInvitations || []) {
-          if (relationMap.has(invitation.linkedin_user_id)) {
-            const updatedInvitation = await updateInvitationStatus(
-              invitation.id,
-              "accepted",
-              new Date().toISOString()
-            );
-            updatedInvitations.push(updatedInvitation);
+              const messageSent = await client.messaging.sendMessage({
+                account_id: profileData.unipile_account_id,
+                provider: "LINKEDIN",
+                recipient_id: invitation.linkedin_user_id,
+                text: personalizedMessage,
+                chat_id: chat.id,
+              });
 
-            // If there's a follow-up message template, send it
-            if (
-              invitation.invitation_jobs?.invitation_templates
-                ?.follow_up_message
-            ) {
-              try {
-                const templateMessage =
-                  invitation.invitation_jobs.invitation_templates
-                    .follow_up_message;
-                const personalizedMessage = templateMessage
-                  .replace(/{{name}}/g, invitation.name || "there")
-                  .replace(
-                    /{{first_name}}/g,
-                    invitation.name?.split(" ")[0] || "there"
-                  );
+              console.log("Message sent response:", messageSent);
 
-                console.log({ templateMessage });
-
-                const msg = await client.messaging.sendMessage({
-                  account_id: profile.unipile_account_id,
-                  provider: "LINKEDIN",
-                  recipient_id: invitation.linkedin_user_id,
-                  text: personalizedMessage,
-                });
-                console.log({ msg });
-
-                await markFollowUpSent(invitation.id);
-              } catch (error) {
-                console.error(`Error sending follow-up: ${error.message}`);
+              if (messageSent) {
+                // Update invitation status
+                const updatedInvitation = await updateInvitationStatus(
+                  invitation.id,
+                  "accepted",
+                  new Date().toISOString()
+                );
+                if (updatedInvitation) {
+                  await markFollowUpSent(invitation.id);
+                  results[results.length - 1].followUp = "sent";
+                }
               }
+            } catch (error) {
+              console.error(
+                `Failed to send follow-up for invitation ${invitation.id}:`,
+                error
+              );
+              results[results.length - 1].followUp = "failed";
             }
           }
         }
-
-        results.push({
-          userId,
-          status: "processed",
-          updatedCount: updatedInvitations.length,
-        });
       } catch (error) {
-        console.error(`Error processing user ${userId}:`, error);
-        results.push({ userId, status: "error", message: error.message });
+        if (error.message?.includes("insufficient_relationship")) {
+          console.log(
+            `Invitation ${invitation.id} pending - user hasn't accepted yet`
+          );
+          continue;
+        }
+
+        console.error(
+          `Error processing invitation ${invitation.id}:`,
+          error.body
+        );
+        results.push({
+          id: invitation.id,
+          status: "error",
+          error: error.message,
+        });
       }
     }
 
     return NextResponse.json({
-      message: `Processed ${results.length} users`,
+      message: `Processed ${pendingInvitations.length} invitations`,
       results,
     });
   } catch (error) {
