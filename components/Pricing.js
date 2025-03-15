@@ -38,11 +38,11 @@ const Pricing = () => {
               <div className="relative flex flex-col h-full gap-5 lg:gap-8 z-10 bg-zinc-900 p-8 rounded-lg">
                 <div className="flex justify-between items-center gap-4">
                   <div>
-                    <p className="text-lg lg:text-xl font-bold text-white">{plan.name}</p>
+                    <p className="text-lg lg:text-xl font-bold text-white">
+                      {plan.name}
+                    </p>
                     {plan.description && (
-                      <p className="text-white/80 mt-2">
-                        {plan.description}
-                      </p>
+                      <p className="text-white/80 mt-2">{plan.description}</p>
                     )}
                   </div>
                 </div>
@@ -57,7 +57,9 @@ const Pricing = () => {
                       </p>
                     </div>
                   )}
-                  <p className={`text-5xl tracking-tight font-extrabold text-white`}>
+                  <p
+                    className={`text-5xl tracking-tight font-extrabold text-white`}
+                  >
                     ${plan.price}
                   </p>
                   <div className="flex flex-col justify-end mb-[4px]">
@@ -89,7 +91,10 @@ const Pricing = () => {
                   </ul>
                 )}
                 <div className="space-y-2">
-                  <ButtonCheckout priceId={plan.priceId} />
+                  <ButtonCheckout
+                    priceId={plan.priceId}
+                    productLink={plan.link}
+                  />
 
                   <p className="flex items-center justify-center gap-2 text-sm text-center text-white/80 font-medium relative">
                     Pay once. Access forever.

@@ -17,33 +17,36 @@ const config = {
   stripe: {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
     plans: [
+      // {
+      //   priceId:
+      //     process.env.NODE_ENV === "development"
+      //       ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
+      //       : "price_456",
+      //   name: "Basic",
+      //   description: "Perfect for getting started with LinkedIn automation",
+      //   price: 20,
+      //   priceDetails: "/month",
+      //   features: [
+      //     {
+      //       name: "1 active campaign",
+      //     },
+      //     { name: "Automatic connection requests" },
+      //     { name: "Basic Auto Reply capabilities" },
+      //   ],
+      // },
       {
+        link:
+          process.env.NODE_ENV === "development"
+            ? "https://buy.stripe.com/test_fZe16q0u61tkfQYdQR"
+            : "",
         priceId:
           process.env.NODE_ENV === "development"
-            ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
-            : "price_456",
-        name: "Basic",
-        description: "Perfect for getting started with LinkedIn automation",
-        price: 20,
-        priceDetails: "/month",
-        features: [
-          {
-            name: "1 active campaign",
-          },
-          { name: "Automatic connection requests" },
-          { name: "Basic Auto Reply capabilities" },
-        ],
-      },
-      {
-        isFeatured: true,
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_1O5KtcAxyNprDp7iftKnrrpw"
-            : "price_456",
-        name: "Pro",
-        description: "Advanced features for serious networkers",
+            ? "price_1R2tZJGGMtZacA5oHJvko1rj"
+            : "",
         price: 50,
+        name: "Pro",
         priceDetails: "/month",
+        isFeatured: true,
         features: [
           {
             name: "Unlimited campaigns",
@@ -53,24 +56,43 @@ const config = {
           { name: "Automatic send message to inbox, inmail" },
         ],
       },
-      {
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_1Niyy5AxyNprDp7iZIqEyD2h_team"
-            : "price_456",
-        name: "Team",
-        description: "Perfect for teams and agencies",
-        price: 30,
-        priceDetails: "/user/month",
-        features: [
-          {
-            name: "Volume Discounts",
-          },
-          { name: "Advanced Team Settings" },
-          { name: "Team Inbox Management" },
-          { name: "All prices are per user, per month" },
-        ],
-      },
+      // {
+      //   isFeatured: true,
+      //   priceId:
+      //     process.env.NODE_ENV === "development"
+      //       ? "price_1O5KtcAxyNprDp7iftKnrrpw"
+      //       : "price_456",
+      //   name: "Pro",
+      //   description: "Advanced features for serious networkers",
+      //   price: 50,
+      //   priceDetails: "/month",
+      //   features: [
+      //     {
+      //       name: "Unlimited campaigns",
+      //     },
+      //     { name: "Automatic connection requests" },
+      //     { name: "Sales Navigator support" },
+      //     { name: "Automatic send message to inbox, inmail" },
+      //   ],
+      // },
+      // {
+      //   priceId:
+      //     process.env.NODE_ENV === "development"
+      //       ? "price_1Niyy5AxyNprDp7iZIqEyD2h_team"
+      //       : "price_456",
+      //   name: "Team",
+      //   description: "Perfect for teams and agencies",
+      //   price: 30,
+      //   priceDetails: "/user/month",
+      //   features: [
+      //     {
+      //       name: "Volume Discounts",
+      //     },
+      //     { name: "Advanced Team Settings" },
+      //     { name: "Team Inbox Management" },
+      //     { name: "All prices are per user, per month" },
+      //   ],
+      // },
     ],
   },
   aws: {
@@ -95,7 +117,7 @@ const config = {
     // The DaisyUI theme to use. Choose from: light, dark, cupcake, bumblebee, emerald, corporate, synthwave, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter
     theme: "black",
     // Main color for browser UI elements
-    main: themes["black"]
+    main: themes["black"],
   },
   auth: {
     // REQUIRED — the path to log in users. It's use to protect private routes (like /dashboard). It's used in apiClient (/libs/api.js) upon 401 errors from our API
