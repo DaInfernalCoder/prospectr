@@ -92,7 +92,7 @@ const Pricing = () => {
                   <ButtonCheckout priceId={plan.priceId} />
 
                   <p className="flex items-center justify-center gap-2 text-sm text-center text-white/80 font-medium relative">
-                    Pay once. Access forever.
+                    $0.00 due today, cancel anytime
                   </p>
                 </div>
               </div>
