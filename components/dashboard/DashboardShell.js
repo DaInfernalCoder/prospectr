@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, BarChart2, Settings, Menu, X } from "lucide-react";
+import { LayoutDashboard, Users, BarChart2, Settings, Menu, X, Zap } from "lucide-react";
 import ButtonLinkedin from "@/components/ButtonLinkedin";
 import { useLinkedIn } from "@/components/contexts/LinkedInContext";
+import ButtonCheckout from "@/components/ButtonCheckout";
+import config from "@/config";
 
 const navigationLinks = [
   {
@@ -34,11 +36,37 @@ export default function DashboardShell({ children }) {
   const pathname = usePathname();
   const { linkedInStatus } = useLinkedIn();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState(null);
+
+  // Get the premium plan (featured plan)
+  const premiumPlan = config.stripe.plans.find((plan) => plan.isFeatured) || config.stripe.plans[1];
+  // Get the pro plan (non-featured plan)
+  const proPlan = config.stripe.plans.find((plan) => !plan.isFeatured) || config.stripe.plans[0];
 
   // Close sidebar when pathname changes (navigation occurs)
   useEffect(() => {
     setIsSidebarOpen(false);
   }, [pathname]);
+
+  // Check if user is subscribed
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const res = await fetch("/api/users");
+        if (!res.ok) return;
+        const data = await res.json();
+        setIsSubscribed(data.user?.isSubscribed || false);
+        setSubscriptionTier(data.user?.subscriptionTier || null);
+      } catch (error) {
+        console.error("Error checking subscription:", error);
+      }
+    };
+    checkSubscription();
+  }, []);
+
+  // Determine if user needs to upgrade (no subscription or only Pro tier)
+  const needsUpgrade = !isSubscribed || (subscriptionTier === 'pro');
 
   return (
     <div className="min-h-screen bg-black text-white" suppressHydrationWarning>
@@ -78,6 +106,18 @@ export default function DashboardShell({ children }) {
             </Link>
           </div>
 
+          {/* Subscription Status */}
+          {isSubscribed && (
+            <div className="px-4 mb-2">
+              <div className="bg-zinc-800/50 rounded-md p-2 text-center">
+                <span className="text-xs text-white/70">Current Plan:</span>
+                <div className="text-sm font-medium text-white">
+                  {subscriptionTier === 'premium' ? 'Premium' : 'Pro'}
+                </div>
+              </div>
+            </div>
+          )}
+
           <nav className="flex-1 px-4 space-y-1">
             {navigationLinks.map((item) => {
               const isActive = pathname === item.href;
@@ -95,6 +135,32 @@ export default function DashboardShell({ children }) {
               );
             })}
           </nav>
+
+          {/* Upgrade Button */}
+          {needsUpgrade && (
+            <div className="px-4 py-3">
+              <div className="bg-gradient-to-r from-red-500/20 to-red-700/20 rounded-lg p-3 border border-red-500/30">
+                <h3 className="text-sm font-medium text-white mb-2">
+                  {isSubscribed ? 'Upgrade to Premium' : 'Upgrade Your Plan'}
+                </h3>
+                <p className="text-xs text-white/70 mb-3">
+                  {isSubscribed 
+                    ? 'Get 500 connection requests/month and advanced features' 
+                    : 'Unlock campaigns and connection requests'}
+                </p>
+                <ButtonCheckout
+                  priceId={premiumPlan?.priceId}
+                  productLink={premiumPlan?.link}
+                  className="btn btn-sm w-full bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
+                >
+                  <span className="flex items-center justify-center gap-1 text-xs">
+                    <Zap className="w-3 h-3" />
+                    {isSubscribed ? 'Upgrade Now' : 'Go Premium'}
+                  </span>
+                </ButtonCheckout>
+              </div>
+            </div>
+          )}
 
           <div className="p-4 border-t border-[#1A1A1A]">
             <div className="flex items-center gap-3 px-3 py-2 text-sm text-[#A1A1AA]">
@@ -116,6 +182,13 @@ export default function DashboardShell({ children }) {
               <div className="flex items-center gap-2">
                 <span className="text-sm text-amber-400">LinkedIn not connected</span>
                 <ButtonLinkedin variant="outline" text="Connect" className="btn-sm rounded-md" />
+              </div>
+            )}
+            {isSubscribed && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-white/70">
+                  {subscriptionTier === 'premium' ? 'Premium Plan' : 'Pro Plan'}
+                </span>
               </div>
             )}
           </div>

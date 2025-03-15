@@ -60,6 +60,9 @@ export async function POST(req) {
         const plan = configFile.stripe.plans.find((p) => p.priceId === priceId);
         console.log({ plan });
 
+        // Determine subscription tier based on plan name
+        const subscriptionTier = plan?.name?.toLowerCase() === 'premium' ? 'premium' : 'pro';
+
         // Get subscription data to check trial status
         const subscriptionId = session?.subscription;
         let trialEndsAt = null;
@@ -85,6 +88,7 @@ export async function POST(req) {
           subscription_status: subscriptionId ? "active" : "inactive",
           trial_ends_at: trialEndsAt,
           subscription_created_at: new Date().toISOString(),
+          subscription_tier: subscriptionTier,
         });
 
         // Update the profile with subscription info
@@ -98,6 +102,7 @@ export async function POST(req) {
             subscription_status: subscriptionId ? "active" : "inactive",
             trial_ends_at: trialEndsAt,
             subscription_created_at: new Date().toISOString(),
+            subscription_tier: subscriptionTier,
           })
           .eq("user_id", userId);
 
@@ -188,6 +193,13 @@ export async function POST(req) {
           break;
         }
 
+        // Get the price ID from the subscription
+        const priceId = subscription.items.data[0]?.price.id;
+        
+        // Find the plan and determine the tier
+        const plan = configFile.stripe.plans.find((p) => p.priceId === priceId);
+        const subscriptionTier = plan?.name?.toLowerCase() === 'premium' ? 'premium' : 'pro';
+
         // Check if trial status changed
         const trialEndsAt = subscription.trial_end
           ? new Date(subscription.trial_end * 1000).toISOString()
@@ -203,6 +215,7 @@ export async function POST(req) {
             subscription_status: subscription.status,
             trial_ends_at: trialEndsAt,
             cancel_at_period_end: subscription.cancel_at_period_end,
+            subscription_tier: subscriptionTier,
           })
           .eq("user_id", user.user_id);
 

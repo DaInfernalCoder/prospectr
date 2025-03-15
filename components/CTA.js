@@ -4,6 +4,7 @@ import Image from "next/image";
 import config from "@/config";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
+import ButtonCheckout from "./ButtonCheckout";
 
 const CTA = () => {
   const router = useRouter();
@@ -17,10 +18,10 @@ const CTA = () => {
 
   // Get the plans from config
   const plans = config.stripe.plans;
-  // Get the featured plan or the first plan
-  const proPlan = plans.find((plan) => plan.isFeatured) || plans[0];
-  // Use the first non-featured plan or just the first plan if there's no featured plan
-  const basicPlan = plans.find((plan) => !plan.isFeatured) || plans[0];
+  // Get the premium plan (featured plan)
+  const premiumPlan = plans.find((plan) => plan.isFeatured) || plans[1];
+  // Get the pro plan (non-featured plan)
+  const proPlan = plans.find((plan) => !plan.isFeatured) || plans[0];
 
   return (
     <section className="relative hero overflow-hidden min-h-screen">
@@ -70,53 +71,75 @@ const CTA = () => {
 
           <div className="bg-zinc-900/80 p-8 rounded-2xl border border-zinc-800 backdrop-blur-sm shadow-xl">
             <div className="text-center mb-8">
-              <h3 className="font-bold text-2xl mb-2">Get Started Now</h3>
+              <h3 className="font-bold text-2xl mb-2">Choose Your Plan</h3>
               <p className="text-gray-400">
-                Choose the plan that fits your needs
+                Select the plan that fits your growth needs
               </p>
             </div>
 
             <div className="flex flex-col space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center justify-between rounded-lg bg-zinc-800/50 p-4 border border-zinc-700/30">
-                  <div>
-                    <p className="font-medium">{basicPlan?.name}</p>
-                    <p className="text-sm text-gray-400">
-                      {basicPlan?.description}
-                    </p>
+                <div className="flex flex-col rounded-lg bg-zinc-800/50 p-4 border border-zinc-700/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-medium">{proPlan?.name}</p>
+                    <span className="text-lg font-bold text-red-500">
+                      ${proPlan?.price}
+                      {proPlan?.priceDetails}
+                    </span>
                   </div>
-                  <span className="text-lg font-bold text-red-500">
-                    ${basicPlan?.price}
-                    {basicPlan?.priceDetails}
-                  </span>
+                  <p className="text-sm text-gray-400 mb-3">
+                    {proPlan?.description}
+                  </p>
+                  <ul className="space-y-1 mb-4">
+                    {proPlan?.features.slice(0, 3).map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
+                        <Check className="w-3 h-3 text-red-500" />
+                        <span>{feature.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <ButtonCheckout
+                    priceId={proPlan?.priceId}
+                    productLink={proPlan?.link}
+                    className="mt-auto btn btn-sm bg-zinc-700 hover:bg-zinc-600 text-white border-0"
+                  >
+                    Get Started with Pro
+                  </ButtonCheckout>
                 </div>
 
-                <div className="flex items-center justify-between rounded-lg bg-red-500/10 p-4 border border-red-500/30 relative">
-                  {proPlan?.isFeatured && (
+                <div className="flex flex-col rounded-lg bg-red-500/10 p-4 border border-red-500/30 relative">
+                  {premiumPlan?.isFeatured && (
                     <div className="absolute -top-3 right-3 bg-red-500 text-xs font-bold px-2 py-1 rounded text-white">
                       BEST VALUE
                     </div>
                   )}
-                  <div>
-                    <p className="font-medium">{proPlan?.name}</p>
-                    <p className="text-sm text-gray-400">
-                      {proPlan?.description}
-                    </p>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-medium">{premiumPlan?.name}</p>
+                    <span className="text-lg font-bold text-red-500">
+                      ${premiumPlan?.price}
+                      {premiumPlan?.priceDetails}
+                    </span>
                   </div>
-                  <span className="text-lg font-bold text-red-500">
-                    ${proPlan?.price}
-                    {proPlan?.priceDetails}
-                  </span>
+                  <p className="text-sm text-gray-400 mb-3">
+                    {premiumPlan?.description}
+                  </p>
+                  <ul className="space-y-1 mb-4">
+                    {premiumPlan?.features.slice(0, 3).map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
+                        <Check className="w-3 h-3 text-red-500" />
+                        <span>{feature.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <ButtonCheckout
+                    priceId={premiumPlan?.priceId}
+                    productLink={premiumPlan?.link}
+                    className="mt-auto bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white border-0 btn btn-sm"
+                  >
+                    Get Premium Access
+                  </ButtonCheckout>
                 </div>
               </div>
-
-              <button
-                onClick={() => router.push("/signin")}
-                className="bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white px-8 py-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:scale-105 duration-300"
-              >
-                Start Your LinkedIn Growth
-                <ArrowRight className="w-5 h-5" />
-              </button>
 
               <p className="text-center text-sm text-gray-400">
                 By signing up, you agree to our{" "}

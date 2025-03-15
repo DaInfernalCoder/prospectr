@@ -17,23 +17,25 @@ const config = {
   stripe: {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
     plans: [
-      // {
-      //   priceId:
-      //     process.env.NODE_ENV === "development"
-      //       ? "price_1Niyy5AxyNprDp7iZIqEyD2h"
-      //       : "price_456",
-      //   name: "Basic",
-      //   description: "Perfect for getting started with LinkedIn automation",
-      //   price: 20,
-      //   priceDetails: "/month",
-      //   features: [
-      //     {
-      //       name: "1 active campaign",
-      //     },
-      //     { name: "Automatic connection requests" },
-      //     { name: "Basic Auto Reply capabilities" },
-      //   ],
-      // },
+      {
+        priceId:
+          process.env.NODE_ENV === "development"
+            ? "price_1R2tZJGGMtZacA5oHJvko1rj"
+            : "price_1R2tZJGGMtZacA5oHJvko1rj",
+        price: 19.99,
+        name: "Pro",
+        description: "Perfect for getting started with LinkedIn automation",
+        priceDetails: "/month",
+        connectionLimit: 100,
+        features: [
+          {
+            name: "100 connection requests/month",
+          },
+          { name: "Automatic connection requests" },
+          { name: "Basic Auto Reply capabilities" },
+          { name: "1 active campaign" },
+        ],
+      },
       {
         link:
           process.env.NODE_ENV === "development"
@@ -43,56 +45,22 @@ const config = {
           process.env.NODE_ENV === "development"
             ? "price_1R2tZJGGMtZacA5oHJvko1rj"
             : "price_1R2tZJGGMtZacA5oHJvko1rj",
-        price: 50,
-        name: "Pro",
+        price: 49.99,
+        name: "Premium",
+        description: "Advanced LinkedIn automation for serious growth",
         priceDetails: "/month",
+        connectionLimit: 500,
         isFeatured: true,
         features: [
           {
-            name: "Unlimited campaigns",
+            name: "500 connection requests/month",
           },
-          { name: "Automatic connection requests" },
-          { name: "Sales Navigator support" },
-          { name: "Automatic send message to inbox, inmail" },
+          { name: "Unlimited active campaigns" },
+          { name: "Advanced Auto Reply capabilities" },
+          { name: "AI message personalization" },
+          { name: "Priority support" },
         ],
       },
-      // {
-      //   isFeatured: true,
-      //   priceId:
-      //     process.env.NODE_ENV === "development"
-      //       ? "price_1O5KtcAxyNprDp7iftKnrrpw"
-      //       : "price_456",
-      //   name: "Pro",
-      //   description: "Advanced features for serious networkers",
-      //   price: 50,
-      //   priceDetails: "/month",
-      //   features: [
-      //     {
-      //       name: "Unlimited campaigns",
-      //     },
-      //     { name: "Automatic connection requests" },
-      //     { name: "Sales Navigator support" },
-      //     { name: "Automatic send message to inbox, inmail" },
-      //   ],
-      // },
-      // {
-      //   priceId:
-      //     process.env.NODE_ENV === "development"
-      //       ? "price_1Niyy5AxyNprDp7iZIqEyD2h_team"
-      //       : "price_456",
-      //   name: "Team",
-      //   description: "Perfect for teams and agencies",
-      //   price: 30,
-      //   priceDetails: "/user/month",
-      //   features: [
-      //     {
-      //       name: "Volume Discounts",
-      //     },
-      //     { name: "Advanced Team Settings" },
-      //     { name: "Team Inbox Management" },
-      //     { name: "All prices are per user, per month" },
-      //   ],
-      // },
     ],
   },
   aws: {
