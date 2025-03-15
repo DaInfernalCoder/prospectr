@@ -8,9 +8,24 @@ import { findCheckoutSession } from "@/libs/stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// Disable body parsing for this route
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export async function POST(req) {
+  // Get the raw body as text
   const body = await req.text();
-  const signature = await headers().get("stripe-signature");
+
+  // Get the signature from headers
+  const signature = headers().get("stripe-signature");
+
+  console.log(
+    "Webhook received - Signature:",
+    signature ? "Present" : "Missing"
+  );
 
   let data;
   let eventType;
@@ -18,9 +33,14 @@ export async function POST(req) {
 
   // verify Stripe event is legit
   try {
+    if (!signature) {
+      throw new Error("No Stripe signature found in request headers");
+    }
+
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    console.log("Webhook verified successfully:", event.type);
   } catch (err) {
-    console.error(`Webhook signature verification failed. ${err.message}`);
+    console.error(`Webhook signature verification failed:`, err.message);
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
 

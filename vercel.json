@@ -1,4 +1,11 @@
 {
+  "functions": {
+    "app/api/webhook/stripe/route.js": {
+      "includeFiles": "app/api/webhook/stripe/route.js",
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/check-invitations",
