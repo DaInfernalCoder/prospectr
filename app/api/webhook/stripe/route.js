@@ -22,11 +22,6 @@ export async function POST(req) {
   // Get the signature from headers
   const signature = headers().get("stripe-signature");
 
-  console.log(
-    "Webhook received - Signature:",
-    signature ? "Present" : "Missing"
-  );
-
   let data;
   let eventType;
   let event;
@@ -38,7 +33,6 @@ export async function POST(req) {
     }
 
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    console.log("Webhook verified successfully:", event.type);
   } catch (err) {
     console.error(`Webhook signature verification failed:`, err.message);
     return NextResponse.json({ error: err.message }, { status: 400 });
@@ -59,6 +53,7 @@ export async function POST(req) {
         // First payment is successful and a subscription is created
         const session = await findCheckoutSession(data.object.id);
 
+        console.log({ session });
         const customerId = session?.customer;
         const priceId = session?.line_items?.data[0]?.price.id;
         const userId = data.object.client_reference_id;
@@ -72,13 +67,24 @@ export async function POST(req) {
           const subscription = await stripe.subscriptions.retrieve(
             subscriptionId
           );
+          console.log({ subscription });
           if (subscription.status === "trialing") {
+            console.log("trial");
             trialEndsAt = new Date(subscription.trial_end * 1000).toISOString();
           }
         }
 
         if (!plan) break;
 
+        console.log({
+          customer_id: customerId,
+          price_id: priceId,
+          has_access: true,
+          subscription_id: subscriptionId,
+          subscription_status: subscriptionId ? "active" : "inactive",
+          trial_ends_at: trialEndsAt,
+          subscription_created_at: new Date().toISOString(),
+        });
         // Update the profile with subscription info
         await supabase
           .from("profiles")
