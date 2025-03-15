@@ -1,34 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import apiClient from "@/libs/api";
 import config from "@/config";
+import Link from "next/link";
 
 // This component is used to create Stripe Checkout Sessions
 // It calls the /api/stripe/create-checkout route with the priceId, successUrl and cancelUrl
 // By default, it doesn't force users to be authenticated. But if they are, it will prefill the Checkout data with their email and/or credit card. You can change that in the API route
 // You can also change the mode to "subscription" if you want to create a subscription instead of a one-time payment
-const ButtonCheckout = ({ priceId, mode = "payment" }) => {
+const ButtonCheckout = ({ priceId, productLink, mode = "payment" }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState({});
 
-  const handlePayment = async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    const getUser = async () => {
+      const res = await fetch("/api/users");
+      if (!res.ok) throw new Error("No user found");
+      const data = await res.json();
 
-    try {
-      const res = await apiClient.post("/stripe/create-checkout", {
-        priceId,
-        mode,
-        successUrl: window.location.href,
-        cancelUrl: window.location.href,
-      });
-
-      window.location.href = res.url;
-    } catch (e) {
-      console.error(e);
-    }
-
-    setIsLoading(false);
-  };
+      setUser(data.user);
+    };
+    getUser();
+  }, []);
 
   return (
     <button
