@@ -14,21 +14,14 @@ const CTA = () => {
     "Personalized messaging at scale",
     "Sales pipeline acceleration",
   ];
-<<<<<<< HEAD
 
-  // Get the Basic and Pro plans from config
-  const basicPlan = config.stripe.plans[0];
-
-=======
-  
   // Get the plans from config
   const plans = config.stripe.plans;
   // Get the featured plan or the first plan
-  const proPlan = plans.find(plan => plan.isFeatured) || plans[0];
+  const proPlan = plans.find((plan) => plan.isFeatured) || plans[0];
   // Use the first non-featured plan or just the first plan if there's no featured plan
-  const basicPlan = plans.find(plan => !plan.isFeatured) || plans[0];
-  
->>>>>>> 0d288267cfb056c6aa188b736dbb96b790422a2d
+  const basicPlan = plans.find((plan) => !plan.isFeatured) || plans[0];
+
   return (
     <section className="relative hero overflow-hidden min-h-screen">
       <Image
@@ -87,33 +80,33 @@ const CTA = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center justify-between rounded-lg bg-zinc-800/50 p-4 border border-zinc-700/30">
                   <div>
-<<<<<<< HEAD
-                    <p className="font-medium">{basicPlan.name}</p>
+                    <p className="font-medium">{basicPlan?.name}</p>
                     <p className="text-sm text-gray-400">
-                      {basicPlan.description}
+                      {basicPlan?.description}
                     </p>
                   </div>
                   <span className="text-lg font-bold text-red-500">
-                    ${basicPlan.price}
-                    {basicPlan.priceDetails}
+                    ${basicPlan?.price}
+                    {basicPlan?.priceDetails}
                   </span>
-=======
-                    <p className="font-medium">{basicPlan?.name}</p>
-                    <p className="text-sm text-gray-400">{basicPlan?.description}</p>
-                  </div>
-                  <span className="text-lg font-bold text-red-500">${basicPlan?.price}{basicPlan?.priceDetails}</span>
                 </div>
-                
+
                 <div className="flex items-center justify-between rounded-lg bg-red-500/10 p-4 border border-red-500/30 relative">
                   {proPlan?.isFeatured && (
-                    <div className="absolute -top-3 right-3 bg-red-500 text-xs font-bold px-2 py-1 rounded text-white">BEST VALUE</div>
+                    <div className="absolute -top-3 right-3 bg-red-500 text-xs font-bold px-2 py-1 rounded text-white">
+                      BEST VALUE
+                    </div>
                   )}
                   <div>
                     <p className="font-medium">{proPlan?.name}</p>
-                    <p className="text-sm text-gray-400">{proPlan?.description}</p>
+                    <p className="text-sm text-gray-400">
+                      {proPlan?.description}
+                    </p>
                   </div>
-                  <span className="text-lg font-bold text-red-500">${proPlan?.price}{proPlan?.priceDetails}</span>
->>>>>>> 0d288267cfb056c6aa188b736dbb96b790422a2d
+                  <span className="text-lg font-bold text-red-500">
+                    ${proPlan?.price}
+                    {proPlan?.priceDetails}
+                  </span>
                 </div>
               </div>
 
