@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import { Tooltip } from "react-tooltip";
 import config from "@/config";
 import { LinkedInProvider } from "@/components/contexts/LinkedInContext";
+import { AnalyticsProvider } from "@/components/contexts/AnalyticsContext";
 import { createClient } from "@/utils/supabase/client";
 
 // Crisp customer chat support:
@@ -67,6 +68,7 @@ const CrispChat = () => {
 // 3. Tooltip: Show tooltips if any JSX elements has these 2 attributes: data-tooltip-id="tooltip" data-tooltip-content=""
 // 4. CrispChat: Set Crisp customer chat support (see above)
 // 5. LinkedInProvider: Manage LinkedIn connection status throughout the app
+// 6. AnalyticsProvider: Manage analytics data fetching and caching
 const ClientLayout = ({ children }) => {
   return (
     <>
@@ -75,8 +77,11 @@ const ClientLayout = ({ children }) => {
 
       {/* LinkedIn context provider for managing connection status */}
       <LinkedInProvider>
-        {/* Content inside app/page.js files  */}
-        {children}
+        {/* Analytics context provider for managing analytics data */}
+        <AnalyticsProvider>
+          {/* Content inside app/page.js files  */}
+          {children}
+        </AnalyticsProvider>
       </LinkedInProvider>
 
       {/* Show Success/Error messages anywhere from the app with toast() */}

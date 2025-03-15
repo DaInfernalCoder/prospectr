@@ -57,61 +57,12 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Notification Settings */}
-        <div className="bg-[#0F0F0F] rounded-lg p-6 border border-[#1A1A1A]">
-          <h2 className="text-lg font-medium text-white mb-4">Notification Settings</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white">Email Notifications</p>
-                <p className="text-sm text-[#A1A1AA]">Receive updates about your campaigns</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-[#1A1A1A] peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-white rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-[#1A1A1A] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F0F0F]"></div>
-              </label>
-            </div>
-            <div className="flex items-center justify-between pt-4 border-t border-[#1A1A1A]">
-              <div>
-                <p className="text-white">Daily Reports</p>
-                <p className="text-sm text-[#A1A1AA]">Get daily performance summaries</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" />
-                <div className="w-11 h-6 bg-[#1A1A1A] peer-focus:outline-none peer-focus:ring-1 peer-focus:ring-white rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-[#1A1A1A] after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0F0F0F]"></div>
-              </label>
-            </div>
-          </div>
-        </div>
-
         {/* Account Settings */}
         <div className="bg-[#0F0F0F] rounded-lg p-6 border border-[#1A1A1A]">
           <h2 className="text-lg font-medium text-white mb-4">Account Settings</h2>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Email Address
-              </label>
-              <input
-                type="email"
-                className="w-full px-3 py-2 bg-[#0F0F0F] border border-[#1A1A1A] rounded-md text-white"
-                placeholder="your@email.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">
-                Company Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-3 py-2 bg-[#0F0F0F] border border-[#1A1A1A] rounded-md text-white"
-                placeholder="Your Company"
-              />
-            </div>
-            <div className="pt-4 flex justify-end border-t border-[#1A1A1A]">
-              <Button variant="outline">
-                Save Changes
-              </Button>
+            <div className="pt-4 text-center text-[#A1A1AA]">
+              <p>Account settings are managed through your authentication provider.</p>
             </div>
           </div>
         </div>
