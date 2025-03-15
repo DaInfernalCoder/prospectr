@@ -252,7 +252,7 @@ const FeaturesAccordion = () => {
           </span>
           
           <h2 className="font-extrabold text-4xl lg:text-6xl tracking-tight mb-8 text-white">
-            Everything you need to
+            We have everything you need to
             <div className="relative inline-block">
               <span className="relative z-10 bg-gradient-to-r from-red-500 to-red-700 text-transparent bg-clip-text px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
                 dominate LinkedIn

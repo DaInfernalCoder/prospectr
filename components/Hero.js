@@ -7,9 +7,40 @@ import { Play } from "lucide-react";
 import { TypeAnimation } from 'react-type-animation';
 import TestimonialsAvatars from "./TestimonialsAvatars";
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 const Hero = () => {
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(true); // Default to mobile-first (SSR)
+  const [isSplineLoaded, setIsSplineLoaded] = useState(false);
+  const [isSplineVisible, setIsSplineVisible] = useState(false);
+
+  // Detect if on mobile device
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768); // Consider mobile if less than md breakpoint
+    };
+
+    // Check on mount
+    checkIfMobile();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+
+    // Clean up
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
+  // Handle Spline load event with a slight delay for smooth transition
+  const handleSplineLoad = () => {
+    setIsSplineLoaded(true);
+    
+    // Add a small delay before showing the Spline animation
+    // This ensures the animation is fully ready to display
+    setTimeout(() => {
+      setIsSplineVisible(true);
+    }, 500);
+  };
 
   const handleStartFinding = () => {
     router.push('/dashboard');
@@ -99,7 +130,47 @@ const Hero = () => {
           {/* Right content */}
           <div className="w-full lg:w-1/2 h-[350px] sm:h-[450px] md:h-[500px] lg:h-[650px] relative mt-2 sm:mt-4 lg:mt-8">
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-red-500/5 to-transparent"></div>
-            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full scale-110 sm:scale-125 lg:scale-140" />
+            
+            {isMobile ? (
+              // Static image for mobile
+              <div className="relative w-full h-full">
+                <Image
+                  src="/images/prospectr-3d-static.webp"
+                  alt="3D visualization"
+                  fill
+                  priority
+                  className="object-contain scale-110 sm:scale-125"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  aria-hidden="true"
+                  role="presentation"
+                />
+              </div>
+            ) : (
+              // Desktop: Show static image while Spline loads, then transition to Spline
+              <>
+                <div 
+                  className={`absolute inset-0 z-10 transition-opacity duration-700 ${isSplineVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+                >
+                  <Image
+                    src="/images/prospectr-3d-static.webp"
+                    alt="3D visualization"
+                    fill
+                    priority
+                    className="object-contain scale-110 sm:scale-125"
+                    sizes="(min-width: 768px) 50vw"
+                    aria-hidden="true"
+                    role="presentation"
+                  />
+                </div>
+                <div className={`w-full h-full transition-opacity duration-700 ${isSplineVisible ? 'opacity-100' : 'opacity-0'}`}>
+                  <Splite 
+                    scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" 
+                    className="w-full h-full scale-110 sm:scale-125 lg:scale-140"
+                    onLoad={handleSplineLoad}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

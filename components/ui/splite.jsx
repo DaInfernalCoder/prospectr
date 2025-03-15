@@ -4,8 +4,16 @@ const Spline = lazy(() => import('@splinetool/react-spline'))
 
 export function Splite({
   scene,
-  className
+  className,
+  onLoad
 }) {
+  // Handle when Spline is loaded
+  const handleSplineLoad = () => {
+    if (onLoad && typeof onLoad === 'function') {
+      onLoad();
+    }
+  };
+
   return (
     <div className={`relative w-full h-full ${className}`}>
       <Suspense
@@ -15,7 +23,8 @@ export function Splite({
           </div>
         }>
         <Spline 
-          scene={scene} 
+          scene={scene}
+          onLoad={handleSplineLoad}
         />
       </Suspense>
     </div>
