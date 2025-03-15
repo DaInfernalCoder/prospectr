@@ -4,7 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronRight, ChevronDown, ArrowRight, Search, ChevronLeft, AlertCircle, LinkIcon } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronDown,
+  ArrowRight,
+  Search,
+  ChevronLeft,
+  AlertCircle,
+  LinkIcon,
+} from "lucide-react";
 import { useLinkedIn } from "@/components/contexts/LinkedInContext";
 
 export default function AddLeadsPage() {
@@ -17,7 +25,7 @@ export default function AddLeadsPage() {
     excludeProfilesWithoutPhotos: false,
     excludeFirstDegreeConnections: false,
     premiumUsersOnly: false,
-    includeLeadsFromOtherCampaigns: false
+    includeLeadsFromOtherCampaigns: false,
   });
 
   // Search and Pagination State
@@ -27,7 +35,7 @@ export default function AddLeadsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const resultsPerPage = 10;
-  
+
   // Advanced search parameters
   const [advancedSearch, setAdvancedSearch] = useState({
     company: "",
@@ -35,30 +43,30 @@ export default function AddLeadsPage() {
     industry: "",
     school: "",
     networkDistance: [],
-    sortBy: "relevance"
+    sortBy: "relevance",
   });
 
   // Toggle section expansion
   const toggleSection = (section) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [section]: !prev[section]
+      [section]: !prev[section],
     }));
   };
 
   // Handle exclusion checkbox changes
   const handleExclusionChange = (exclusion) => {
-    setExclusions(prev => ({
+    setExclusions((prev) => ({
       ...prev,
-      [exclusion]: !prev[exclusion]
+      [exclusion]: !prev[exclusion],
     }));
   };
 
   // Handle advanced search parameter changes
   const handleAdvancedSearchChange = (field, value) => {
-    setAdvancedSearch(prev => ({
+    setAdvancedSearch((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -71,89 +79,106 @@ export default function AddLeadsPage() {
 
     // Check LinkedIn status before performing search
     if (!linkedInStatus.connected) {
-      setError("LinkedIn account not connected. Please connect your LinkedIn account in settings.");
+      setError(
+        "LinkedIn account not connected. Please connect your LinkedIn account in settings."
+      );
       return;
     }
 
     setIsLoading(true);
     setError(null);
-    
+
     try {
       // Prepare search parameters based on form values - simplify to reduce potential issues
       const searchParams = {
-        keywords: searchQuery,  // Use keywords instead of name/jobTitle for consistency
+        keywords: searchQuery, // Use keywords instead of name/jobTitle for consistency
       };
-      
+
       // Only add parameters if they have values to avoid undefined issues
       if (advancedSearch.company) {
         searchParams.company = advancedSearch.company;
       }
-      
+
       if (advancedSearch.location) {
         searchParams.location = advancedSearch.location;
       }
-      
+
       if (advancedSearch.industry) {
         searchParams.industry = advancedSearch.industry;
       }
-      
+
       if (advancedSearch.school) {
         searchParams.school = advancedSearch.school;
       }
-      
+
       // Only add network distance if there are options selected
       if (advancedSearch.networkDistance.length > 0) {
         searchParams.networkDistance = advancedSearch.networkDistance;
       }
-      
+
       // Apply exclusions
-      if (exclusions.excludeFirstDegreeConnections && !searchParams.networkDistance) {
-        searchParams.networkDistance = ['SECOND_DEGREE', 'THIRD_DEGREE_AND_BEYOND'];
+      if (
+        exclusions.excludeFirstDegreeConnections &&
+        !searchParams.networkDistance
+      ) {
+        searchParams.networkDistance = [
+          "SECOND_DEGREE",
+          "THIRD_DEGREE_AND_BEYOND",
+        ];
       }
-      
+
       if (advancedSearch.sortBy) {
         searchParams.sortBy = advancedSearch.sortBy;
       }
-      
-      console.log('Search parameters:', searchParams); // Debugging
-      
+
+      console.log("Search parameters:", searchParams); // Debugging
+
       // Call the LinkedIn search API
-      const response = await fetch('/api/linkedin/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(searchParams)
+      const response = await fetch("/api/linkedin/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(searchParams),
       });
-      
+
+      console.log(response, "response");
+
       // Handle potential error responses
       if (!response.ok) {
         const errorData = await response.json();
-        
+        console.log(errorData, "errorDAta");
+
         // Special handling for LinkedIn not connected error
         if (errorData.error === "LinkedIn not connected") {
-          throw new Error("LinkedIn account not connected. Please connect your LinkedIn account in settings.");
+          throw new Error(
+            "LinkedIn account not connected. Please connect your LinkedIn account in settings."
+          );
         }
-        
+
         // If we have detailed error info, show it
         if (errorData.details) {
           throw new Error(`${errorData.error}: ${errorData.details}`);
         }
-        
-        throw new Error(errorData.error || `Search failed: ${response.status} ${response.statusText}`);
+
+        throw new Error(
+          errorData.error ||
+            `Search failed: ${response.status} ${response.statusText}`
+        );
       }
-      
+
       const results = await response.json();
-      
+      console.log(results, "res");
+
       if (!results || !Array.isArray(results)) {
         throw new Error("Invalid response format from search API");
       }
-      
+
       setSearchResults(results);
       setTotalResults(results.length);
       setCurrentPage(page);
     } catch (error) {
       console.error("Search error:", error);
       setError(error.message);
-      setSearchResults([]);
+      // setSearchResults([]);
     } finally {
       setIsLoading(false);
     }
@@ -167,7 +192,8 @@ export default function AddLeadsPage() {
 
   // Change page
   const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > Math.ceil(totalResults / resultsPerPage)) return;
+    if (newPage < 1 || newPage > Math.ceil(totalResults / resultsPerPage))
+      return;
     setCurrentPage(newPage);
   };
 
@@ -180,136 +206,164 @@ export default function AddLeadsPage() {
 
   // Navigate to next step
   const goToNextStep = () => {
-    router.push('/dashboard/campaigns/new/sequence');
+    router.push("/dashboard/campaigns/new/sequence");
   };
 
   // Filter sections
   const filterSections = [
-    { 
-      id: 'connections', 
-      title: 'Connections',
+    {
+      id: "connections",
+      title: "Connections",
       content: (
         <div className="space-y-2">
           <div className="flex flex-col space-y-1">
             <label className="text-[#A3A3A3] text-sm">Network Distance</label>
             <div className="flex flex-wrap gap-2">
-              {['FIRST_DEGREE', 'SECOND_DEGREE', 'THIRD_DEGREE_AND_BEYOND'].map((distance) => {
-                const distLabel = distance === 'FIRST_DEGREE' ? '1st connections' : 
-                                  distance === 'SECOND_DEGREE' ? '2nd connections' : 
-                                  '3rd+ connections';
-                return (
-                  <div key={distance} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`distance-${distance}`}
-                      checked={advancedSearch.networkDistance.includes(distance)}
-                      onChange={() => {
-                        if (advancedSearch.networkDistance.includes(distance)) {
-                          handleAdvancedSearchChange('networkDistance', 
-                            advancedSearch.networkDistance.filter(d => d !== distance)
-                          );
-                        } else {
-                          handleAdvancedSearchChange('networkDistance', 
-                            [...advancedSearch.networkDistance, distance]
-                          );
-                        }
-                      }}
-                      className="h-4 w-4 rounded border-[#2A2A2A] bg-black text-blue-600"
-                    />
-                    <label htmlFor={`distance-${distance}`} className="ml-2 text-[#A3A3A3] text-sm">
-                      {distLabel}
-                    </label>
-                  </div>
-                );
-              })}
+              {["FIRST_DEGREE", "SECOND_DEGREE", "THIRD_DEGREE_AND_BEYOND"].map(
+                (distance) => {
+                  const distLabel =
+                    distance === "FIRST_DEGREE"
+                      ? "1st connections"
+                      : distance === "SECOND_DEGREE"
+                      ? "2nd connections"
+                      : "3rd+ connections";
+                  return (
+                    <div key={distance} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`distance-${distance}`}
+                        checked={advancedSearch.networkDistance.includes(
+                          distance
+                        )}
+                        onChange={() => {
+                          if (
+                            advancedSearch.networkDistance.includes(distance)
+                          ) {
+                            handleAdvancedSearchChange(
+                              "networkDistance",
+                              advancedSearch.networkDistance.filter(
+                                (d) => d !== distance
+                              )
+                            );
+                          } else {
+                            handleAdvancedSearchChange("networkDistance", [
+                              ...advancedSearch.networkDistance,
+                              distance,
+                            ]);
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-[#2A2A2A] bg-black text-blue-600"
+                      />
+                      <label
+                        htmlFor={`distance-${distance}`}
+                        className="ml-2 text-[#A3A3A3] text-sm"
+                      >
+                        {distLabel}
+                      </label>
+                    </div>
+                  );
+                }
+              )}
             </div>
           </div>
         </div>
-      )
+      ),
     },
-    { 
-      id: 'companies', 
-      title: 'Companies', 
+    {
+      id: "companies",
+      title: "Companies",
       content: (
         <div className="space-y-3">
           <div>
-            <label className="block text-[#A3A3A3] text-sm mb-1">Current Company</label>
+            <label className="block text-[#A3A3A3] text-sm mb-1">
+              Current Company
+            </label>
             <Input
               type="text"
               value={advancedSearch.company}
-              onChange={(e) => handleAdvancedSearchChange('company', e.target.value)}
+              onChange={(e) =>
+                handleAdvancedSearchChange("company", e.target.value)
+              }
               placeholder="Enter company name"
               className="bg-black border-[#2A2A2A] text-white"
             />
           </div>
         </div>
-      )
+      ),
     },
-    { 
-      id: 'locations', 
-      title: 'Locations',
+    {
+      id: "locations",
+      title: "Locations",
       content: (
         <div>
           <label className="block text-[#A3A3A3] text-sm mb-1">Location</label>
           <Input
             type="text"
             value={advancedSearch.location}
-            onChange={(e) => handleAdvancedSearchChange('location', e.target.value)}
+            onChange={(e) =>
+              handleAdvancedSearchChange("location", e.target.value)
+            }
             placeholder="Enter location"
             className="bg-black border-[#2A2A2A] text-white"
           />
         </div>
-      )
+      ),
     },
-    { 
-      id: 'industries', 
-      title: 'Industries',
+    {
+      id: "industries",
+      title: "Industries",
       content: (
         <div>
           <label className="block text-[#A3A3A3] text-sm mb-1">Industry</label>
           <Input
             type="text"
             value={advancedSearch.industry}
-            onChange={(e) => handleAdvancedSearchChange('industry', e.target.value)}
+            onChange={(e) =>
+              handleAdvancedSearchChange("industry", e.target.value)
+            }
             placeholder="Enter industry"
             className="bg-black border-[#2A2A2A] text-white"
           />
         </div>
-      )
+      ),
     },
-    { 
-      id: 'schools', 
-      title: 'Schools',
+    {
+      id: "schools",
+      title: "Schools",
       content: (
         <div>
           <label className="block text-[#A3A3A3] text-sm mb-1">School</label>
           <Input
             type="text"
             value={advancedSearch.school}
-            onChange={(e) => handleAdvancedSearchChange('school', e.target.value)}
+            onChange={(e) =>
+              handleAdvancedSearchChange("school", e.target.value)
+            }
             placeholder="Enter school name"
             className="bg-black border-[#2A2A2A] text-white"
           />
         </div>
-      )
+      ),
     },
-    { 
-      id: 'sortOptions', 
-      title: 'Sort Options',
+    {
+      id: "sortOptions",
+      title: "Sort Options",
       content: (
         <div>
           <label className="block text-[#A3A3A3] text-sm mb-1">Sort By</label>
           <select
             value={advancedSearch.sortBy}
-            onChange={(e) => handleAdvancedSearchChange('sortBy', e.target.value)}
+            onChange={(e) =>
+              handleAdvancedSearchChange("sortBy", e.target.value)
+            }
             className="w-full p-2 bg-black border border-[#2A2A2A] rounded-md text-white"
           >
             <option value="relevance">Relevance</option>
             <option value="date">Date</option>
           </select>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   return (
@@ -328,18 +382,22 @@ export default function AddLeadsPage() {
             <div className="w-8 h-8 rounded-full bg-[#2A2A2A] text-[#A3A3A3] flex items-center justify-center font-bold">
               2
             </div>
-            <span className="ml-2 text-[#A3A3A3] font-medium">Set Sequence</span>
+            <span className="ml-2 text-[#A3A3A3] font-medium">
+              Set Sequence
+            </span>
           </div>
           <div className="w-8 h-0.5 bg-[#2A2A2A]"></div>
           <div className="flex items-center">
             <div className="w-8 h-8 rounded-full bg-[#2A2A2A] text-[#A3A3A3] flex items-center justify-center font-bold">
               3
             </div>
-            <span className="ml-2 text-[#A3A3A3] font-medium">Review And Publish</span>
+            <span className="ml-2 text-[#A3A3A3] font-medium">
+              Review And Publish
+            </span>
           </div>
         </div>
-        <Button 
-          onClick={goToNextStep} 
+        <Button
+          onClick={goToNextStep}
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           Next
@@ -352,11 +410,13 @@ export default function AddLeadsPage() {
           <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
           <div className="flex-1">
             <p className="font-medium">LinkedIn account not connected</p>
-            <p className="text-sm mt-1">You need to connect your LinkedIn account to search for leads.</p>
+            <p className="text-sm mt-1">
+              You need to connect your LinkedIn account to search for leads.
+            </p>
           </div>
-          <Button 
+          <Button
             className="bg-yellow-600 hover:bg-yellow-700 text-white ml-4"
-            onClick={() => router.push('/dashboard/settings/')}
+            onClick={() => router.push("/dashboard/settings/")}
           >
             <LinkIcon className="h-4 w-4 mr-2" />
             Connect LinkedIn
@@ -380,8 +440,8 @@ export default function AddLeadsPage() {
                 placeholder="eg. project manager OR manager OR senior project manager"
                 className="bg-black border-[#2A2A2A] text-white pr-10"
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#A3A3A3] hover:text-white"
                 disabled={isLoading}
               >
@@ -396,7 +456,8 @@ export default function AddLeadsPage() {
               disabled={isLoading}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {isLoading ? "Searching..." : "Search LinkedIn"} <ArrowRight className="ml-2 h-4 w-4" />
+              {isLoading ? "Searching..." : "Search LinkedIn"}{" "}
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </form>
@@ -415,16 +476,19 @@ export default function AddLeadsPage() {
               <h3 className="text-white text-lg font-medium">Search Results</h3>
               <span className="text-[#A3A3A3]">{totalResults} leads found</span>
             </div>
-            
+
             <div className="space-y-4">
               {getCurrentPageResults().map((profile) => (
-                <div key={profile.id} className="p-4 bg-[#0C0C0C] border border-[#2A2A2A] rounded-lg hover:border-[#3A3A3A] transition-colors">
+                <div
+                  key={profile.id}
+                  className="p-4 bg-[#0C0C0C] border border-[#2A2A2A] rounded-lg hover:border-[#3A3A3A] transition-colors"
+                >
                   <div className="flex">
                     {profile.profile_picture && (
                       <div className="mr-4 flex-shrink-0">
-                        <img 
-                          src={profile.profile_picture} 
-                          alt={profile.name} 
+                        <img
+                          src={profile.profile_picture}
+                          alt={profile.name}
                           className="w-12 h-12 rounded-full object-cover"
                         />
                       </div>
@@ -432,37 +496,53 @@ export default function AddLeadsPage() {
                     <div className="flex-1">
                       <div className="flex justify-between">
                         <div>
-                          <h4 className="text-white font-medium">{profile.name}</h4>
-                          <p className="text-[#A3A3A3] text-sm">{profile.headline}</p>
+                          <h4 className="text-white font-medium">
+                            {profile.name}
+                          </h4>
+                          <p className="text-[#A3A3A3] text-sm">
+                            {profile.headline}
+                          </p>
                           <div className="flex items-center mt-1">
-                            <span className="text-[#A3A3A3] text-xs">{profile.location}</span>
+                            <span className="text-[#A3A3A3] text-xs">
+                              {profile.location}
+                            </span>
                             {profile.company && (
                               <>
                                 <span className="mx-1 text-[#A3A3A3]">•</span>
-                                <span className="text-[#A3A3A3] text-xs">{profile.company}</span>
+                                <span className="text-[#A3A3A3] text-xs">
+                                  {profile.company}
+                                </span>
                               </>
                             )}
                           </div>
                         </div>
                         <div className="flex flex-col items-end">
                           <div className="text-xs px-2 py-1 bg-[#1A1A1A] rounded-full text-[#A3A3A3]">
-                            {profile.network_distance === 'FIRST_DEGREE' ? '1st' : 
-                             profile.network_distance === 'SECOND_DEGREE' ? '2nd' : 
-                             profile.network_distance === 'THIRD_DEGREE_AND_BEYOND' ? '3rd+' : 
-                             profile.network_distance}
+                            {profile.network_distance === "FIRST_DEGREE"
+                              ? "1st"
+                              : profile.network_distance === "SECOND_DEGREE"
+                              ? "2nd"
+                              : profile.network_distance ===
+                                "THIRD_DEGREE_AND_BEYOND"
+                              ? "3rd+"
+                              : profile.network_distance}
                           </div>
                           {profile.shared_connections_count > 0 && (
                             <span className="text-xs text-[#A3A3A3] mt-1">
-                              {profile.shared_connections_count} shared connection{profile.shared_connections_count !== 1 ? 's' : ''}
+                              {profile.shared_connections_count} shared
+                              connection
+                              {profile.shared_connections_count !== 1
+                                ? "s"
+                                : ""}
                             </span>
                           )}
                         </div>
                       </div>
                       {profile.profile_url && (
                         <div className="mt-2">
-                          <a 
-                            href={profile.profile_url} 
-                            target="_blank" 
+                          <a
+                            href={profile.profile_url}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="text-xs text-blue-400 hover:underline"
                           >
@@ -488,35 +568,49 @@ export default function AddLeadsPage() {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                
+
                 <div className="flex items-center space-x-1">
-                  {Array.from({ length: Math.min(5, Math.ceil(totalResults / resultsPerPage)) }, (_, i) => {
-                    const pageNumber = i + 1;
-                    return (
-                      <Button
-                        key={pageNumber}
-                        variant={currentPage === pageNumber ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handlePageChange(pageNumber)}
-                        className={currentPage === pageNumber 
-                          ? "bg-blue-600 text-white" 
-                          : "border-[#2A2A2A] text-[#A3A3A3] hover:text-white"}
-                      >
-                        {pageNumber}
-                      </Button>
-                    );
-                  })}
-                  
+                  {Array.from(
+                    {
+                      length: Math.min(
+                        5,
+                        Math.ceil(totalResults / resultsPerPage)
+                      ),
+                    },
+                    (_, i) => {
+                      const pageNumber = i + 1;
+                      return (
+                        <Button
+                          key={pageNumber}
+                          variant={
+                            currentPage === pageNumber ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={
+                            currentPage === pageNumber
+                              ? "bg-blue-600 text-white"
+                              : "border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
+                          }
+                        >
+                          {pageNumber}
+                        </Button>
+                      );
+                    }
+                  )}
+
                   {Math.ceil(totalResults / resultsPerPage) > 5 && (
                     <span className="text-[#A3A3A3]">...</span>
                   )}
                 </div>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === Math.ceil(totalResults / resultsPerPage)}
+                  disabled={
+                    currentPage === Math.ceil(totalResults / resultsPerPage)
+                  }
                   className="border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -528,12 +622,14 @@ export default function AddLeadsPage() {
 
         {/* Advanced Filters */}
         <div className="mt-6">
-          <h3 className="text-white font-medium mb-4">Want to be more precise?</h3>
-          
+          <h3 className="text-white font-medium mb-4">
+            Want to be more precise?
+          </h3>
+
           {/* Filter Sections */}
           <div className="space-y-2">
             {filterSections.map((section) => (
-              <div 
+              <div
                 key={section.id}
                 className="border border-[#2A2A2A] rounded-md overflow-hidden"
               >
@@ -549,7 +645,7 @@ export default function AddLeadsPage() {
                     <ChevronRight className="h-5 w-5 text-[#A3A3A3]" />
                   )}
                 </button>
-                
+
                 {expandedSections[section.id] && (
                   <div className="p-3 bg-black border-t border-[#2A2A2A]">
                     {section.content}
@@ -558,7 +654,7 @@ export default function AddLeadsPage() {
               </div>
             ))}
           </div>
-          
+
           {/* Apply Filters Button */}
           <div className="mt-4 flex justify-end">
             <Button
@@ -572,7 +668,9 @@ export default function AddLeadsPage() {
 
         {/* Maximum amount of leads */}
         <div className="mt-6">
-          <h3 className="text-white font-medium mb-2">Maximum amount of leads:</h3>
+          <h3 className="text-white font-medium mb-2">
+            Maximum amount of leads:
+          </h3>
           <div className="flex items-center space-x-4">
             <input
               type="range"
@@ -582,10 +680,14 @@ export default function AddLeadsPage() {
               onChange={(e) => setMaxLeads(parseInt(e.target.value))}
               className="w-full h-2 bg-[#2A2A2A] rounded-lg appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #0066FF 0%, #0066FF ${maxLeads / 20}%, #2A2A2A ${maxLeads / 20}%, #2A2A2A 100%)`
+                background: `linear-gradient(to right, #0066FF 0%, #0066FF ${
+                  maxLeads / 20
+                }%, #2A2A2A ${maxLeads / 20}%, #2A2A2A 100%)`,
               }}
             />
-            <span className="text-white font-medium min-w-[50px]">{maxLeads}</span>
+            <span className="text-white font-medium min-w-[50px]">
+              {maxLeads}
+            </span>
           </div>
         </div>
 
@@ -596,49 +698,64 @@ export default function AddLeadsPage() {
               type="checkbox"
               id="excludeProfilesWithoutPhotos"
               checked={exclusions.excludeProfilesWithoutPhotos}
-              onChange={() => handleExclusionChange('excludeProfilesWithoutPhotos')}
+              onChange={() =>
+                handleExclusionChange("excludeProfilesWithoutPhotos")
+              }
               className="h-4 w-4 rounded border-[#2A2A2A] bg-black text-blue-600"
             />
-            <label htmlFor="excludeProfilesWithoutPhotos" className="ml-2 text-[#A3A3A3]">
+            <label
+              htmlFor="excludeProfilesWithoutPhotos"
+              className="ml-2 text-[#A3A3A3]"
+            >
               Exclude profiles without photos.
             </label>
           </div>
-          
+
           <div className="flex items-center">
             <input
               type="checkbox"
               id="excludeFirstDegreeConnections"
               checked={exclusions.excludeFirstDegreeConnections}
-              onChange={() => handleExclusionChange('excludeFirstDegreeConnections')}
+              onChange={() =>
+                handleExclusionChange("excludeFirstDegreeConnections")
+              }
               className="h-4 w-4 rounded border-[#2A2A2A] bg-black text-blue-600"
             />
-            <label htmlFor="excludeFirstDegreeConnections" className="ml-2 text-[#A3A3A3]">
+            <label
+              htmlFor="excludeFirstDegreeConnections"
+              className="ml-2 text-[#A3A3A3]"
+            >
               Exclude 1st degree connections.
             </label>
           </div>
-          
+
           <div className="flex items-center">
             <input
               type="checkbox"
               id="premiumUsersOnly"
               checked={exclusions.premiumUsersOnly}
-              onChange={() => handleExclusionChange('premiumUsersOnly')}
+              onChange={() => handleExclusionChange("premiumUsersOnly")}
               className="h-4 w-4 rounded border-[#2A2A2A] bg-black text-blue-600"
             />
             <label htmlFor="premiumUsersOnly" className="ml-2 text-[#A3A3A3]">
               Premium users only.
             </label>
           </div>
-          
+
           <div className="flex items-center">
             <input
               type="checkbox"
               id="includeLeadsFromOtherCampaigns"
               checked={exclusions.includeLeadsFromOtherCampaigns}
-              onChange={() => handleExclusionChange('includeLeadsFromOtherCampaigns')}
+              onChange={() =>
+                handleExclusionChange("includeLeadsFromOtherCampaigns")
+              }
               className="h-4 w-4 rounded border-[#2A2A2A] bg-black text-blue-600"
             />
-            <label htmlFor="includeLeadsFromOtherCampaigns" className="ml-2 text-[#A3A3A3]">
+            <label
+              htmlFor="includeLeadsFromOtherCampaigns"
+              className="ml-2 text-[#A3A3A3]"
+            >
               Include leads from other campaigns.
             </label>
           </div>
