@@ -17,8 +17,8 @@ const Pricing = () => {
         </div>
 
         <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch gap-8">
-          {config.stripe.plans.map((plan) => (
-            <div key={plan.priceId} className="relative w-full max-w-lg">
+          {config.stripe.plans.map((plan, index) => (
+            <div key={`plan-${plan.name}-${index}`} className="relative w-full max-w-lg">
               {plan.isFeatured && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                   <span
@@ -85,7 +85,7 @@ const Pricing = () => {
                           />
                         </svg>
 
-                        <span>{feature.name} </span>
+                        <span>{typeof feature === 'string' ? feature : feature.name}</span>
                       </li>
                     ))}
                   </ul>
@@ -94,10 +94,12 @@ const Pricing = () => {
                   <ButtonCheckout
                     priceId={plan.priceId}
                     productLink={plan.link}
-                  />
+                  >
+                    {plan.name === "Premium" ? "Start 7-Day Free Trial" : null}
+                  </ButtonCheckout>
 
                   <p className="flex items-center justify-center gap-2 text-sm text-center text-white/80 font-medium relative">
-                    $0.00 due today, cancel anytime
+                    {plan.name === "Premium" ? "$0.00 due today for 7 days, cancel anytime" : "$0.00 due today, cancel anytime"}
                   </p>
                 </div>
               </div>

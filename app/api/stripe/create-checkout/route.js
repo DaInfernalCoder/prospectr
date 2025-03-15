@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getUser } from "@/utils/supabase/getUser";
+import config from "@/config";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -17,8 +18,12 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Determine if this is the Premium plan (to add trial period)
+    const premiumPlan = config.stripe.plans.find(plan => plan.isFeatured);
+    const isPremiumPlan = premiumPlan && premiumPlan.priceId === priceId;
+
     // Create checkout session
-    const session = await stripe.checkout.sessions.create({
+    const sessionOptions = {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [
@@ -30,11 +35,17 @@ export async function POST(req) {
       success_url: successUrl,
       cancel_url: cancelUrl,
       client_reference_id: user.id,
-      subscription_data: {
-        trial_period_days: 7,
-      },
       customer_email: user.email,
-    });
+    };
+
+    // Add trial period only for Premium plan
+    if (isPremiumPlan) {
+      sessionOptions.subscription_data = {
+        trial_period_days: 7,
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionOptions);
 
     return NextResponse.json({ url: session.url });
   } catch (error) {

@@ -134,33 +134,18 @@ export default function DashboardShell({ children }) {
                 </Link>
               );
             })}
+            
+            {/* Upgrade Link */}
+            <Link
+              href="/dashboard/upgrade"
+              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                pathname === "/dashboard/upgrade" ? "bg-[#1A1A1A] text-white" : "text-[#A1A1AA] hover:text-white hover:bg-[#1A1A1A]"
+              }`}
+            >
+              <Zap className="w-4 h-4 text-red-500" />
+              <span className={needsUpgrade ? "font-medium text-red-500" : ""}>Upgrade</span>
+            </Link>
           </nav>
-
-          {/* Upgrade Button */}
-          {needsUpgrade && (
-            <div className="px-4 py-3">
-              <div className="bg-gradient-to-r from-red-500/20 to-red-700/20 rounded-lg p-3 border border-red-500/30">
-                <h3 className="text-sm font-medium text-white mb-2">
-                  {isSubscribed ? 'Upgrade to Premium' : 'Upgrade Your Plan'}
-                </h3>
-                <p className="text-xs text-white/70 mb-3">
-                  {isSubscribed 
-                    ? 'Get 500 connection requests/month and advanced features' 
-                    : 'Unlock campaigns and connection requests'}
-                </p>
-                <ButtonCheckout
-                  priceId={premiumPlan?.priceId}
-                  productLink={premiumPlan?.link}
-                  className="btn btn-sm w-full bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
-                >
-                  <span className="flex items-center justify-center gap-1 text-xs">
-                    <Zap className="w-3 h-3" />
-                    {isSubscribed ? 'Upgrade Now' : 'Go Premium'}
-                  </span>
-                </ButtonCheckout>
-              </div>
-            </div>
-          )}
 
           <div className="p-4 border-t border-[#1A1A1A]">
             <div className="flex items-center gap-3 px-3 py-2 text-sm text-[#A1A1AA]">
@@ -216,6 +201,7 @@ function getPageTitle(pathname) {
   if (pathname === "/dashboard/campaigns") return "Campaigns";
   if (pathname === "/dashboard/analytics") return "Analytics";
   if (pathname === "/dashboard/settings") return "Settings";
+  if (pathname === "/dashboard/upgrade") return "Upgrade";
   
   // Extract the last part of the pathname as a fallback
   const segments = pathname.split("/");

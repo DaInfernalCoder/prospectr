@@ -28,12 +28,10 @@ const config = {
         priceDetails: "/month",
         connectionLimit: 100,
         features: [
-          {
-            name: "100 connection requests/month",
-          },
-          { name: "Automatic connection requests" },
-          { name: "Basic Auto Reply capabilities" },
-          { name: "1 active campaign" },
+          "100 connection requests/month",
+          "Automatic connection requests",
+          "Basic Auto Reply capabilities",
+          "1 active campaign"
         ],
       },
       {
@@ -47,18 +45,17 @@ const config = {
             : "price_1R2tZJGGMtZacA5oHJvko1rj",
         price: 49.99,
         name: "Premium",
-        description: "Advanced LinkedIn automation for serious growth",
+        description: "Advanced LinkedIn automation with 7-day free trial",
         priceDetails: "/month",
         connectionLimit: 500,
         isFeatured: true,
         features: [
-          {
-            name: "500 connection requests/month",
-          },
-          { name: "Unlimited active campaigns" },
-          { name: "Advanced Auto Reply capabilities" },
-          { name: "AI message personalization" },
-          { name: "Priority support" },
+          "500 connection requests/month",
+          "Unlimited active campaigns",
+          "Advanced Auto Reply capabilities",
+          "AI message personalization",
+          "Priority support",
+          "7-day free trial"
         ],
       },
     ],

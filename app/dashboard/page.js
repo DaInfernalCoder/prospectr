@@ -78,39 +78,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Subscription Alert */}
-      {!isLoading && !isSubscribed && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-white font-medium">Upgrade to start connecting</h3>
-              <p className="text-sm text-white/70 mt-1">
-                Choose a plan to start sending connection requests on LinkedIn
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <ButtonCheckout
-                priceId={proPlan?.priceId}
-                productLink={proPlan?.link}
-                className="btn btn-sm btn-outline"
-              >
-                Get Pro
-              </ButtonCheckout>
-              <ButtonCheckout
-                priceId={premiumPlan?.priceId}
-                productLink={premiumPlan?.link}
-                className="btn btn-sm bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
-              >
-                <span className="flex items-center justify-center gap-1">
-                  <Zap className="w-3 h-3" />
-                  Get Premium
-                </span>
-              </ButtonCheckout>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Connection Limit */}
       {!isLoading && isSubscribed && (
         <div className="bg-[#0F0F0F] rounded-lg p-4 border border-[#1A1A1A]">
@@ -124,16 +91,15 @@ export default function Dashboard() {
               </p>
             </div>
             {subscriptionTier === 'pro' && (
-              <ButtonCheckout
-                priceId={premiumPlan?.priceId}
-                productLink={premiumPlan?.link}
+              <Button
+                onClick={() => router.push('/dashboard/upgrade')}
                 className="btn btn-sm bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
               >
                 <span className="flex items-center justify-center gap-1">
                   <Zap className="w-3 h-3" />
                   Upgrade to Premium
                 </span>
-              </ButtonCheckout>
+              </Button>
             )}
           </div>
           <div className="mt-3">
@@ -190,6 +156,17 @@ export default function Dashboard() {
         >
           New Campaign
         </Button>
+        {!isSubscribed && (
+          <Button
+            onClick={() => router.push('/dashboard/upgrade')}
+            className="text-sm sm:text-base py-2 px-3 sm:px-4 bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
+          >
+            <span className="flex items-center justify-center gap-1">
+              <Zap className="w-3 h-3" />
+              Upgrade
+            </span>
+          </Button>
+        )}
       </div>
 
       {/* Recent Activity */}

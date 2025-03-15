@@ -91,10 +91,10 @@ const CTA = () => {
                     {proPlan?.description}
                   </p>
                   <ul className="space-y-1 mb-4">
-                    {proPlan?.features.slice(0, 3).map((feature, i) => (
+                    {proPlan?.features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
                         <Check className="w-3 h-3 text-red-500" />
-                        <span>{feature.name}</span>
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -124,10 +124,10 @@ const CTA = () => {
                     {premiumPlan?.description}
                   </p>
                   <ul className="space-y-1 mb-4">
-                    {premiumPlan?.features.slice(0, 3).map((feature, i) => (
+                    {premiumPlan?.features.map((feature, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
                         <Check className="w-3 h-3 text-red-500" />
-                        <span>{feature.name}</span>
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -136,7 +136,7 @@ const CTA = () => {
                     productLink={premiumPlan?.link}
                     className="mt-auto bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white border-0 btn btn-sm"
                   >
-                    Get Premium Access
+                    Start 7-Day Free Trial
                   </ButtonCheckout>
                 </div>
               </div>
