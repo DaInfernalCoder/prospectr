@@ -16,19 +16,19 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-base-100">
-      <div className="max-w-[1300px] mx-auto px-6 w-full">
+    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-base-100 pt-16 md:pt-20 lg:pt-0">
+      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 w-full">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
           {/* Left content */}
-          <div className="w-full lg:w-1/2 flex flex-col gap-6 lg:gap-8 pb-10 lg:pb-0">
+          <div className="w-full lg:w-1/2 flex flex-col gap-4 sm:gap-6 lg:gap-8 pb-6 sm:pb-10 lg:pb-0">
             {/*<div className="flex items-center gap-2 text-primary hover:text-primary/80">
               <Play className="w-4 h-4" />
               <a href="#" className="text-sm font-medium">Watch demo video</a>
             </div> */}
             
-            <h1 className="font-extrabold text-5xl lg:text-7xl tracking-tight">
+            <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-7xl tracking-tight">
               Find the right leads for{' '}
-              <span className="inline-block min-w-[220px] sm:min-w-[280px] lg:min-w-[320px]">
+              <span className="inline-block min-w-[180px] sm:min-w-[220px] md:min-w-[280px] lg:min-w-[320px]">
                 <TypeAnimation
                   sequence={[
                     'internships.',
@@ -51,14 +51,14 @@ const Hero = () => {
                 />
               </span>
             </h1>
-            <p className="text-lg lg:text-xl opacity-80 leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl opacity-80 leading-relaxed max-w-2xl">
               Your personal AI powered LinkedIn assistant for founders, allowing you to send messages and get new connections for your business on autopilot. 
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
               <RainbowButton 
                 onClick={handleStartFinding}
-                className="text-lg font-semibold px-8 py-4 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out"
+                className="text-base sm:text-lg font-semibold px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out"
               >
                 Start Finding Leads
               </RainbowButton>
@@ -70,8 +70,8 @@ const Hero = () => {
           </div>
 
           {/* Right content */}
-          <div className="w-full lg:w-1/2 h-[500px] md:h-[550px] lg:h-[650px] relative mt-6 lg:mt-16">
-            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full scale-125 lg:scale-140" />
+          <div className="w-full lg:w-1/2 h-[350px] sm:h-[450px] md:h-[500px] lg:h-[650px] relative mt-4 sm:mt-6 lg:mt-16">
+            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full scale-110 sm:scale-125 lg:scale-140" />
           </div>
         </div>
       </div>
