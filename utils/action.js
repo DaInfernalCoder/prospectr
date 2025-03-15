@@ -7,7 +7,7 @@ const { createClient } = require("./supabase/server");
 
 const signInWith = (provider) => async () => {
   const supabase = await createClient();
-  const headersList = headers();
+  const headersList = await headers();
   
   // Get the host, with fallbacks for Vercel and local development
   const host = headersList.get('host') || 
