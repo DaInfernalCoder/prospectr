@@ -9,6 +9,7 @@ const nextConfig = {
       "logos-world.net",
       "www.linkedin.com",
       "unsplash.com",
+      "via.placeholder.com",
     ],
   },
   // Configure ESLint to not fail builds on warnings

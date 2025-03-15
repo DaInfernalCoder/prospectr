@@ -408,9 +408,9 @@ const FeaturesListicle = () => {
   const [hasClicked, setHasClicked] = useState(false);
 
   return (
-    <section className="py-24" id="features">
+    <section className="py-24 bg-base-200" id="features">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <p className="text-accent font-medium text-sm font-mono mb-3">
             const launch_time = &quot;Today&quot;;
           </p>
@@ -424,7 +424,7 @@ const FeaturesListicle = () => {
           </div>
         </div>
 
-        <div className="space-y-24">
+        <div className="space-y-20">
           {features.map((feature, index) => (
             <motion.div
               key={feature.name}
@@ -432,27 +432,18 @@ const FeaturesListicle = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
-              className={`flex flex-col ${
-                index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
-              } gap-12 items-center`}
+              className="flex flex-col gap-10 items-center"
             >
-              <div className="w-full md:w-1/2 space-y-6">
-                <div className="flex items-center gap-4">
+              {/* Feature Title and Description */}
+              <div className="w-full max-w-3xl mx-auto bg-base-100 p-8 rounded-xl shadow-lg">
+                <div className="flex items-center gap-4 mb-6">
                   <span className="text-primary">{feature.svg}</span>
                   <h3 className="text-2xl font-bold">{feature.name}</h3>
                 </div>
                 <div className="text-base-content/80">{feature.description}</div>
               </div>
               
-              <div className="w-full md:w-1/2">
-                <HeroVideoDialog
-                  videoSrc={feature.video.videoSrc}
-                  thumbnailSrc={feature.video.thumbnailSrc}
-                  thumbnailAlt={`${feature.name} feature demo`}
-                  className="w-full aspect-video rounded-xl overflow-hidden"
-                  animationStyle="from-bottom"
-                />
-              </div>
+              {/* Video section removed as requested - can be added back later */}
             </motion.div>
           ))}
         </div>

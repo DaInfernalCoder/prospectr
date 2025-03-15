@@ -16,17 +16,17 @@ import Header from "@/components/Header";
 // import Modal from "@/components/Modal";
 import Pricing from "@/components/Pricing";
 import Problem from "@/components/Problem";
-// import Testimonial from "@/components/Testimonials1";
+import Testimonial from "@/components/Testimonials1";
 //import Testimonials11 from "@/components/Testimonials11";
 // import Testimonial1Small from "@/components/Testimonial1Small";
-// import Testimonials3 from "@/components/Testimonials3";
-// import TestimonialsAvatars from "@/components/TestimonialsAvatars";
+import Testimonials3 from "@/components/Testimonials3";
 import WithWithout from "@/components/WithWithout";
 import Hero from "@/components/Hero";
 import CTA from "@/components/CTA";
 import ButtonLead from "@/components/ButtonLead";
 import { Suspense } from "react";
 import SectionBiography from "@/components/SectionBiography";
+import ContactSection from "@/components/ContactSection";
 
 export default function Page() {
   return (
@@ -37,6 +37,7 @@ export default function Page() {
       <Hero />
       <main>
         <Problem />
+        <Testimonials3 />
         
         {/* <ButtonAccount /> */}
         <FeaturesAccordion />
@@ -48,16 +49,17 @@ export default function Page() {
         {/* <CTA /> */}
         {/* <FeaturesListicle /> */}
         {/* <Problem /> */}
+        <Testimonial />
         <Pricing />
         <SectionBiography />
         {/* <Testimonials11 /> */}
         {/* <Testimonial /> */}
         
         {/* <Testimonial1Small /> */}
-        {/* <Testimonials3 /> */}
         {/* <TestimonialsAvatars /> */}
         
         <FAQ />
+        <ContactSection />
         <CTA />
         <Footer />
       </main>

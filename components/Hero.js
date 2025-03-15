@@ -16,28 +16,36 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-base-100">
-      <div className="max-w-[1300px] mx-auto px-6 w-full">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+    <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-black via-black to-base-100 pt-16 md:pt-20 lg:pt-0">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-red-500/10 rounded-full blur-3xl transform -translate-x-1/4 -translate-y-1/4"></div>
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-red-500/5 rounded-full blur-3xl transform translate-x-1/4 translate-y-1/4"></div>
+      </div>
+      
+      <div className="max-w-[1300px] mx-auto px-4 sm:px-6 w-full relative z-10">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Left content */}
-          <div className="w-full lg:w-1/2 flex flex-col gap-6 lg:gap-8 pb-10 lg:pb-0">
-            {/*<div className="flex items-center gap-2 text-primary hover:text-primary/80">
-              <Play className="w-4 h-4" />
-              <a href="#" className="text-sm font-medium">Watch demo video</a>
-            </div> */}
+          <div className="w-full lg:w-1/2 flex flex-col gap-5 sm:gap-7 lg:gap-8 pb-8 sm:pb-10 lg:pb-0">
+            <div className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-500/10 text-red-500 font-medium self-start animate-pulse">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              B2B SaaS Founders: Stop Wasting Time
+            </div>
             
-            <h1 className="font-extrabold text-5xl lg:text-7xl tracking-tight">
-              Find the right leads for{' '}
-              <span className="inline-block min-w-[220px] sm:min-w-[280px] lg:min-w-[320px]">
+            <h1 className="font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight">
+              <span className="text-white">10x Your LinkedIn</span>{' '}
+              <span className="inline-block min-w-[180px] sm:min-w-[220px] md:min-w-[280px] lg:min-w-[320px]">
                 <TypeAnimation
                   sequence={[
-                    'internships.',
+                    'Outreach',
                     2000,
-                    'recruiting.',
+                    'Connections',
                     2000,
-                    'job hunting.', 
+                    'Sales Leads', 
                     2000, 
-                    'sales.',
+                    'Revenue',
                     2000,
                   ]}
                   wrapper="span"
@@ -51,27 +59,47 @@ const Hero = () => {
                 />
               </span>
             </h1>
-            <p className="text-lg lg:text-xl opacity-80 leading-relaxed max-w-2xl">
-              Your personal AI powered LinkedIn assistant for founders, allowing you to send messages and get new connections for your business on autopilot. 
+            <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed max-w-2xl">
+              <span className="font-semibold text-white">Prospectr</span> is your AI-powered LinkedIn assistant that finds targeted leads, 
+              sends personalized messages, and converts connections into customers—without the 
+              <span className="line-through px-1">hours of manual work</span>.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
               <RainbowButton 
                 onClick={handleStartFinding}
-                className="text-lg font-semibold px-8 py-4 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out"
+                className="text-base sm:text-lg font-semibold px-8 sm:px-10 py-4 sm:py-5 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out shadow-lg shadow-red-500/20"
               >
                 Start Finding Leads
               </RainbowButton>
+              
+              <a 
+                href="#features" 
+                className="text-base sm:text-lg font-medium text-white/80 hover:text-white flex items-center gap-2 transition-colors"
+              >
+                <Play className="w-4 h-4" />
+                See how it works
+              </a>
             </div>
 
-            <div className="mt-1">
-              {/* <TestimonialsAvatars priority={true} /> */}
+            <div className="mt-4 sm:mt-6">
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-2">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-700 border-2 border-black"></div>
+                  ))}
+                </div>
+                <p className="text-sm text-white/70">
+                  <span className="font-semibold text-white">120+</span> founders growing their businesses with Prospectr
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Right content */}
-          <div className="w-full lg:w-1/2 h-[500px] md:h-[550px] lg:h-[650px] relative mt-6 lg:mt-16">
-            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full scale-125 lg:scale-140" />
+          <div className="w-full lg:w-1/2 h-[350px] sm:h-[450px] md:h-[500px] lg:h-[650px] relative mt-2 sm:mt-4 lg:mt-8">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-red-500/5 to-transparent"></div>
+            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full scale-110 sm:scale-125 lg:scale-140" />
           </div>
         </div>
       </div>
