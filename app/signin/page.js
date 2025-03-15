@@ -11,9 +11,7 @@ import { signInWithGoogle } from "@/utils/action";
 // Successfull login redirects to /api/auth/callback where the Code Exchange is processed (see app/api/auth/callback/route.js).
 export default function Login() {
   const supabase = createClientComponentClient();
-  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
 
   const handleSignup = async (e, options) => {
     e?.preventDefault();
@@ -34,17 +32,6 @@ export default function Login() {
             },
           },
         });
-      } else if (type === "magic_link") {
-        await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/api/auth/callback`,
-          },
-        });
-
-        toast.success("Check your emails!");
-
-        setIsDisabled(true);
       }
     } catch (error) {
       console.log(error);
@@ -113,42 +100,6 @@ export default function Login() {
           Sign-up with Google
         </button>
 
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-700"></div>
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="px-2 text-gray-400 bg-gradient-to-b from-gray-900 to-black">
-              OR
-            </span>
-          </div>
-        </div>
-
-        <form
-          className="form-control w-full space-y-4"
-          onSubmit={(e) => handleSignup(e, { type: "magic_link" })}
-        >
-          <input
-            required
-            type="email"
-            value={email}
-            autoComplete="email"
-            placeholder="tom@cruise.com"
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent placeholder:text-gray-500"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-
-          <button
-            className="w-full px-4 py-3 text-white bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
-            disabled={isLoading || isDisabled}
-            type="submit"
-          >
-            {isLoading && (
-              <span className="loading loading-spinner loading-xs"></span>
-            )}
-            Send Magic Link
-          </button>
-        </form>
         <p className="mt-8 text-center text-sm text-gray-400">
           By signing in, you agree to our{" "}
           <Link href="/tos" className="text-white hover:underline">
