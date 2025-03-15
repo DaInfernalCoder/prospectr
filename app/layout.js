@@ -2,8 +2,8 @@ import { Inter } from "next/font/google";
 import PlausibleProvider from "next-plausible";
 import { getSEOTags } from "@/libs/seo";
 import ClientLayout from "@/components/LayoutClient";
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Analytics } from "@vercel/analytics/react"
+// import { SpeedInsights } from "@vercel/speed-insights/next";
+// import { Analytics } from "@vercel/analytics/react";
 import config from "@/config";
 import "./globals.css";
 
@@ -35,8 +35,8 @@ export default function RootLayout({ children }) {
         {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
         <ClientLayout>
           {children}
-          <SpeedInsights />
-          <Analytics />
+          {/* <SpeedInsights /> */}
+          {/* <Analytices /> */}
         </ClientLayout>
       </body>
     </html>

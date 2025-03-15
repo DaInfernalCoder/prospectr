@@ -31,7 +31,7 @@ export async function POST(req) {
       cancel_url: cancelUrl,
       client_reference_id: user.id,
       subscription_data: {
-        trial_period_days: 7, // 7-day free trial
+        trial_period_days: 7,
       },
       customer_email: user.email,
     });

@@ -27,7 +27,7 @@ export default function Login() {
         await supabase.auth.signInWithOAuth({
           provider,
           options: {
-            redirectTo: `${window.location.origin}/api/auth/callback`,
+            redirectTo: `${window.location.origin}/api/auths/callback`,
             queryParams: {
               access_type: "offline",
               prompt: "consent",

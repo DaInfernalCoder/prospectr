@@ -1,3 +1,4 @@
+import { checkSubscription } from "@/utils/check-subscription";
 import { getUser } from "@/utils/supabase/getUser";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
@@ -10,6 +11,26 @@ export async function POST(request) {
 
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // First check if user has access
+    const subscriptionCheck = await checkSubscription(user.id, true, true);
+
+    // If user needs checkout, return the checkout URL
+    if (subscriptionCheck.needsCheckout) {
+      console.log({
+        error: "Subscription required",
+        checkoutUrl:
+          subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+      });
+      return NextResponse.json(
+        {
+          error: "Subscription required",
+          checkoutUrl:
+            subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+        },
+        { status: 402 }
+      ); // 402 Payment Required
+    }
 
     const { data: profile } = await supabase
       .from("profiles")

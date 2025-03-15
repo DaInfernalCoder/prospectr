@@ -9,7 +9,6 @@ import Footer from "@/components/Footer";
 // import ButtonGradient from "@/components/ButtonGradient";
 // import ButtonLead from "@/components/ButtonLead";
 // import ButtonSupport from "@/components/ButtonSupport";
-// import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
 // import FeaturesListicle from "@/components/FeaturesListicle";
 import Header from "@/components/Header";
@@ -38,13 +37,13 @@ export default function Page() {
       <main>
         <Problem />
         <Testimonials3 />
-        
+
         {/* <ButtonAccount /> */}
         <FeaturesAccordion />
         {/* <BetterIcon /> */}
         {/* <ButtonCheckout /> */}
         {/* <ButtonGradient /> */}
-        
+
         {/* <ButtonSupport /> */}
         {/* <CTA /> */}
         {/* <FeaturesListicle /> */}
@@ -54,10 +53,10 @@ export default function Page() {
         <SectionBiography />
         {/* <Testimonials11 /> */}
         {/* <Testimonial /> */}
-        
+
         {/* <Testimonial1Small /> */}
         {/* <TestimonialsAvatars /> */}
-        
+
         <FAQ />
         <ContactSection />
         <CTA />

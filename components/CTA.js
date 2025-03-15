@@ -7,18 +7,17 @@ import { ArrowRight, Check } from "lucide-react";
 
 const CTA = () => {
   const router = useRouter();
-  
+
   const benefits = [
     "AI-powered lead generation",
     "Automated connection requests",
     "Personalized messaging at scale",
-    "Sales pipeline acceleration"
+    "Sales pipeline acceleration",
   ];
-  
+
   // Get the Basic and Pro plans from config
   const basicPlan = config.stripe.plans[0];
-  const proPlan = config.stripe.plans[1];
-  
+
   return (
     <section className="relative hero overflow-hidden min-h-screen">
       <Image
@@ -38,15 +37,21 @@ const CTA = () => {
               </span>
               Limited Time Offer
             </div>
-            
+
             <h2 className="font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">
-              Ready to <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">transform</span> your LinkedIn outreach?
+              Ready to{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700">
+                transform
+              </span>{" "}
+              your LinkedIn outreach?
             </h2>
-            
+
             <p className="text-lg text-gray-300 max-w-xl">
-              Join the founders who are consistently generating high-quality leads and growing their SaaS businesses with Prospectr&apos;s AI-powered automation.
+              Join the founders who are consistently generating high-quality
+              leads and growing their SaaS businesses with Prospectr&apos;s
+              AI-powered automation.
             </p>
-            
+
             <ul className="space-y-3">
               {benefits.map((benefit, index) => (
                 <li key={index} className="flex items-center gap-3">
@@ -58,45 +63,51 @@ const CTA = () => {
               ))}
             </ul>
           </div>
-          
+
           <div className="bg-zinc-900/80 p-8 rounded-2xl border border-zinc-800 backdrop-blur-sm shadow-xl">
             <div className="text-center mb-8">
               <h3 className="font-bold text-2xl mb-2">Get Started Now</h3>
-              <p className="text-gray-400">Choose the plan that fits your needs</p>
+              <p className="text-gray-400">
+                Choose the plan that fits your needs
+              </p>
             </div>
-            
+
             <div className="flex flex-col space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center justify-between rounded-lg bg-zinc-800/50 p-4 border border-zinc-700/30">
                   <div>
                     <p className="font-medium">{basicPlan.name}</p>
-                    <p className="text-sm text-gray-400">{basicPlan.description}</p>
+                    <p className="text-sm text-gray-400">
+                      {basicPlan.description}
+                    </p>
                   </div>
-                  <span className="text-lg font-bold text-red-500">${basicPlan.price}{basicPlan.priceDetails}</span>
-                </div>
-                
-                <div className="flex items-center justify-between rounded-lg bg-red-500/10 p-4 border border-red-500/30 relative">
-                  {proPlan.isFeatured && (
-                    <div className="absolute -top-3 right-3 bg-red-500 text-xs font-bold px-2 py-1 rounded text-white">BEST VALUE</div>
-                  )}
-                  <div>
-                    <p className="font-medium">{proPlan.name}</p>
-                    <p className="text-sm text-gray-400">{proPlan.description}</p>
-                  </div>
-                  <span className="text-lg font-bold text-red-500">${proPlan.price}{proPlan.priceDetails}</span>
+                  <span className="text-lg font-bold text-red-500">
+                    ${basicPlan.price}
+                    {basicPlan.priceDetails}
+                  </span>
                 </div>
               </div>
-              
-              <button 
-                onClick={() => router.push('/signin')}
+
+              <button
+                onClick={() => router.push("/signin")}
                 className="bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white px-8 py-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:scale-105 duration-300"
               >
                 Start Your LinkedIn Growth
                 <ArrowRight className="w-5 h-5" />
               </button>
-              
+
               <p className="text-center text-sm text-gray-400">
-                By signing up, you agree to our <a href="/tos" className="underline hover:text-white">Terms of Service</a> and <a href="/privacy-policy" className="underline hover:text-white">Privacy Policy</a>
+                By signing up, you agree to our{" "}
+                <a href="/tos" className="underline hover:text-white">
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  href="/privacy-policy"
+                  className="underline hover:text-white"
+                >
+                  Privacy Policy
+                </a>
               </p>
             </div>
           </div>
