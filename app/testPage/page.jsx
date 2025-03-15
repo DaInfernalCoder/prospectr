@@ -24,12 +24,12 @@ function Test() {
       profile_url:
         "https://www.linkedin.com/in/salmane-zouitni-746b37155?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAACVdemYBbD07PkkVHHmurQ-cdPtxgLFLw1k",
     },
-    {
-      identifier: "sunny-datta-mba-cbi-84b69622",
-      name: "Sunny Datta, MBA, CBI",
-      profile_url:
-        "https://www.linkedin.com/in/sunny-datta-mba-cbi-84b69622?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAAS6bjsBdbWTvub77cJC1tITFdi02p0GkqY",
-    },
+    // {
+    //   identifier: "sunny-datta-mba-cbi-84b69622",
+    //   name: "Sunny Datta, MBA, CBI",
+    //   profile_url:
+    //     "https://www.linkedin.com/in/sunny-datta-mba-cbi-84b69622?miniProfileUrn=urn%3Ali%3Afs_miniProfile%3AACoAAAS6bjsBdbWTvub77cJC1tITFdi02p0GkqY",
+    // },
   ];
   // useEffect(() => {
   //   async function testFetch() {
@@ -42,24 +42,33 @@ function Test() {
 
   useEffect(() => {
     async function testFetch() {
-      const res = await fetch("/api/linkedin/invitations/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          recipients: recipients,
-          message: "Hi, I'd like to connect!",
-          templateName: "My Follow-up Template",
-          followUpMessage: "Thanks for connecting {{name}}! ...",
-        }),
-      });
+      const res = await fetch("/api/linkedin/analytics");
       const data = await res.json();
       setData(data);
     }
 
     testFetch();
   }, []);
+  // useEffect(() => {
+  //   async function testFetch() {
+  //     const res = await fetch("/api/linkedin/invitations/send", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         recipients: recipients,
+  //         message: "Hi, I'd like to connect!",
+  //         templateName: "My Follow-up Template",
+  //         followUpMessage: "Thanks for connecting {{name}}! ...",
+  //       }),
+  //     });
+  //     const data = await res.json();
+  //     setData(data);
+  //   }
+
+  //   testFetch();
+  // }, []);
 
   // useEffect(() => {
   //   async function testFetch() {
