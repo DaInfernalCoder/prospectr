@@ -53,24 +53,6 @@ const config = {
           { name: "Automatic send message to inbox, inmail" },
         ],
       },
-      {
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_1Niyy5AxyNprDp7iZIqEyD2h_team"
-            : "price_456",
-        name: "Team",
-        description: "Perfect for teams and agencies",
-        price: 30,
-        priceDetails: "/user/month",
-        features: [
-          {
-            name: "Volume Discounts",
-          },
-          { name: "Advanced Team Settings" },
-          { name: "Team Inbox Management" },
-          { name: "All prices are per user, per month" },
-        ],
-      },
     ],
   },
   aws: {
