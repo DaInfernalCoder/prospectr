@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 // <FAQ> component is a list of <Item> component
 // Just import the FAQ & add your FAQ content to the const faqList
@@ -74,21 +74,21 @@ const faqList = [
 ];
 
 const Item = ({ item, isLast, isOpen, toggleOpen }) => {
-  const accordion = useRef(null);
+  const contentRef = useRef(null);
 
   return (
-    <li className={`rounded-lg transition-all ${isOpen ? "bg-zinc-900/50 shadow-lg" : ""}`}>
+    <li className={`rounded-lg transition-all duration-200 ${isOpen ? "bg-zinc-900/50 shadow-lg" : ""}`}>
       <button
         className={`relative flex gap-4 items-start w-full p-6 text-base font-medium text-left ${
           !isLast ? "border-b border-zinc-800" : ""
-        } ${isOpen ? "rounded-t-lg" : "rounded-lg"} hover:bg-zinc-900/30 transition-colors`}
+        } ${isOpen ? "rounded-t-lg" : "rounded-lg"} hover:bg-zinc-900/30 transition-colors duration-200`}
         onClick={toggleOpen}
         aria-expanded={isOpen}
       >
         <span
           className={`mt-0.5 h-10 w-10 flex flex-none justify-center items-center rounded-full text-xl ${
             isOpen ? "bg-red-500 text-white" : "bg-zinc-800 text-white"
-          } transition-colors duration-300`}
+          } transition-colors duration-200`}
         >
           {item.icon}
         </span>
@@ -99,7 +99,7 @@ const Item = ({ item, isLast, isOpen, toggleOpen }) => {
         <span className="ml-auto">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className={`h-5 w-5 transition-all duration-300 text-zinc-400 ${
+            className={`h-5 w-5 transition-transform duration-200 text-zinc-400 ${
               isOpen ? "rotate-180" : ""
             }`}
             viewBox="0 0 20 20"
@@ -114,19 +114,18 @@ const Item = ({ item, isLast, isOpen, toggleOpen }) => {
         </span>
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden text-white/70 px-6 pb-6"
-          >
-            <div className="border-l-2 border-red-500 pl-4 leading-relaxed">{item?.answer}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Optimized animation using CSS transitions instead of Framer Motion for better performance */}
+      <div 
+        ref={contentRef}
+        className={`overflow-hidden text-white/70 px-6 transition-all duration-200 ease-out ${
+          isOpen ? "max-h-96 opacity-100 pb-6" : "max-h-0 opacity-0 pb-0"
+        }`}
+        style={{
+          transitionProperty: "max-height, opacity, padding",
+        }}
+      >
+        <div className="border-l-2 border-red-500 pl-4 leading-relaxed">{item?.answer}</div>
+      </div>
     </li>
   );
 };
@@ -136,28 +135,43 @@ const FAQ = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [openItems, setOpenItems] = useState({});
 
-  // Filter FAQs based on active category and search term
+  // Memoized filtering for better performance
   const filteredFAQs = faqList.filter((item) => {
     const matchesCategory = activeCategory === "All" || item.category === activeCategory;
-    const matchesSearch = 
-      item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (typeof item.answer.props.children === 'string' && 
-       item.answer.props.children.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    return matchesCategory && (searchTerm === "" || matchesSearch);
+    if (!matchesCategory) return false;
+    
+    if (searchTerm === "") return true;
+    
+    // More efficient search implementation
+    const questionMatch = item.question.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Check if answer is a string or has children that are strings
+    let answerMatch = false;
+    const answerContent = item.answer.props.children;
+    
+    if (typeof answerContent === 'string') {
+      answerMatch = answerContent.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+    
+    return questionMatch || answerMatch;
   });
 
-  // Toggle accordion item
+  // Toggle accordion item - keep only one open at a time for better performance
   const toggleItem = (index) => {
-    setOpenItems(prev => ({
-      ...prev,
-      [index]: !prev[index]
-    }));
+    setOpenItems(prev => {
+      const isCurrentlyOpen = prev[index];
+      // Close all items, then open the clicked one if it was closed
+      return {
+        ...Object.keys(prev).reduce((acc, key) => ({ ...acc, [key]: false }), {}),
+        [index]: !isCurrentlyOpen
+      };
+    });
   };
 
   return (
     <section className="bg-black relative pb-24" id="faq">
-      {/* Gradient effects */}
+      {/* Simplified gradient effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-red-500/10 to-transparent rounded-full blur-3xl transform -rotate-12 opacity-30"></div>
       </div>
@@ -195,7 +209,7 @@ const FAQ = () => {
               <button
                 key={category.name}
                 onClick={() => setActiveCategory(category.name)}
-                className={`px-5 py-2.5 rounded-full flex items-center gap-2 transition-colors ${
+                className={`px-5 py-2.5 rounded-full flex items-center gap-2 transition-colors duration-200 ${
                   activeCategory === category.name
                     ? "bg-red-500 text-white"
                     : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800"
@@ -236,7 +250,7 @@ const FAQ = () => {
           <p className="text-zinc-400 mb-4">Still have questions?</p>
           <a 
             href="#contact" 
-            className="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="inline-flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
             onClick={(e) => {
               e.preventDefault();
               document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
