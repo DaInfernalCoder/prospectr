@@ -58,6 +58,7 @@ export async function POST(req) {
         const priceId = session?.line_items?.data[0]?.price.id;
         const userId = data.object.client_reference_id;
         const plan = configFile.stripe.plans.find((p) => p.priceId === priceId);
+        console.log({ plan });
 
         // Get subscription data to check trial status
         const subscriptionId = session?.subscription;
@@ -85,6 +86,7 @@ export async function POST(req) {
           trial_ends_at: trialEndsAt,
           subscription_created_at: new Date().toISOString(),
         });
+
         // Update the profile with subscription info
         await supabase
           .from("profiles")
@@ -107,14 +109,52 @@ export async function POST(req) {
         const subscription = data.object;
         const customerId = subscription.customer;
 
-        const { data: user } = await supabase
+        // First try to find user by customer_id (for existing customers)
+        let { data: userByCustomerId } = await supabase
           .from("profiles")
           .select("user_id")
           .eq("customer_id", customerId)
           .single();
 
-        if (!user) break;
+        // If no user found by customer_id, we need to find the user by client_reference_id
+        // from the checkout session that created this subscription
+        if (!userByCustomerId) {
+          // Get the checkout session that created this subscription
+          const sessions = await stripe.checkout.sessions.list({
+            subscription: subscription.id,
+            limit: 1,
+          });
 
+          if (sessions.data.length > 0) {
+            const userId = sessions.data[0].client_reference_id;
+
+            if (userId) {
+              // Update the user's profile with the customer_id and subscription info
+              await supabase
+                .from("profiles")
+                .update({
+                  customer_id: customerId,
+                  has_access: true,
+                  subscription_id: subscription.id,
+                  subscription_status: subscription.status,
+                  trial_ends_at: subscription.trial_end
+                    ? new Date(subscription.trial_end * 1000).toISOString()
+                    : null,
+                })
+                .eq("user_id", userId);
+
+              console.log(
+                `Updated user ${userId} with new subscription ${subscription.id}`
+              );
+              break;
+            }
+          }
+
+          console.log("Could not find user for subscription:", subscription.id);
+          break;
+        }
+
+        // If we found a user by customer_id, update their subscription info
         const trialEndsAt = subscription.trial_end
           ? new Date(subscription.trial_end * 1000).toISOString()
           : null;
@@ -127,7 +167,7 @@ export async function POST(req) {
             subscription_status: subscription.status,
             trial_ends_at: trialEndsAt,
           })
-          .eq("user_id", user.user_id);
+          .eq("user_id", userByCustomerId.user_id);
 
         break;
       }
@@ -143,7 +183,10 @@ export async function POST(req) {
           .eq("customer_id", customerId)
           .single();
 
-        if (!user) break;
+        if (!user) {
+          console.log("No user found for customer:", customerId);
+          break;
+        }
 
         // Check if trial status changed
         const trialEndsAt = subscription.trial_end
@@ -171,6 +214,17 @@ export async function POST(req) {
         const subscription = data.object;
         const customerId = subscription.customer;
 
+        const { data: user } = await supabase
+          .from("profiles")
+          .select("user_id")
+          .eq("customer_id", customerId)
+          .single();
+
+        if (!user) {
+          console.log("No user found for customer:", customerId);
+          break;
+        }
+
         await supabase
           .from("profiles")
           .update({
@@ -178,24 +232,26 @@ export async function POST(req) {
             subscription_status: "canceled",
             canceled_at: new Date().toISOString(),
           })
-          .eq("customer_id", customerId);
+          .eq("user_id", user.user_id);
 
         break;
       }
 
       case "invoice.paid": {
         // Recurring payment success - extend access
-        const priceId = data.object.lines.data[0].price.id;
         const customerId = data.object.customer;
 
         // Find profile
-        const { data: profile } = await supabase
+        const { data: user } = await supabase
           .from("profiles")
-          .select("*")
+          .select("user_id, price_id")
           .eq("customer_id", customerId)
           .single();
 
-        if (!profile || profile.price_id !== priceId) break;
+        if (!user) {
+          console.log("No user found for customer:", customerId);
+          break;
+        }
 
         // Grant access and update records
         await supabase
@@ -205,7 +261,7 @@ export async function POST(req) {
             subscription_status: "active",
             last_payment_at: new Date().toISOString(),
           })
-          .eq("customer_id", customerId);
+          .eq("user_id", user.user_id);
 
         break;
       }
@@ -215,6 +271,17 @@ export async function POST(req) {
         // Stripe will retry and send customer.subscription.deleted if all retries fail
         const customerId = data.object.customer;
 
+        const { data: user } = await supabase
+          .from("profiles")
+          .select("user_id")
+          .eq("customer_id", customerId)
+          .single();
+
+        if (!user) {
+          console.log("No user found for customer:", customerId);
+          break;
+        }
+
         // Add a flag to indicate payment issues
         await supabase
           .from("profiles")
@@ -222,16 +289,16 @@ export async function POST(req) {
             payment_failed: true,
             subscription_status: "past_due",
           })
-          .eq("customer_id", customerId);
+          .eq("user_id", user.user_id);
 
         break;
       }
 
       default:
-      // Unhandled event type
+        console.log(`Unhandled event type: ${eventType}`);
     }
   } catch (e) {
-    console.error("stripe error: " + e.message + "EVENT TYPE: " + eventType);
+    console.error("stripe error:", e.message, "EVENT TYPE:", eventType);
   }
 
   return NextResponse.json({});

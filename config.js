@@ -38,11 +38,11 @@ const config = {
         link:
           process.env.NODE_ENV === "development"
             ? "https://buy.stripe.com/test_fZe16q0u61tkfQYdQR"
-            : "",
+            : "https://buy.stripe.com/test_fZe16q0u61tkfQYdQR",
         priceId:
           process.env.NODE_ENV === "development"
             ? "price_1R2tZJGGMtZacA5oHJvko1rj"
-            : "",
+            : "price_1R2tZJGGMtZacA5oHJvko1rj",
         price: 50,
         name: "Pro",
         priceDetails: "/month",
