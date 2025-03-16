@@ -53,7 +53,18 @@ const ButtonLinkedin = ({
           );
         }
       } else {
-        // New connection - redirect to LinkedIn connect API
+        // For new connections, first check if subscription is required
+        const checkResponse = await fetch(
+          "/api/auths/linkedin/check-subscription"
+        );
+        const checkData = await checkResponse.json();
+
+        if (checkResponse.status === 402 && checkData.checkoutUrl) {
+          window.location.href = checkData.checkoutUrl;
+          return;
+        }
+
+        // If subscription check passes, redirect to LinkedIn connect API
         window.location.href = "/api/auths/linkedin/connect";
       }
     } catch (error) {
