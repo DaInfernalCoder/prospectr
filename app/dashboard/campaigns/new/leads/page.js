@@ -14,10 +14,18 @@ import {
   LinkIcon,
 } from "lucide-react";
 import { useLinkedIn } from "@/components/contexts/LinkedInContext";
+import { useCampaignStore } from "@/app/store/campaignStore";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AddLeadsPage() {
   const router = useRouter();
   const { linkedInStatus } = useLinkedIn();
+  const {
+    selectedLeads,
+    setSelectedLeads,
+    addSelectedLead,
+    removeSelectedLead,
+  } = useCampaignStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedSections, setExpandedSections] = useState({});
   const [maxLeads, setMaxLeads] = useState(0);
@@ -28,10 +36,6 @@ export default function AddLeadsPage() {
     includeLeadsFromOtherCampaigns: false,
   });
 
-  // Search and Pagination State
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
-  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const resultsPerPage = 10;
@@ -44,6 +48,93 @@ export default function AddLeadsPage() {
     school: "",
     networkDistance: [],
     sortBy: "relevance",
+  });
+
+  // Track selected profiles
+  const [selectedProfiles, setSelectedProfiles] = useState([]);
+
+  // Use React Query for search
+  const {
+    data: searchResults = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: [
+      "linkedinSearch",
+      searchQuery,
+      advancedSearch,
+      exclusions,
+      currentPage,
+    ],
+    queryFn: async () => {
+      if (!searchQuery.trim()) {
+        return [];
+      }
+
+      // Check LinkedIn status before performing search
+      if (!linkedInStatus.connected) {
+        throw new Error(
+          "LinkedIn account not connected. Please connect your LinkedIn account in settings."
+        );
+      }
+
+      // Prepare search parameters based on form values
+      const searchParams = {
+        keywords: searchQuery,
+      };
+
+      // Only add parameters if they have values
+      if (advancedSearch.company) searchParams.company = advancedSearch.company;
+      if (advancedSearch.location)
+        searchParams.location = advancedSearch.location;
+      if (advancedSearch.industry)
+        searchParams.industry = advancedSearch.industry;
+      if (advancedSearch.school) searchParams.school = advancedSearch.school;
+
+      // Only add network distance if there are options selected
+      if (advancedSearch.networkDistance.length > 0) {
+        searchParams.networkDistance = advancedSearch.networkDistance;
+      }
+
+      // Apply exclusions
+      if (
+        exclusions.excludeFirstDegreeConnections &&
+        !searchParams.networkDistance
+      ) {
+        searchParams.networkDistance = [
+          "SECOND_DEGREE",
+          "THIRD_DEGREE_AND_BEYOND",
+        ];
+      }
+
+      if (advancedSearch.sortBy) {
+        searchParams.sortBy = advancedSearch.sortBy;
+      }
+
+      const response = await fetch("/api/linkedin/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(searchParams),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error ||
+            `Search failed: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const results = await response.json();
+
+      if (!results || !Array.isArray(results)) {
+        throw new Error("Invalid response format from search API");
+      }
+
+      return results;
+    },
+    enabled: false, // Don't run query on mount
   });
 
   // Toggle section expansion
@@ -70,125 +161,36 @@ export default function AddLeadsPage() {
     }));
   };
 
-  // Perform LinkedIn search
-  const performSearch = async (page = 1) => {
-    if (!searchQuery.trim()) {
-      setError("Please enter a search query");
-      return;
-    }
-
-    // Check LinkedIn status before performing search
-    if (!linkedInStatus.connected) {
-      setError(
-        "LinkedIn account not connected. Please connect your LinkedIn account in settings."
-      );
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // Prepare search parameters based on form values - simplify to reduce potential issues
-      const searchParams = {
-        keywords: searchQuery, // Use keywords instead of name/jobTitle for consistency
-      };
-
-      // Only add parameters if they have values to avoid undefined issues
-      if (advancedSearch.company) {
-        searchParams.company = advancedSearch.company;
-      }
-
-      if (advancedSearch.location) {
-        searchParams.location = advancedSearch.location;
-      }
-
-      if (advancedSearch.industry) {
-        searchParams.industry = advancedSearch.industry;
-      }
-
-      if (advancedSearch.school) {
-        searchParams.school = advancedSearch.school;
-      }
-
-      // Only add network distance if there are options selected
-      if (advancedSearch.networkDistance.length > 0) {
-        searchParams.networkDistance = advancedSearch.networkDistance;
-      }
-
-      // Apply exclusions
-      if (
-        exclusions.excludeFirstDegreeConnections &&
-        !searchParams.networkDistance
-      ) {
-        searchParams.networkDistance = [
-          "SECOND_DEGREE",
-          "THIRD_DEGREE_AND_BEYOND",
-        ];
-      }
-
-      if (advancedSearch.sortBy) {
-        searchParams.sortBy = advancedSearch.sortBy;
-      }
-
-      console.log("Search parameters:", searchParams); // Debugging
-
-      // Call the LinkedIn search API
-      const response = await fetch("/api/linkedin/search", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(searchParams),
-      });
-
-      console.log(response, "response");
-
-      // Handle potential error responses
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log(errorData, "errorDAta");
-
-        // Special handling for LinkedIn not connected error
-        if (errorData.error === "LinkedIn not connected") {
-          throw new Error(
-            "LinkedIn account not connected. Please connect your LinkedIn account in settings."
-          );
-        }
-
-        // If we have detailed error info, show it
-        if (errorData.details) {
-          throw new Error(`${errorData.error}: ${errorData.details}`);
-        }
-
-        throw new Error(
-          errorData.error ||
-            `Search failed: ${response.status} ${response.statusText}`
-        );
-      }
-
-      const results = await response.json();
-      console.log(results, "res");
-
-      if (!results || !Array.isArray(results)) {
-        throw new Error("Invalid response format from search API");
-      }
-
-      setSearchResults(results);
-      setTotalResults(results.length);
-      setCurrentPage(page);
-    } catch (error) {
-      console.error("Search error:", error);
-      setError(error.message);
-      // setSearchResults([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // Handle search form submission
   const handleSearch = (e) => {
     e?.preventDefault();
-    performSearch(1); // Reset to first page when performing a new search
+    refetch();
+    setCurrentPage(1); // Reset to first page when performing a new search
   };
+
+  // Toggle lead selection
+  const toggleLeadSelection = (profile) => {
+    if (selectedProfiles.some((p) => p.identifier === profile.identifier)) {
+      setSelectedProfiles(
+        selectedProfiles.filter((p) => p.identifier !== profile.identifier)
+      );
+      removeSelectedLead(profile.identifier);
+    } else {
+      setSelectedProfiles([...selectedProfiles, profile]);
+      addSelectedLead(profile);
+    }
+  };
+
+  // Save selected leads and go to next step
+  const goToNextStep = () => {
+    setSelectedLeads(selectedProfiles);
+    router.push("/dashboard/campaigns/new/sequence");
+  };
+
+  // Initialize selected profiles from store on mount
+  useEffect(() => {
+    setSelectedProfiles(selectedLeads);
+  }, [selectedLeads]);
 
   // Change page
   const handlePageChange = (newPage) => {
@@ -202,11 +204,6 @@ export default function AddLeadsPage() {
     const startIndex = (currentPage - 1) * resultsPerPage;
     const endIndex = startIndex + resultsPerPage;
     return searchResults.slice(startIndex, endIndex);
-  };
-
-  // Navigate to next step
-  const goToNextStep = () => {
-    router.push("/dashboard/campaigns/new/sequence");
   };
 
   // Filter sections
@@ -474,16 +471,40 @@ export default function AddLeadsPage() {
           <div className="mt-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-white text-lg font-medium">Search Results</h3>
-              <span className="text-[#A3A3A3]">{totalResults} leads found</span>
+              <div className="flex items-center">
+                <span className="text-[#A3A3A3] mr-4">
+                  {totalResults} leads found
+                </span>
+                <span className="text-blue-400">
+                  {selectedProfiles.length} selected
+                </span>
+              </div>
             </div>
 
             <div className="space-y-4">
               {getCurrentPageResults().map((profile) => (
                 <div
-                  key={profile.id}
-                  className="p-4 bg-[#0C0C0C] border border-[#2A2A2A] rounded-lg hover:border-[#3A3A3A] transition-colors"
+                  key={profile.identifier || profile.id}
+                  className={`p-4 border rounded-lg transition-colors ${
+                    selectedProfiles.some(
+                      (p) => p.identifier === profile.identifier
+                    )
+                      ? "bg-blue-900/20 border-blue-800"
+                      : "bg-[#0C0C0C] border-[#2A2A2A] hover:border-[#3A3A3A]"
+                  }`}
                 >
                   <div className="flex">
+                    <div className="mr-4 flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedProfiles.some(
+                          (p) => p.identifier === profile.identifier
+                        )}
+                        onChange={() => toggleLeadSelection(profile)}
+                        className="h-5 w-5 rounded border-[#2A2A2A] bg-black text-blue-600"
+                      />
+                    </div>
+
                     {profile.profile_picture && (
                       <div className="mr-4 flex-shrink-0">
                         <img
@@ -493,6 +514,7 @@ export default function AddLeadsPage() {
                         />
                       </div>
                     )}
+
                     <div className="flex-1">
                       <div className="flex justify-between">
                         <div>

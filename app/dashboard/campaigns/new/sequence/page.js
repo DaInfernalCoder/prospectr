@@ -2,36 +2,61 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { ArrowRight, ChevronLeft, AlertCircle } from "lucide-react";
+import { useCampaignStore } from "@/app/store/campaignStore";
 
-export default function SetSequencePage() {
+export default function SequencePage() {
   const router = useRouter();
-  const [connectionMessage, setConnectionMessage] = useState("Looks like we have similar connections, let's connect :)");
-  const [followUpMessage, setFollowUpMessage] = useState("Thanks for connecting with me.");
-  const [autoFollowUp, setAutoFollowUp] = useState(true);
-  const [characterCount, setCharacterCount] = useState(0);
-  const [followUpCharacterCount, setFollowUpCharacterCount] = useState(0);
-  const [activeTab, setActiveTab] = useState("templates");
+  const {
+    selectedLeads,
+    connectionMessage,
+    setConnectionMessage,
+    followUpMessage,
+    setFollowUpMessage,
+    templateName,
+    setTemplateName,
+  } = useCampaignStore();
 
-  // Update character count when message changes
+  const [errors, setErrors] = useState({});
+
+  // Check if we have leads
   useEffect(() => {
-    setCharacterCount(connectionMessage.length);
-  }, [connectionMessage]);
+    if (selectedLeads.length === 0) {
+      router.push("/dashboard/campaigns/new/leads");
+    }
+  }, [selectedLeads, router]);
 
-  // Update follow-up character count when message changes
-  useEffect(() => {
-    setFollowUpCharacterCount(followUpMessage.length);
-  }, [followUpMessage]);
+  // Validate form
+  const validateForm = () => {
+    const newErrors = {};
 
-  // Navigate to previous step
-  const goToPreviousStep = () => {
-    router.push('/dashboard/campaigns/new/leads');
+    // Connection message is now optional, but still has a character limit
+    if (connectionMessage && connectionMessage.length > 300) {
+      newErrors.connectionMessage =
+        "Connection message must be less than 300 characters";
+    }
+
+    // Follow-up message is still optional with a character limit
+    if (followUpMessage && followUpMessage.length > 1000) {
+      newErrors.followUpMessage =
+        "Follow-up message must be less than 1000 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  // Navigate to next step
+  // Go to previous step
+  const goToPreviousStep = () => {
+    router.push("/dashboard/campaigns/new/leads");
+  };
+
+  // Go to next step
   const goToNextStep = () => {
-    router.push('/dashboard/campaigns/new/review');
+    if (validateForm()) {
+      router.push("/dashboard/campaigns/new/review");
+    }
   };
 
   return (
@@ -47,7 +72,7 @@ export default function SetSequencePage() {
           </div>
           <div className="w-8 h-0.5 bg-[#2A2A2A]"></div>
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-full bg-[#C9E5FF] text-black flex items-center justify-center font-bold">
               2
             </div>
             <span className="ml-2 text-white font-medium">Set Sequence</span>
@@ -57,161 +82,123 @@ export default function SetSequencePage() {
             <div className="w-8 h-8 rounded-full bg-[#2A2A2A] text-[#A3A3A3] flex items-center justify-center font-bold">
               3
             </div>
-            <span className="ml-2 text-[#A3A3A3] font-medium">Review And Publish</span>
+            <span className="ml-2 text-[#A3A3A3] font-medium">
+              Review And Publish
+            </span>
           </div>
-        </div>
-        <div className="flex space-x-3">
-          <Button 
-            variant="outline" 
-            onClick={goToPreviousStep}
-            className="border-[#2A2A2A] text-white hover:bg-[#2A2A2A]"
-          >
-            Back
-          </Button>
-          <Button 
-            onClick={goToNextStep} 
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Next
-          </Button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="space-y-6">
-        {/* LinkedIn Icon and Step Title */}
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-[#0077B5] rounded-md flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-              <rect x="2" y="9" width="4" height="12"></rect>
-              <circle cx="4" cy="4" r="2"></circle>
-            </svg>
-          </div>
-          <h2 className="text-white text-lg font-medium">Step 1 - Send a connection request</h2>
-          <button className="ml-auto text-[#A3A3A3]">×</button>
-        </div>
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-xl font-bold text-white mb-6">
+            Set up your connection sequence
+          </h2>
 
-        {/* Connection Request Message */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <h3 className="text-white font-medium">Connection Request Message</h3>
-            <div className="flex space-x-2">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                <TabsList className="bg-[#0C0C0C] border border-[#2A2A2A]">
-                  <TabsTrigger 
-                    value="templates" 
-                    className={`${activeTab === 'templates' ? 'bg-[#2A2A2A] text-white' : 'text-[#A3A3A3]'}`}
-                  >
-                    Templates
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="personalize" 
-                    className={`${activeTab === 'personalize' ? 'bg-[#2A2A2A] text-white' : 'text-[#A3A3A3]'}`}
-                  >
-                    Personalize
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+          {/* Template Name */}
+          <div className="mb-6">
+            <label className="block text-white font-medium mb-2">
+              Template Name (for your reference)
+            </label>
+            <Input
+              type="text"
+              value={templateName}
+              onChange={(e) => setTemplateName(e.target.value)}
+              placeholder="My LinkedIn Campaign"
+              className="bg-black border-[#2A2A2A] text-white"
+            />
+          </div>
+
+          {/* Connection Message */}
+          <div className="mb-6">
+            <label className="block text-white font-medium mb-2">
+              Connection Message (Optional)
+            </label>
+            <div className="mb-1 flex justify-between">
+              <span className="text-[#A3A3A3] text-sm">
+                This message will be sent with your connection request
+              </span>
+              <span
+                className={`text-sm ${
+                  connectionMessage.length > 300
+                    ? "text-red-500"
+                    : "text-[#A3A3A3]"
+                }`}
+              >
+                {connectionMessage.length}/300
+              </span>
+            </div>
+            <textarea
+              value={connectionMessage}
+              onChange={(e) => setConnectionMessage(e.target.value)}
+              placeholder="Hi {{name}}, I noticed we're both in the same industry. I'd love to connect!"
+              className="bg-black border-[#2A2A2A] text-white h-32 w-full p-2 rounded-md"
+            />
+            {errors.connectionMessage && (
+              <p className="mt-1 text-red-500 text-sm">
+                {errors.connectionMessage}
+              </p>
+            )}
+            <div className="mt-2 text-[#A3A3A3] text-sm">
+              <p>Available variables:</p>
+              <ul className="list-disc list-inside ml-2 mt-1">
+                <li>{`{{name}}`} - Recipient&apos;s name</li>
+                <li>{`{{company}}`} - Recipient&apos;s company</li>
+                <li>{`{{position}}`} - Recipient&apos;s job title</li>
+              </ul>
             </div>
           </div>
-          <textarea
-            value={connectionMessage}
-            onChange={(e) => setConnectionMessage(e.target.value)}
-            className="w-full h-24 p-3 bg-black border border-[#2A2A2A] rounded-md text-white resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
-            maxLength={300}
-          />
-          <div className="flex justify-between text-xs text-[#A3A3A3]">
-            <p>Please note that if your message exceeds 300 characters, we will automatically trim it.</p>
-            <p>{characterCount}/300</p>
-          </div>
-          <p className="text-xs text-[#A3A3A3]">If we identify a limit on connection request messages, we'll automatically send the connection request without including a message.</p>
-        </div>
 
-        {/* Auto Follow-up Toggle */}
-        <div className="flex items-center space-x-3 py-2">
-          <div className="relative inline-flex items-center cursor-pointer">
-            <input 
-              type="checkbox" 
-              checked={autoFollowUp}
-              onChange={() => setAutoFollowUp(!autoFollowUp)}
-              className="sr-only peer"
-            />
-            <div className={`w-11 h-6 rounded-full peer ${autoFollowUp ? 'bg-blue-600' : 'bg-[#2A2A2A]'} peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all`}></div>
-          </div>
-          <span className="text-white">Auto follow-up with message once connected</span>
-        </div>
-
-        {/* Follow Up Message (only shown if auto follow-up is enabled) */}
-        {autoFollowUp && (
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <h3 className="text-white font-medium">Follow Up Message</h3>
-              <div className="flex space-x-2">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                  <TabsList className="bg-[#0C0C0C] border border-[#2A2A2A]">
-                    <TabsTrigger 
-                      value="templates" 
-                      className={`${activeTab === 'templates' ? 'bg-[#2A2A2A] text-white' : 'text-[#A3A3A3]'}`}
-                    >
-                      Templates
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="personalize" 
-                      className={`${activeTab === 'personalize' ? 'bg-[#2A2A2A] text-white' : 'text-[#A3A3A3]'}`}
-                    >
-                      Personalize
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+          {/* Follow-up Message */}
+          <div>
+            <label className="block text-white font-medium mb-2">
+              Follow-up Message (Optional)
+            </label>
+            <div className="mb-1 flex justify-between">
+              <span className="text-[#A3A3A3] text-sm">
+                This message will be sent after the connection is accepted
+              </span>
+              <span
+                className={`text-sm ${
+                  followUpMessage.length > 1000
+                    ? "text-red-500"
+                    : "text-[#A3A3A3]"
+                }`}
+              >
+                {followUpMessage.length}/1000
+              </span>
             </div>
             <textarea
               value={followUpMessage}
               onChange={(e) => setFollowUpMessage(e.target.value)}
-              className="w-full h-24 p-3 bg-black border border-[#2A2A2A] rounded-md text-white resize-none focus:outline-none focus:ring-1 focus:ring-blue-600"
+              placeholder="Thanks for connecting {{name}}! I'd love to learn more about your work at {{company}}."
+              className="bg-black border-[#2A2A2A] text-white h-32 w-full p-2 rounded-md"
             />
-            <div className="flex justify-end text-xs text-[#A3A3A3]">
-              <p>{followUpCharacterCount}/8000</p>
-            </div>
+            {errors.followUpMessage && (
+              <p className="mt-1 text-red-500 text-sm">
+                {errors.followUpMessage}
+              </p>
+            )}
           </div>
-        )}
-
-        {/* Add Tags (disabled for now) */}
-        <div className="flex items-center space-x-3 py-2">
-          <div className="relative inline-flex items-center cursor-pointer">
-            <input 
-              type="checkbox" 
-              className="sr-only peer"
-              disabled
-            />
-            <div className="w-11 h-6 rounded-full bg-[#2A2A2A] peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#A3A3A3] after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </div>
-          <span className="text-[#A3A3A3]">Add tags</span>
         </div>
-      </div>
 
-      {/* Add Campaign Step */}
-      <div className="mt-8">
-        <h3 className="text-white font-medium mb-4">Add campaign step:</h3>
-        <div className="flex space-x-3">
-          <button className="w-12 h-12 bg-[#0077B5] rounded-md flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white">
-              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-              <rect x="2" y="9" width="4" height="12"></rect>
-              <circle cx="4" cy="4" r="2"></circle>
-            </svg>
+        {/* Navigation Buttons */}
+        <div className="flex justify-between pt-4">
+          <button
+            onClick={goToPreviousStep}
+            className="border border-[#2A2A2A] text-white hover:bg-[#2A2A2A] px-4 py-2 rounded-md flex items-center"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to Leads
           </button>
-          <button className="w-12 h-12 bg-[#2A2A2A] rounded-md flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#A3A3A3]">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-              <polyline points="22,6 12,13 2,6"></polyline>
-            </svg>
-          </button>
-          <button className="w-12 h-12 bg-[#2A2A2A] rounded-md flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#A3A3A3]">
-              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-            </svg>
+
+          <button
+            onClick={goToNextStep}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+          >
+            Review Campaign
+            <ArrowRight className="ml-2 h-4 w-4" />
           </button>
         </div>
       </div>
