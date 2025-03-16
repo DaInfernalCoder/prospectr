@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { processInvitations } from "@/lib/invitation-service";
 import { createClient } from "@/utils/supabase/server";
 import { getUser } from "@/utils/supabase/getUser";
+import { checkSubscription } from "@/utils/check-subscription";
 
 // front end :
 // const recipients = searchResults.map(profile => ({
@@ -24,6 +25,26 @@ export async function POST(request) {
     const user = await getUser();
     if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // First check if user has access
+    const subscriptionCheck = await checkSubscription(user.id, true, true);
+
+    // If user needs checkout, return the checkout URL
+    if (subscriptionCheck.needsCheckout) {
+      console.log({
+        error: "Subscription required",
+        checkoutUrl:
+          subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+      });
+      return NextResponse.json(
+        {
+          error: "Subscription required",
+          checkoutUrl:
+            subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+        },
+        { status: 402 }
+      );
+    }
 
     const { data: profile } = await supabase
       .from("profiles")

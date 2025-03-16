@@ -1,6 +1,7 @@
 import { UnipileClient } from "unipile-node-sdk";
 import { NextResponse } from "next/server";
 import { getUser } from "@/utils/supabase/getUser";
+import { checkSubscription } from "@/utils/check-subscription";
 
 export async function GET(request) {
   try {
@@ -13,6 +14,28 @@ export async function GET(request) {
     }
 
     const user = await getUser();
+    if (!user)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // First check if user has access
+    const subscriptionCheck = await checkSubscription(user.id, true, true);
+
+    // If user needs checkout, return the checkout URL
+    if (subscriptionCheck.needsCheckout) {
+      console.log({
+        error: "Subscription required",
+        checkoutUrl:
+          subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+      });
+      return NextResponse.json(
+        {
+          error: "Subscription required",
+          checkoutUrl:
+            subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+        },
+        { status: 402 }
+      );
+    }
     if (!user)
       return NextResponse.json({ status: 404, message: "There is no user" });
 

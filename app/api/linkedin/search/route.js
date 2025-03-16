@@ -30,7 +30,7 @@ export async function POST(request) {
             subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
         },
         { status: 402 }
-      ); // 402 Payment Required
+      );
     }
 
     const { data: profile } = await supabase

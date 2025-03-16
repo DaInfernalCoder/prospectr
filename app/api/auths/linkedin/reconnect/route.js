@@ -1,3 +1,4 @@
+import { checkSubscription } from "@/utils/check-subscription";
 import { sendReconnectionEmail } from "@/utils/email/reconnectionEmail";
 import { getUser } from "@/utils/supabase/getUser";
 import { createClient } from "@/utils/supabase/server";
@@ -8,7 +9,29 @@ export async function GET(request) {
   const accountId = searchParams.get("account_id");
 
   const supabase = await createClient();
-  //   const user = await getUser();
+  const user = await getUser();
+  if (!user)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // First check if user has access
+  const subscriptionCheck = await checkSubscription(user.id, true, true);
+
+  // If user needs checkout, return the checkout URL
+  if (subscriptionCheck.needsCheckout) {
+    console.log({
+      error: "Subscription required",
+      checkoutUrl:
+        subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+    });
+    return NextResponse.json(
+      {
+        error: "Subscription required",
+        checkoutUrl:
+          subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
+      },
+      { status: 402 }
+    );
+  }
   const { error: dbError } = await supabase
     .from("profiles")
     .update({
@@ -19,8 +42,7 @@ export async function GET(request) {
   //   if (dbError) {
   //     return NextResponse.json({ error: dbError }, { status: 500 });
   //   }
-  console.log(accountId, "account");
-  await sendReconnectionEmail("sadm3979@gmail.com", "SAJQdhTeSq2qZYvRxY2SaA");
+  await sendReconnectionEmail(user.email, accountId);
 
   return NextResponse.json({ success: true });
 }

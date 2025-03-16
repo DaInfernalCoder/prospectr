@@ -67,7 +67,8 @@ export default function ReviewPage() {
       setPublishingStatus(false);
     },
     onError: (error) => {
-      setPublishError(error.message);
+      // Convert the error to a string to avoid the React child error
+      setPublishError(error.message || String(error));
       setPublishingStatus(false);
     },
   });
@@ -146,7 +147,11 @@ export default function ReviewPage() {
           <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
           <div>
             <p className="font-medium">Error publishing campaign</p>
-            <p className="text-sm mt-1">{publishError}</p>
+            <p className="text-sm mt-1">
+              {typeof publishError === "string"
+                ? publishError
+                : "An unexpected error occurred"}
+            </p>
           </div>
         </div>
       )}
