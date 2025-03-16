@@ -462,7 +462,7 @@ export default function AddLeadsPage() {
         {/* Error Message */}
         {error && (
           <div className="p-3 bg-red-900/20 border border-red-800 rounded-md text-red-400">
-            {error}
+            {error.message || String(error)}
           </div>
         )}
 
