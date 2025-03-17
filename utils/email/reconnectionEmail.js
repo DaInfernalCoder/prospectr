@@ -20,5 +20,5 @@ export async function sendReconnectionEmail(email, accountId) {
     subject: "Reconnect LinkedIn Account",
     html: `<a href="${reconnectionUrl}">Reconnect Now</a>`,
   });
-  console.log(data, "dataIN asdasdasd", error, "ERROR ON ASDASD");
+  console.log(data, "dataIN asdasdasd");
 }

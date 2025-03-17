@@ -90,12 +90,6 @@ export async function GET(request) {
         });
         console.log({ userProfile });
 
-        console.log(
-          "Comparing provider_ids:",
-          userProfile.provider_id,
-          invitation.linkedin_user_id
-        );
-
         // If we get a profile with provider_id matching our invitation, they've accepted
         if (
           userProfile &&
@@ -113,8 +107,10 @@ export async function GET(request) {
               console.log(template.follow_up_message, "template");
               const personalizedMessage = template.follow_up_message
                 .replace(/{{name}}/g, userProfile.name || "there")
-                .replace(/{{first_name}}/g, userProfile.first_name || "there");
-
+                .replace(/{{first_name}}/g, userProfile.first_name || "there")
+                .replace(/{{company}}/g, "the company")
+                .replace(/{{first_name}}/g, userProfile.first_name || "there")
+                .replace(/{{position}}/g, "the position");
               console.log("Sending follow-up message:", {
                 personalizedMessage,
               });
