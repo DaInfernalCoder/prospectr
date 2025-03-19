@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,10 @@ import {
 import { useLinkedIn } from "@/components/contexts/LinkedInContext";
 import { useCampaignStore } from "@/app/store/campaignStore";
 import { useQuery } from "@tanstack/react-query";
-
+import {
+  PARAMETER_TYPES,
+  fetchLinkedInParameterIds,
+} from "@/app/utils/linkedin/searchParameters";
 export default function AddLeadsPage() {
   const router = useRouter();
   const { linkedInStatus } = useLinkedIn();
@@ -50,15 +53,130 @@ export default function AddLeadsPage() {
     sortBy: "relevance",
   });
 
+  // Parameter IDs for search
+  const [parameterIds, setParameterIds] = useState({
+    locationIds: [],
+    companyIds: [],
+    industryIds: [],
+    schoolIds: [],
+  });
+
+  // Debounce timers for parameter searches
+  const locationTimer = useRef(null);
+  const companyTimer = useRef(null);
+  const industryTimer = useRef(null);
+  const schoolTimer = useRef(null);
+
   // Track selected profiles
   const [selectedProfiles, setSelectedProfiles] = useState([]);
 
   // Add state for checkout URL
   const [checkoutUrl, setCheckoutUrl] = useState(null);
 
-  // Use React Query for search
+  // Add loading states for parameters
+  const [parameterLoading, setParameterLoading] = useState({
+    location: false,
+    company: false,
+    industry: false,
+    school: false,
+  });
+
+  // Modified debounced parameter search function
+  const debouncedParameterSearch = useCallback(
+    async (type, field, value, timer) => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+
+      if (!value || value.trim().length < 2) {
+        setParameterIds((prev) => ({
+          ...prev,
+          [`${field}Ids`]: [],
+        }));
+        return;
+      }
+
+      // Set loading state for this parameter
+      setParameterLoading((prev) => ({
+        ...prev,
+        [field]: true,
+      }));
+
+      timer.current = setTimeout(async () => {
+        try {
+          const results = await fetchLinkedInParameterIds(type, value);
+          if (results && results.length > 0) {
+            setParameterIds((prev) => ({
+              ...prev,
+              [`${field}Ids`]: [results[0].id],
+            }));
+          } else {
+            // Clear IDs if no results found
+            setParameterIds((prev) => ({
+              ...prev,
+              [`${field}Ids`]: [],
+            }));
+          }
+        } catch (error) {
+          console.error(`Error fetching ${type} parameters:`, error);
+          // Clear IDs on error
+          setParameterIds((prev) => ({
+            ...prev,
+            [`${field}Ids`]: [],
+          }));
+        } finally {
+          setParameterLoading((prev) => ({
+            ...prev,
+            [field]: false,
+          }));
+        }
+      }, 1000); // Increased debounce time to 1 second
+    },
+    []
+  );
+
+  // Effect to update parameter IDs when advanced search changes
+  useEffect(() => {
+    if (advancedSearch.location) {
+      debouncedParameterSearch(
+        PARAMETER_TYPES.LOCATION,
+        "location",
+        advancedSearch.location,
+        locationTimer
+      );
+    }
+
+    if (advancedSearch.company) {
+      debouncedParameterSearch(
+        PARAMETER_TYPES.COMPANY,
+        "company",
+        advancedSearch.company,
+        companyTimer
+      );
+    }
+
+    if (advancedSearch.industry) {
+      debouncedParameterSearch(
+        PARAMETER_TYPES.INDUSTRY,
+        "industry",
+        advancedSearch.industry,
+        industryTimer
+      );
+    }
+
+    if (advancedSearch.school) {
+      debouncedParameterSearch(
+        PARAMETER_TYPES.SCHOOL,
+        "school",
+        advancedSearch.school,
+        schoolTimer
+      );
+    }
+  }, [advancedSearch, debouncedParameterSearch]);
+
+  // Modified search query
   const {
-    data: searchResults = [],
+    data: searchResults = { results: [] },
     isLoading,
     error,
     refetch,
@@ -67,12 +185,13 @@ export default function AddLeadsPage() {
       "linkedinSearch",
       searchQuery,
       advancedSearch,
+      parameterIds,
       exclusions,
       currentPage,
     ],
     queryFn: async () => {
       if (!searchQuery.trim()) {
-        return [];
+        return { results: [] };
       }
 
       // Check LinkedIn status before performing search
@@ -82,18 +201,43 @@ export default function AddLeadsPage() {
         );
       }
 
+      // Check if we're still loading parameters
+      const isLoadingParams = Object.values(parameterLoading).some(
+        (loading) => loading
+      );
+      if (isLoadingParams) {
+        throw new Error("Still loading search parameters...");
+      }
+
       // Prepare search parameters based on form values
       const searchParams = {
         keywords: searchQuery,
       };
 
-      // Only add parameters if they have values
-      if (advancedSearch.company) searchParams.company = advancedSearch.company;
-      if (advancedSearch.location)
+      // Add parameter IDs if available, otherwise fall back to text values
+      if (parameterIds.locationIds.length > 0) {
+        searchParams.locationIds = parameterIds.locationIds;
+      } else if (advancedSearch.location) {
         searchParams.location = advancedSearch.location;
-      if (advancedSearch.industry)
+      }
+
+      if (parameterIds.companyIds.length > 0) {
+        searchParams.companyIds = parameterIds.companyIds;
+      } else if (advancedSearch.company) {
+        searchParams.company = advancedSearch.company;
+      }
+
+      if (parameterIds.industryIds.length > 0) {
+        searchParams.industryIds = parameterIds.industryIds;
+      } else if (advancedSearch.industry) {
         searchParams.industry = advancedSearch.industry;
-      if (advancedSearch.school) searchParams.school = advancedSearch.school;
+      }
+
+      if (parameterIds.schoolIds.length > 0) {
+        searchParams.schoolIds = parameterIds.schoolIds;
+      } else if (advancedSearch.school) {
+        searchParams.school = advancedSearch.school;
+      }
 
       // Only add network distance if there are options selected
       if (advancedSearch.networkDistance.length > 0) {
@@ -149,13 +293,15 @@ export default function AddLeadsPage() {
         throw new Error("Subscription required");
       }
 
-      if (!results || !Array.isArray(results)) {
-        throw new Error("Invalid response format from search API");
+      // Update total results count
+      if (results.results) {
+        setTotalResults(results.results.length);
       }
 
       return results;
     },
     enabled: false, // Don't run query on mount
+    retry: false, // Don't retry on failure
   });
 
   // Handle redirect to checkout when needed
@@ -187,13 +333,37 @@ export default function AddLeadsPage() {
       ...prev,
       [field]: value,
     }));
+
+    // Clear the corresponding parameter IDs when the text field changes
+    if (
+      field === "location" ||
+      field === "company" ||
+      field === "industry" ||
+      field === "school"
+    ) {
+      setParameterIds((prev) => ({
+        ...prev,
+        [`${field}Ids`]: [],
+      }));
+    }
   };
 
-  // Handle search form submission
-  const handleSearch = (e) => {
+  // Modified handleSearch to wait for parameter loading
+  const handleSearch = async (e) => {
     e?.preventDefault();
+
+    // Check if any parameters are still loading
+    const isLoadingParams = Object.values(parameterLoading).some(
+      (loading) => loading
+    );
+    if (isLoadingParams) {
+      // Wait a bit and try again
+      setTimeout(() => refetch(), 1000);
+      return;
+    }
+
     refetch();
-    setCurrentPage(1); // Reset to first page when performing a new search
+    setCurrentPage(1);
   };
 
   // Toggle lead selection
@@ -229,9 +399,11 @@ export default function AddLeadsPage() {
 
   // Get current page results
   const getCurrentPageResults = () => {
+    if (!searchResults || !searchResults.results) return [];
+
     const startIndex = (currentPage - 1) * resultsPerPage;
     const endIndex = startIndex + resultsPerPage;
-    return searchResults.slice(startIndex, endIndex);
+    return searchResults.results.slice(startIndex, endIndex);
   };
 
   // Filter sections
@@ -391,6 +563,10 @@ export default function AddLeadsPage() {
     },
   ];
 
+  // Add loading indicator to the search button
+  const isSearching =
+    isLoading || Object.values(parameterLoading).some((loading) => loading);
+
   return (
     <div className="space-y-6 p-6 bg-black">
       {/* Step Indicator */}
@@ -468,7 +644,7 @@ export default function AddLeadsPage() {
               <button
                 type="submit"
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#A3A3A3] hover:text-white"
-                disabled={isLoading}
+                disabled={isSearching}
               >
                 <Search className="h-5 w-5" />
               </button>
@@ -478,11 +654,25 @@ export default function AddLeadsPage() {
           <div className="flex justify-end">
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isSearching}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              {isLoading ? "Searching..." : "Search LinkedIn"}{" "}
-              <ArrowRight className="ml-2 h-4 w-4" />
+              {isSearching ? (
+                <>
+                  <span className="animate-pulse">Searching...</span>
+                  {Object.values(parameterLoading).some(
+                    (loading) => loading
+                  ) && (
+                    <span className="text-xs ml-2">
+                      (Loading parameters...)
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  Search LinkedIn <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         </form>
@@ -507,180 +697,184 @@ export default function AddLeadsPage() {
         )}
 
         {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div className="mt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-white text-lg font-medium">Search Results</h3>
-              <div className="flex items-center">
-                <span className="text-[#A3A3A3] mr-4">
-                  {totalResults} leads found
-                </span>
-                <span className="text-blue-400">
-                  {selectedProfiles.length} selected
-                </span>
+        {searchResults &&
+          searchResults.results &&
+          searchResults.results.length > 0 && (
+            <div className="mt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-white text-lg font-medium">
+                  Search Results
+                </h3>
+                <div className="flex items-center">
+                  <span className="text-[#A3A3A3] mr-4">
+                    {totalResults} leads found
+                  </span>
+                  <span className="text-blue-400">
+                    {selectedProfiles.length} selected
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
-              {getCurrentPageResults().map((profile) => (
-                <div
-                  key={profile.identifier || profile.id}
-                  className={`p-4 border rounded-lg transition-colors ${
-                    selectedProfiles.some(
-                      (p) => p.identifier === profile.identifier
-                    )
-                      ? "bg-blue-900/20 border-blue-800"
-                      : "bg-[#0C0C0C] border-[#2A2A2A] hover:border-[#3A3A3A]"
-                  }`}
-                >
-                  <div className="flex">
-                    <div className="mr-4 flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedProfiles.some(
-                          (p) => p.identifier === profile.identifier
-                        )}
-                        onChange={() => toggleLeadSelection(profile)}
-                        className="h-5 w-5 rounded border-[#2A2A2A] bg-black text-blue-600"
-                      />
-                    </div>
-
-                    {profile.profile_picture && (
-                      <div className="mr-4 flex-shrink-0">
-                        <img
-                          src={profile.profile_picture}
-                          alt={profile.name}
-                          className="w-12 h-12 rounded-full object-cover"
+              <div className="space-y-4">
+                {getCurrentPageResults().map((profile) => (
+                  <div
+                    key={profile.identifier || profile.id}
+                    className={`p-4 border rounded-lg transition-colors ${
+                      selectedProfiles.some(
+                        (p) => p.identifier === profile.identifier
+                      )
+                        ? "bg-blue-900/20 border-blue-800"
+                        : "bg-[#0C0C0C] border-[#2A2A2A] hover:border-[#3A3A3A]"
+                    }`}
+                  >
+                    <div className="flex">
+                      <div className="mr-4 flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedProfiles.some(
+                            (p) => p.identifier === profile.identifier
+                          )}
+                          onChange={() => toggleLeadSelection(profile)}
+                          className="h-5 w-5 rounded border-[#2A2A2A] bg-black text-blue-600"
                         />
                       </div>
-                    )}
 
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                        <div>
-                          <h4 className="text-white font-medium">
-                            {profile.name}
-                          </h4>
-                          <p className="text-[#A3A3A3] text-sm">
-                            {profile.headline}
-                          </p>
-                          <div className="flex items-center mt-1">
-                            <span className="text-[#A3A3A3] text-xs">
-                              {profile.location}
-                            </span>
-                            {profile.company && (
-                              <>
-                                <span className="mx-1 text-[#A3A3A3]">•</span>
-                                <span className="text-[#A3A3A3] text-xs">
-                                  {profile.company}
-                                </span>
-                              </>
+                      {profile.profile_picture && (
+                        <div className="mr-4 flex-shrink-0">
+                          <img
+                            src={profile.profile_picture}
+                            alt={profile.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex-1">
+                        <div className="flex justify-between">
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {profile.name}
+                            </h4>
+                            <p className="text-[#A3A3A3] text-sm">
+                              {profile.headline}
+                            </p>
+                            <div className="flex items-center mt-1">
+                              <span className="text-[#A3A3A3] text-xs">
+                                {profile.location}
+                              </span>
+                              {profile.company && (
+                                <>
+                                  <span className="mx-1 text-[#A3A3A3]">•</span>
+                                  <span className="text-[#A3A3A3] text-xs">
+                                    {profile.company}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <div className="text-xs px-2 py-1 bg-[#1A1A1A] rounded-full text-[#A3A3A3]">
+                              {profile.network_distance === "FIRST_DEGREE"
+                                ? "1st"
+                                : profile.network_distance === "SECOND_DEGREE"
+                                ? "2nd"
+                                : profile.network_distance ===
+                                  "THIRD_DEGREE_AND_BEYOND"
+                                ? "3rd+"
+                                : profile.network_distance}
+                            </div>
+                            {profile.shared_connections_count > 0 && (
+                              <span className="text-xs text-[#A3A3A3] mt-1">
+                                {profile.shared_connections_count} shared
+                                connection
+                                {profile.shared_connections_count !== 1
+                                  ? "s"
+                                  : ""}
+                              </span>
                             )}
                           </div>
                         </div>
-                        <div className="flex flex-col items-end">
-                          <div className="text-xs px-2 py-1 bg-[#1A1A1A] rounded-full text-[#A3A3A3]">
-                            {profile.network_distance === "FIRST_DEGREE"
-                              ? "1st"
-                              : profile.network_distance === "SECOND_DEGREE"
-                              ? "2nd"
-                              : profile.network_distance ===
-                                "THIRD_DEGREE_AND_BEYOND"
-                              ? "3rd+"
-                              : profile.network_distance}
+                        {profile.profile_url && (
+                          <div className="mt-2">
+                            <a
+                              href={profile.profile_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-400 hover:underline"
+                            >
+                              View LinkedIn Profile
+                            </a>
                           </div>
-                          {profile.shared_connections_count > 0 && (
-                            <span className="text-xs text-[#A3A3A3] mt-1">
-                              {profile.shared_connections_count} shared
-                              connection
-                              {profile.shared_connections_count !== 1
-                                ? "s"
-                                : ""}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
-                      {profile.profile_url && (
-                        <div className="mt-2">
-                          <a
-                            href={profile.profile_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-400 hover:underline"
-                          >
-                            View LinkedIn Profile
-                          </a>
-                        </div>
-                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalResults > resultsPerPage && (
-              <div className="flex justify-center items-center mt-6 space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                <div className="flex items-center space-x-1">
-                  {Array.from(
-                    {
-                      length: Math.min(
-                        5,
-                        Math.ceil(totalResults / resultsPerPage)
-                      ),
-                    },
-                    (_, i) => {
-                      const pageNumber = i + 1;
-                      return (
-                        <Button
-                          key={pageNumber}
-                          variant={
-                            currentPage === pageNumber ? "default" : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handlePageChange(pageNumber)}
-                          className={
-                            currentPage === pageNumber
-                              ? "bg-blue-600 text-white"
-                              : "border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
-                          }
-                        >
-                          {pageNumber}
-                        </Button>
-                      );
-                    }
-                  )}
-
-                  {Math.ceil(totalResults / resultsPerPage) > 5 && (
-                    <span className="text-[#A3A3A3]">...</span>
-                  )}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={
-                    currentPage === Math.ceil(totalResults / resultsPerPage)
-                  }
-                  className="border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                ))}
               </div>
-            )}
-          </div>
-        )}
+
+              {/* Pagination */}
+              {totalResults > resultsPerPage && (
+                <div className="flex justify-center items-center mt-6 space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+
+                  <div className="flex items-center space-x-1">
+                    {Array.from(
+                      {
+                        length: Math.min(
+                          5,
+                          Math.ceil(totalResults / resultsPerPage)
+                        ),
+                      },
+                      (_, i) => {
+                        const pageNumber = i + 1;
+                        return (
+                          <Button
+                            key={pageNumber}
+                            variant={
+                              currentPage === pageNumber ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePageChange(pageNumber)}
+                            className={
+                              currentPage === pageNumber
+                                ? "bg-blue-600 text-white"
+                                : "border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
+                            }
+                          >
+                            {pageNumber}
+                          </Button>
+                        );
+                      }
+                    )}
+
+                    {Math.ceil(totalResults / resultsPerPage) > 5 && (
+                      <span className="text-[#A3A3A3]">...</span>
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={
+                      currentPage === Math.ceil(totalResults / resultsPerPage)
+                    }
+                    className="border-[#2A2A2A] text-[#A3A3A3] hover:text-white"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
 
         {/* Advanced Filters */}
         <div className="mt-6">

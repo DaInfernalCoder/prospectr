@@ -47,95 +47,92 @@ export async function POST(request) {
     }
 
     const {
-      name,
-      jobTitle,
+      keywords,
+      locationIds,
+      companyIds,
+      industryIds,
+      schoolIds,
+      networkDistance,
+      sortBy,
       location,
       company,
       industry,
-      keywords,
-      networkDistance,
-      profileLanguage,
       school,
-      sortBy,
-      pastCompany,
-      yearsOfExperience,
-      openToWork,
     } = await request.json();
 
+    // Prepare search parameters according to Unipile API requirements
     const searchParams = {
-      api: "classic", // You can use "classic", "sales_navigator", or "recruiter" depending on the LinkedIn account type
+      api: "classic", // You can use "classic", "sales_navigator", or "recruiter"
       category: "people",
       limit: 20,
     };
 
-    // Add keywords if either name, jobTitle or keywords is provided
-    if (name || jobTitle || keywords) {
-      const keywordString = [name, jobTitle, keywords]
-        .filter(Boolean)
-        .join(" ");
-      if (keywordString) {
-        searchParams.keywords = keywordString;
-      }
+    // Add keywords if provided
+    if (keywords) {
+      searchParams.keywords = keywords;
     }
 
-    // NOTWORK FOR NOW
-    // Add location filter if provided
-    // if (location) {
-    //   // Note: For exact location matching, you might need to first call the
-    //   // /linkedin/search/parameters endpoint with type=LOCATION to get location IDs
-    //   searchParams.location_name = location;
-    // }
+    // Handle location parameters
+    if (locationIds && locationIds.length > 0) {
+      searchParams.location = locationIds; // Unipile expects an array of location IDs
+    } else if (location) {
+      searchParams.location_name = location; // Fallback to location name
+    }
 
-    if (company) {
-      searchParams.company = {
-        include: [company],
+    // Handle company parameters
+    if (companyIds && companyIds.length > 0) {
+      searchParams.current_company = {
+        include: companyIds, // Unipile expects an object with include array
+      };
+    } else if (company) {
+      searchParams.current_company = {
+        include: [company], // Wrap single company in array
       };
     }
 
-    if (pastCompany) {
-      searchParams.past_company = {
-        include: [pastCompany],
+    // Handle industry parameters
+    if (industryIds && industryIds.length > 0) {
+      searchParams.industry = {
+        include: industryIds,
       };
-    }
-
-    if (industry) {
+    } else if (industry) {
       searchParams.industry = {
         include: [industry],
       };
     }
 
-    if (school) {
+    // Handle school parameters
+    if (schoolIds && schoolIds.length > 0) {
+      searchParams.school = {
+        include: schoolIds,
+      };
+    } else if (school) {
       searchParams.school = {
         include: [school],
       };
     }
 
-    if (networkDistance && Array.isArray(networkDistance)) {
-      searchParams.network_distance = networkDistance;
+    // Handle network distance
+    if (networkDistance && networkDistance.length > 0) {
+      // Map our network distance values to Unipile's expected format
+      const distanceMap = {
+        FIRST_DEGREE: "DISTANCE_1",
+        SECOND_DEGREE: "DISTANCE_2",
+        THIRD_DEGREE_AND_BEYOND: "DISTANCE_3",
+      };
+
+      searchParams.network_distance = networkDistance.map(
+        (d) => distanceMap[d] || d
+      );
     }
 
-    if (profileLanguage && Array.isArray(profileLanguage)) {
-      searchParams.profile_language = profileLanguage;
-    }
-
+    // Handle sort options
     if (sortBy) {
-      searchParams.sort_by = sortBy; // Options include: "relevance" or "date"
-    }
-
-    if (yearsOfExperience && typeof yearsOfExperience === "object") {
-      searchParams.tenure = [
-        {
-          min: yearsOfExperience.min,
-          max: yearsOfExperience.max,
-        },
-      ];
-    }
-
-    if (openToWork === true) {
-      searchParams.open_to_work = true;
+      searchParams.sort_by = sortBy.toLowerCase();
     }
 
     console.log("searchParams", { searchParams });
+
     const response = await fetch(
       `${process.env.UNIPILE_API_URL}/api/v1/linkedin/search?account_id=${profile.unipile_account_id}`,
       {
@@ -152,8 +149,12 @@ export async function POST(request) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Unipile API error:", errorData);
       return NextResponse.json(
-        { message: `Search failed: ${response.status} ${response.statusText}` },
-        { status: 402 }
+        {
+          error:
+            errorData.detail ||
+            `Search failed: ${response.status} ${response.statusText}`,
+        },
+        { status: response.status }
       );
     }
 
@@ -175,7 +176,11 @@ export async function POST(request) {
       shared_connections_count: profile.shared_connections_count,
     }));
 
-    return NextResponse.json(formattedResults);
+    return NextResponse.json({
+      results: formattedResults,
+      cursor: results.cursor,
+      paging: results.paging,
+    });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(
