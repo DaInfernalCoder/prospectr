@@ -1,8 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { HeroVideoDialog } from "./ui/hero-video-dialog";
 import { motion } from "framer-motion";
+
+// Rainbow colors array for consistent styling across component
+const rainbowColors = [
+  "from-purple-600 to-blue-500",
+  "from-blue-500 to-teal-400",
+  "from-teal-400 to-green-500",
+  "from-green-500 to-yellow-500",
+  "from-yellow-500 to-orange-500",
+  "from-orange-500 to-red-500",
+];
 
 // List of features to display:
 // - name: name of the feature
@@ -36,7 +46,7 @@ const features = [
               {item}
             </li>
           ))}
-          <li className="flex items-center gap-3 text-accent font-medium">
+          <li className="flex items-center gap-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -49,7 +59,9 @@ const features = [
                 clipRule="evenodd"
               />
             </svg>
-            Time saved: 2 hours
+            <span className="bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent font-bold">
+              Time saved: 2 hours
+            </span>
           </li>
         </ul>
       </>
@@ -100,7 +112,7 @@ const features = [
               {item}
             </li>
           ))}
-          <li className="flex items-center gap-3 text-accent font-medium">
+          <li className="flex items-center gap-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -113,7 +125,9 @@ const features = [
                 clipRule="evenodd"
               />
             </svg>
-            Time saved: 2 hours
+            <span className="bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent font-bold">
+              Time saved: 2 hours
+            </span>
           </li>
         </ul>
       </>
@@ -166,7 +180,7 @@ const features = [
               {item}
             </li>
           ))}
-          <li className="flex items-center gap-3 text-accent font-medium">
+          <li className="flex items-center gap-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -179,7 +193,9 @@ const features = [
                 clipRule="evenodd"
               />
             </svg>
-            Time saved: 3 hours
+            <span className="bg-gradient-to-r from-teal-400 to-green-500 bg-clip-text text-transparent font-bold">
+              Time saved: 3 hours
+            </span>
           </li>
         </ul>
       </>
@@ -229,7 +245,7 @@ const features = [
               </li>
             )
           )}
-          <li className="flex items-center gap-3 text-accent font-medium">
+          <li className="flex items-center gap-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -242,7 +258,9 @@ const features = [
                 clipRule="evenodd"
               />
             </svg>
-            Time saved: 2 hours
+            <span className="bg-gradient-to-r from-green-500 to-yellow-500 bg-clip-text text-transparent font-bold">
+              Time saved: 2 hours
+            </span>
           </li>
         </ul>
       </>
@@ -296,7 +314,7 @@ const features = [
               {item}
             </li>
           ))}
-          <li className="flex items-center gap-3 text-accent font-medium">
+          <li className="flex items-center gap-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -309,7 +327,9 @@ const features = [
                 clipRule="evenodd"
               />
             </svg>
-            Time saved: 6 hours
+            <span className="bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent font-bold">
+              Time saved: 6 hours
+            </span>
           </li>
         </ul>
       </>
@@ -361,7 +381,7 @@ const features = [
               {item}
             </li>
           ))}
-          <li className="flex items-center gap-3 text-accent font-medium">
+          <li className="flex items-center gap-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -374,7 +394,9 @@ const features = [
                 clipRule="evenodd"
               />
             </svg>
-            Time saved: 5 hours
+            <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent font-bold">
+              Time saved: 5 hours
+            </span>
           </li>
         </ul>
       </>
@@ -414,7 +436,8 @@ const FeaturesListicle = () => {
           <p className="text-accent font-medium text-sm font-mono mb-3">
             const launch_time = &quot;Today&quot;;
           </p>
-          <h2 className="font-extrabold text-3xl lg:text-5xl tracking-tight mb-8">
+          {/* Rainbow gradient title */}
+          <h2 className="font-extrabold text-3xl lg:text-5xl tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-blue-600">
             Supercharge your app instantly, launch faster, make $
           </h2>
           <div className="text-base-content/80 leading-relaxed mb-8 lg:text-lg max-w-3xl mx-auto">
@@ -434,14 +457,37 @@ const FeaturesListicle = () => {
               viewport={{ once: true }}
               className="flex flex-col gap-10 items-center"
             >
-              {/* Feature Title and Description */}
-              <div className="w-full max-w-3xl mx-auto bg-base-100 p-8 rounded-xl shadow-lg">
-                <div className="flex items-center gap-4 mb-6">
-                  <span className="text-primary">{feature.svg}</span>
-                  <h3 className="text-2xl font-bold">{feature.name}</h3>
+              {/* Feature Title and Description with rainbow styling */}
+              <motion.div 
+                className={`w-full max-w-3xl mx-auto bg-base-100 p-8 rounded-xl shadow-lg relative overflow-hidden`}
+                whileHover={{ 
+                  y: -5,
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Gradient border effect */}
+                <div className={`absolute inset-0 bg-gradient-to-r ${rainbowColors[index % rainbowColors.length]} opacity-20 rounded-xl`}></div>
+                
+                {/* Small rainbow indicator bar at top */}
+                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${rainbowColors[index % rainbowColors.length]}`}></div>
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-6">
+                    {/* Colorful icon */}
+                    <span className={`bg-gradient-to-r ${rainbowColors[index % rainbowColors.length]} bg-clip-text text-transparent`}>
+                      {feature.svg}
+                    </span>
+                    {/* Colorful feature name */}
+                    <h3 className={`text-2xl font-bold bg-gradient-to-r ${rainbowColors[index % rainbowColors.length]} bg-clip-text text-transparent`}>
+                      {feature.name}
+                    </h3>
+                  </div>
+                  <div className="text-base-content/80">
+                    {feature.description}
+                  </div>
                 </div>
-                <div className="text-base-content/80">{feature.description}</div>
-              </div>
+              </motion.div>
               
               {/* Video section removed as requested - can be added back later */}
             </motion.div>

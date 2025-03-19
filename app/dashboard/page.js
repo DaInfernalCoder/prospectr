@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import ButtonAccount from "@/components/ButtonAccount";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import config from "@/config";
-import ButtonCheckout from "@/components/ButtonCheckout";
-import { Zap } from "lucide-react";
+import { Zap, BarChart2, Users } from "lucide-react";
+import { useAnalytics } from "@/components/contexts/AnalyticsContext";
 
-export default function Dashboard() {
+function DashboardContent() {
   const router = useRouter();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState(null);
@@ -19,6 +19,12 @@ export default function Dashboard() {
     used: 0,
     remaining: 0,
   });
+  const { analyticsData } = useAnalytics();
+
+  // Helper function to format numbers with commas
+  const formatNumber = (num) => {
+    return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "0";
+  };
 
   // Get the premium plan (featured plan)
   const premiumPlan = config.stripe.plans.find((plan) => plan.isFeatured) || config.stripe.plans[1];
@@ -121,7 +127,10 @@ export default function Dashboard() {
           <h3 className="text-base sm:text-lg font-medium text-white">
             Total Connections
           </h3>
-          <p className="text-2xl sm:text-3xl font-bold mt-2 text-white">0</p>
+          <p className="text-2xl sm:text-3xl font-bold mt-2 text-white">
+            {!analyticsData.isLoading && analyticsData.data ? 
+              formatNumber(analyticsData.data.summary?.total_connections || 0) : "0"}
+          </p>
           <p className="text-xs sm:text-sm text-[#A1A1AA] mt-1">
             From all campaigns
           </p>
@@ -130,7 +139,10 @@ export default function Dashboard() {
           <h3 className="text-base sm:text-lg font-medium text-white">
             Active Campaigns
           </h3>
-          <p className="text-2xl sm:text-3xl font-bold mt-2 text-white">0</p>
+          <p className="text-2xl sm:text-3xl font-bold mt-2 text-white">
+            {!analyticsData.isLoading && analyticsData.data ? 
+              analyticsData.data.summary?.active_campaigns || "0" : "0"}
+          </p>
           <p className="text-xs sm:text-sm text-[#A1A1AA] mt-1">
             Currently running
           </p>
@@ -139,7 +151,10 @@ export default function Dashboard() {
           <h3 className="text-base sm:text-lg font-medium text-white">
             Response Rate
           </h3>
-          <p className="text-2xl sm:text-3xl font-bold mt-2 text-white">0%</p>
+          <p className="text-2xl sm:text-3xl font-bold mt-2 text-white">
+            {!analyticsData.isLoading && analyticsData.data ? 
+              `${analyticsData.data.summary?.response_rate || "0"}%` : "0%"}
+          </p>
           <p className="text-xs sm:text-sm text-[#A1A1AA] mt-1">
             Average across campaigns
           </p>
@@ -152,13 +167,13 @@ export default function Dashboard() {
           variant="outline"
           onClick={() => router.push("/dashboard/campaigns/new/leads")}
           className="text-sm sm:text-base py-2 px-3 sm:px-4"
-          disabled={!isSubscribed}
+          
         >
           New Campaign
         </Button>
         {!isSubscribed && (
           <Button
-            onClick={() => router.push('/dashboard/upgrade')}
+            onClick={() => router.push('/dashboard/settings')}
             className="text-sm sm:text-base py-2 px-3 sm:px-4 bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
           >
             <span className="flex items-center justify-center gap-1">
@@ -175,21 +190,79 @@ export default function Dashboard() {
           Recent Activity
         </h2>
         <div className="bg-[#0F0F0F] rounded-lg p-4 sm:p-6 border border-[#1A1A1A]">
-          <div className="text-center py-6 sm:py-8">
-            <p className="text-[#A1A1AA] text-sm sm:text-base">
-              No recent activity
-            </p>
-            <Button
-              variant="link"
-              className="mt-3 sm:mt-4 text-white hover:text-[#A1A1AA] text-sm sm:text-base"
-              onClick={() => router.push("/dashboard/campaigns/new/leads")}
-              disabled={!isSubscribed}
-            >
-              Start your first campaign
-            </Button>
-          </div>
+          {analyticsData.isLoading ? (
+            <div className="text-center py-6 sm:py-8">
+              <span className="loading loading-spinner loading-md"></span>
+            </div>
+          ) : analyticsData.data && analyticsData.data.campaigns && analyticsData.data.campaigns.length > 0 ? (
+            <div className="space-y-4">
+              {analyticsData.data.campaigns.slice(0, 3).map((campaign) => (
+                <div key={campaign.job_id} className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="text-white font-medium">{campaign.name || `Campaign ${campaign.job_id}`}</h4>
+                      <p className="text-sm text-[#A1A1AA]">
+                        {campaign.total_invitations} invitations • {campaign.status}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-sm text-white">{campaign.accepted_connections} connections</p>
+                      <p className="text-xs text-[#A1A1AA]">{campaign.response_rate}% rate</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => router.push(`/dashboard/campaigns/${campaign.job_id}`)}
+                    >
+                      <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <div className="text-center mt-4">
+                <Button
+                  variant="link"
+                  className="text-white hover:text-[#A1A1AA] text-sm"
+                  onClick={() => router.push("/dashboard/campaigns")}
+                >
+                  View all campaigns
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-6 sm:py-8">
+              <p className="text-[#A1A1AA] text-sm sm:text-base">
+                No recent activity
+              </p>
+              <Button
+                variant="link"
+                className="mt-3 sm:mt-4 text-white hover:text-[#A1A1AA] text-sm sm:text-base"
+                onClick={() => router.push("/dashboard/campaigns/new/leads")}
+                disabled={!isSubscribed}
+              >
+                Start your first campaign
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }

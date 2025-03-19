@@ -8,14 +8,7 @@ alwaysApply: false
 Last Updated: 3/12/2025
 
 ## Current Focus
-Priority: LinkedIn Search and Connection Request Features
-- Implementing backend integration for sending connection requests
-- Developing frontend for LinkedIn connection search
-- Implementing automated campaign message editor
-- Integrating search results with connection request flow
-- Implementing rate limiting for connection requests
-- Optimizing search filters and parameters
-- Implementing message templates for campaigns
+
 
 ## Unipile Integration Details
 
@@ -34,12 +27,7 @@ Priority: LinkedIn Search and Connection Request Features
 - Account type management
 
 ### In Progress
-- LinkedIn search functionality
-- Connection request implementation
-- Campaign message editor
-- Automated campaign flow
-- Message sending capabilities
-- Analytics tracking
+
 
 ### Next Steps
 - Implement campaign performance tracking

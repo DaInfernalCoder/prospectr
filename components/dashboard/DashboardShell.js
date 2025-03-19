@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, BarChart2, Settings, Menu, X, Zap } from "lucide-react";
 import ButtonLinkedin from "@/components/ButtonLinkedin";
 import { useLinkedIn } from "@/components/contexts/LinkedInContext";
+import { AnalyticsProvider } from "@/components/contexts/AnalyticsContext";
 import ButtonCheckout from "@/components/ButtonCheckout";
 import config from "@/config";
 
@@ -69,7 +70,7 @@ export default function DashboardShell({ children }) {
   const needsUpgrade = !isSubscribed || (subscriptionTier === 'pro');
 
   return (
-    <div className="min-h-screen bg-black text-white" suppressHydrationWarning>
+    <div className="flex min-h-screen bg-black text-white" suppressHydrationWarning>
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 z-30 bg-[#0F0F0F] border-b border-[#1A1A1A] flex items-center justify-between px-4">
         <Link href="/dashboard" className="flex items-center">
@@ -94,12 +95,12 @@ export default function DashboardShell({ children }) {
       )}
 
       {/* Sidebar */}
-      <div 
-        className={`fixed inset-y-0 left-0 z-30 w-64 bg-[#0F0F0F] border-r border-[#1A1A1A] transform transition-transform duration-200 ease-in-out ${
+      <aside 
+        className={`fixed md:sticky top-0 h-screen w-64 flex-shrink-0 bg-[#0F0F0F] border-r border-[#1A1A1A] flex flex-col z-30 transform transition-transform duration-200 ease-in-out ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-y-auto">
           <div className="p-6 md:pt-6 pt-20">
             <Link href="/dashboard" className="flex items-center">
               <span className="text-white text-lg font-medium tracking-tight">Prospectr</span>
@@ -118,7 +119,7 @@ export default function DashboardShell({ children }) {
             </div>
           )}
 
-          <nav className="flex-1 px-4 space-y-1">
+          <nav className="flex-1 px-4 py-2 space-y-1">
             {navigationLinks.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -134,31 +135,13 @@ export default function DashboardShell({ children }) {
                 </Link>
               );
             })}
-            
-            {/* Upgrade Link */}
-            <Link
-              href="/dashboard/upgrade"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                pathname === "/dashboard/upgrade" ? "bg-[#1A1A1A] text-white" : "text-[#A1A1AA] hover:text-white hover:bg-[#1A1A1A]"
-              }`}
-            >
-              <Zap className="w-4 h-4 text-red-500" />
-              <span className={needsUpgrade ? "font-medium text-red-500" : ""}>Upgrade</span>
-            </Link>
           </nav>
-
-          <div className="p-4 border-t border-[#1A1A1A]">
-            <div className="flex items-center gap-3 px-3 py-2 text-sm text-[#A1A1AA]">
-              <div className="w-8 h-8 rounded-full bg-[#1A1A1A]" />
-              <div className="flex-1 truncate">user@example.com</div>
-            </div>
-          </div>
         </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="md:pl-64 pt-16 md:pt-0">
-        <header className="hidden md:flex items-center justify-between h-16 px-6 border-b border-[#1A1A1A]">
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="hidden md:flex items-center justify-between h-16 px-6 border-b border-[#1A1A1A] sticky top-0 bg-black z-10">
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-medium tracking-tight">{getPageTitle(pathname)}</h1>
           </div>
@@ -180,7 +163,7 @@ export default function DashboardShell({ children }) {
         </header>
         
         {/* Mobile header title and actions */}
-        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A] mt-16">
           <h1 className="text-lg font-medium tracking-tight">{getPageTitle(pathname)}</h1>
           <div className="flex items-center gap-2">
             {!linkedInStatus.connected && pathname !== "/dashboard/settings" && (
@@ -189,8 +172,14 @@ export default function DashboardShell({ children }) {
           </div>
         </div>
         
-        <main className="p-4 md:p-6 max-w-7xl mx-auto">{children}</main>
-      </div>
+        <div className="flex-1 overflow-auto py-4 md:py-6">
+          <AnalyticsProvider>
+            <div className="container px-4 sm:px-6 md:px-8 max-w-6xl mx-auto">
+              {children}
+            </div>
+          </AnalyticsProvider>
+        </div>
+      </main>
     </div>
   );
 }
