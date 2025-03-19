@@ -11,15 +11,14 @@ export async function sendReconnectionEmail(email, accountId) {
     .select("*")
     .eq("unipile_account_id", accountId)
     .single();
-  console.log("profile", profile);
 
   const reconnectionUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/reconnect?token=${profile.reconnect_token}&account_id=${accountId}`;
   console.log(reconnectionUrl, "reconnectionUrl in reconnectionEmail");
   const { data, error } = await resend.emails.send({
-    from: "onboarding@resend.dev",
+    from: "prospectr@customerservice.peakvaluebusiness.com",
     to: email,
     subject: "Reconnect LinkedIn Account",
     html: `<a href="${reconnectionUrl}">Reconnect Now</a>`,
   });
-  console.log(data, error);
+  console.log(data, "dataIN asdasdasd");
 }

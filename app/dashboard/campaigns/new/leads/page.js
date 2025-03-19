@@ -53,6 +53,9 @@ export default function AddLeadsPage() {
   // Track selected profiles
   const [selectedProfiles, setSelectedProfiles] = useState([]);
 
+  // Add state for checkout URL
+  const [checkoutUrl, setCheckoutUrl] = useState(null);
+
   // Use React Query for search
   const {
     data: searchResults = [],
@@ -120,6 +123,17 @@ export default function AddLeadsPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+
+        // Check if this is a subscription required error with checkout URL
+        if (
+          errorData.error === "Subscription required" &&
+          errorData.checkoutUrl
+        ) {
+          // Store the checkout URL in state to handle the redirect
+          setCheckoutUrl(errorData.checkoutUrl);
+          throw new Error("Subscription required");
+        }
+
         throw new Error(
           errorData.error ||
             `Search failed: ${response.status} ${response.statusText}`
@@ -127,6 +141,13 @@ export default function AddLeadsPage() {
       }
 
       const results = await response.json();
+
+      // Check if results indicate subscription required
+      if (results.error === "Subscription required" && results.checkoutUrl) {
+        // Store the checkout URL in state to handle the redirect
+        setCheckoutUrl(results.checkoutUrl);
+        throw new Error("Subscription required");
+      }
 
       if (!results || !Array.isArray(results)) {
         throw new Error("Invalid response format from search API");
@@ -136,6 +157,13 @@ export default function AddLeadsPage() {
     },
     enabled: false, // Don't run query on mount
   });
+
+  // Handle redirect to checkout when needed
+  useEffect(() => {
+    if (checkoutUrl) {
+      router.push(checkoutUrl);
+    }
+  }, [checkoutUrl, router]);
 
   // Toggle section expansion
   const toggleSection = (section) => {
@@ -460,9 +488,21 @@ export default function AddLeadsPage() {
         </form>
 
         {/* Error Message */}
-        {error && (
+        {error && error.message !== "Subscription required" && (
           <div className="p-3 bg-red-900/20 border border-red-800 rounded-md text-red-400">
             {error.message || String(error)}
+            {typeof error === "string"
+              ? error
+              : error instanceof Error
+              ? error.message
+              : "An error occurred during search"}
+          </div>
+        )}
+
+        {/* Subscription Required Message - Optional if you want to show something before redirect */}
+        {error && error.message === "Subscription required" && !checkoutUrl && (
+          <div className="p-3 bg-yellow-900/20 border border-yellow-800 rounded-md text-yellow-400">
+            Subscription required. Redirecting to checkout...
           </div>
         )}
 

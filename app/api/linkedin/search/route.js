@@ -30,7 +30,7 @@ export async function POST(request) {
             subscriptionCheck.checkoutUrl || subscriptionCheck.redirectUrl,
         },
         { status: 402 }
-      ); // 402 Payment Required
+      );
     }
 
     const { data: profile } = await supabase
@@ -135,6 +135,7 @@ export async function POST(request) {
       searchParams.open_to_work = true;
     }
 
+    console.log("searchParams", { searchParams });
     const response = await fetch(
       `${process.env.UNIPILE_API_URL}/api/v1/linkedin/search?account_id=${profile.unipile_account_id}`,
       {
@@ -150,8 +151,9 @@ export async function POST(request) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Unipile API error:", errorData);
-      throw new Error(
-        `Search failed: ${response.status} ${response.statusText}`
+      return NextResponse.json(
+        { message: `Search failed: ${response.status} ${response.statusText}` },
+        { status: 402 }
       );
     }
 
