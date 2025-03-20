@@ -30,6 +30,17 @@ export default function RootLayout({ children }) {
       <head>
         <meta name="darkreader-lock" />
         {config.domainName && <PlausibleProvider domain={config.domainName} />}
+        {/* Trackdesk tracker begin */}
+        <script async src="//cdn.trackdesk.com/tracking.js"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(t,d,k){(t[k]=t[k]||[]).push(d);t[d]=t[d]||t[k].f||function(){(t[d].q=t[d].q||[]).push(arguments)}})(window,"trackdesk","TrackdeskObject");
+              trackdesk('leadsprospectr', 'click');
+            `,
+          }}
+        />
+        {/* Trackdesk tracker end */}
       </head>
       <body data-theme={config.colors.theme} suppressHydrationWarning>
         {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
