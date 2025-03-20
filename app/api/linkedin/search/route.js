@@ -81,48 +81,37 @@ export async function POST(request) {
 
     // Handle company parameters
     if (companyIds && companyIds.length > 0) {
-      searchParams.current_company = {
-        include: companyIds, // Unipile expects an object with include array
-      };
+      searchParams.current_company = companyIds; // Unipile expects an array of company IDs
     } else if (company) {
-      searchParams.current_company = {
-        include: [company], // Wrap single company in array
-      };
+      searchParams.current_company_name = company; // Fallback to company name
     }
 
     // Handle industry parameters
     if (industryIds && industryIds.length > 0) {
-      searchParams.industry = {
-        include: industryIds,
-      };
+      searchParams.industry = industryIds; // Unipile expects an array of industry IDs
     } else if (industry) {
-      searchParams.industry = {
-        include: [industry],
-      };
+      searchParams.industry_name = industry; // Fallback to industry name
     }
 
     // Handle school parameters
     if (schoolIds && schoolIds.length > 0) {
-      searchParams.school = {
-        include: schoolIds,
-      };
+      searchParams.school = schoolIds; // Unipile expects an array of school IDs
     } else if (school) {
-      searchParams.school = {
-        include: [school],
-      };
+      searchParams.school_name = school; // Fallback to school name
     }
 
     // Handle network distance
     if (networkDistance && networkDistance.length > 0) {
       // Map our network distance values to Unipile's expected format
       const distanceMap = {
-        FIRST_DEGREE: "DISTANCE_1",
-        SECOND_DEGREE: "DISTANCE_2",
-        THIRD_DEGREE_AND_BEYOND: "DISTANCE_3",
+        FIRST_DEGREE: 1,
+        SECOND_DEGREE: 2,
+        THIRD_DEGREE_AND_BEYOND: 3,
       };
 
-      searchParams.network_distance = networkDistance.map(
-        (d) => distanceMap[d] || d
+      // Convert string values to numbers as expected by Unipile
+      searchParams.network_distance = networkDistance.map((d) =>
+        typeof d === "string" ? distanceMap[d] || parseInt(d) : d
       );
     }
 
