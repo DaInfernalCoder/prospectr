@@ -4,18 +4,7 @@ import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import ButtonCheckout from "@/components/ButtonCheckout";
 import config from "@/config";
-import dynamic from "next/dynamic";
-
-// Dynamically import the TrackdeskScript component to prevent SSR issues
-const TrackdeskScript = dynamic(() => import("@/components/TrackdeskScript"), {
-  ssr: false,
-});
-
-// Dynamically import the TrackdeskClientReferenceScript component
-const TrackdeskClientReferenceScript = dynamic(
-  () => import("@/components/TrackdeskClientReferenceScript"),
-  { ssr: false }
-);
+import TrackdeskScriptWrapper from "@/components/TrackdeskScriptWrapper";
 
 export default function UpgradePage() {
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -49,7 +38,7 @@ export default function UpgradePage() {
 
   return (
     <>
-      <TrackdeskScript />
+      <TrackdeskScriptWrapper />
       <div className="container px-4 sm:px-6 max-w-6xl mx-auto">
         <div className="space-y-6">
           <div>
@@ -186,7 +175,6 @@ export default function UpgradePage() {
           </div>
         </div>
       </div>
-      <TrackdeskClientReferenceScript />
     </>
   );
 } 

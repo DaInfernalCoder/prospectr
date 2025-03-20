@@ -1,12 +1,6 @@
 import config from "@/config";
 import ButtonCheckout from "./ButtonCheckout";
-import dynamic from "next/dynamic";
-
-// Dynamically import the TrackdeskClientReferenceScript component
-const TrackdeskClientReferenceScript = dynamic(
-  () => import("@/components/TrackdeskClientReferenceScript"),
-  { ssr: false }
-);
+import TrackdeskScriptWrapper from "./TrackdeskScriptWrapper";
 
 // <Pricing/> displays the pricing plans for your app
 // It's your Stripe config in config.js.stripe.plans[] that will be used to display the plans
@@ -114,8 +108,8 @@ const Pricing = () => {
           ))}
         </div>
       </div>
-      {/* Add TrackdeskClientReferenceScript at the end */}
-      <TrackdeskClientReferenceScript />
+      {/* TrackdeskScriptWrapper will handle the client reference ID functionality */}
+      <TrackdeskScriptWrapper />
     </section>
   );
 };

@@ -5,13 +5,7 @@ import config from "@/config";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
 import ButtonCheckout from "./ButtonCheckout";
-import dynamic from "next/dynamic";
-
-// Dynamically import the TrackdeskClientReferenceScript component
-const TrackdeskClientReferenceScript = dynamic(
-  () => import("@/components/TrackdeskClientReferenceScript"),
-  { ssr: false }
-);
+import TrackdeskScriptWrapper from "./TrackdeskScriptWrapper";
 
 const CTA = () => {
   const router = useRouter();
@@ -165,8 +159,8 @@ const CTA = () => {
           </div>
         </div>
       </div>
-      {/* Add TrackdeskClientReferenceScript at the end */}
-      <TrackdeskClientReferenceScript />
+      {/* TrackdeskScriptWrapper will handle the client reference ID functionality */}
+      <TrackdeskScriptWrapper />
     </section>
   );
 };

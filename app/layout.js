@@ -6,6 +6,7 @@ import ClientLayout from "@/components/LayoutClient";
 // import { Analytics } from "@vercel/analytics/react";
 import config from "@/config";
 import "./globals.css";
+import Script from "next/script";
 
 const font = Inter({ subsets: ["latin"] });
 
@@ -43,6 +44,9 @@ export default function RootLayout({ children }) {
         {/* Trackdesk tracker end */}
       </head>
       <body data-theme={config.colors.theme} suppressHydrationWarning>
+        {/* Trackdesk tracker script */}
+        <Script src="//cdn.trackdesk.com/tracking.js" strategy="afterInteractive" />
+        
         {/* ClientLayout contains all the client wrappers (Crisp chat support, toast messages, tooltips, etc.) */}
         <ClientLayout>
           {children}

@@ -26,17 +26,12 @@ import ButtonLead from "@/components/ButtonLead";
 import { Suspense } from "react";
 import SectionBiography from "@/components/SectionBiography";
 import ContactSection from "@/components/ContactSection";
-import dynamic from "next/dynamic";
-
-// Dynamically import the TrackdeskScript component to prevent SSR issues
-const TrackdeskScript = dynamic(() => import("@/components/TrackdeskScript"), {
-  ssr: false,
-});
+import TrackdeskScriptWrapper from "@/components/TrackdeskScriptWrapper";
 
 export default function Page() {
   return (
     <>
-      <TrackdeskScript />
+      <TrackdeskScriptWrapper />
       <Suspense fallback={<div className="w-full h-16"></div>}>
         <Header />
       </Suspense>
