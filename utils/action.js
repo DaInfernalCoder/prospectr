@@ -2,8 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-
-const { createClient } = require("./supabase/server");
+import { createClient } from "./supabase/server";
 
 const signInWith = (provider) => async () => {
   const supabase = await createClient();
@@ -17,17 +16,22 @@ const signInWith = (provider) => async () => {
   const protocol = host.includes("localhost") ? "http" : "https";
 
   const auth_callback = `${protocol}://${host}/auth/callback`;
-  console.log("first", auth_callback);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
       redirectTo: auth_callback,
+      persistSession: true,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      }
     },
   });
 
   if (error) {
-    console.error(error, "Authentication error:", error);
+    console.error("Authentication error:", error);
+    throw error;
   }
 
   redirect(data.url);

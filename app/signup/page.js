@@ -7,59 +7,34 @@ import toast from "react-hot-toast";
 import config from "@/config";
 import { signInWithGoogle } from "@/utils/action";
 
-// This a login/singup page for Supabase Auth.
-// Successfull login redirects to /api/auth/callback where the Code Exchange is processed (see app/api/auth/callback/route.js).
-export default function Login() {
+export default function Signup() {
   const supabase = createClientComponentClient();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleEmailSignIn = async (e) => {
+  const handleEmailSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
 
       if (error) {
         toast.error(error.message);
       } else {
-        window.location.href = "/dashboard";
+        toast.success("Check your email to confirm your account!");
       }
     } catch (error) {
       console.log(error);
-      toast.error("An error occurred during sign in");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignup = async (e, options) => {
-    e?.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { type, provider } = options;
-      if (type === "oauth") {
-        await supabase.auth.signInWithOAuth({
-          provider,
-          options: {
-            redirectTo: `${window.location.origin}/api/auths/callback`,
-            queryParams: {
-              access_type: "offline",
-              prompt: "consent",
-            },
-            persistSession: true
-          },
-        });
-      }
-    } catch (error) {
-      console.log(error);
+      toast.error("An error occurred during sign up");
     } finally {
       setIsLoading(false);
     }
@@ -75,24 +50,24 @@ export default function Login() {
         <div className="flex justify-center gap-4 mb-8">
           <Link
             href="/signin"
-            className="px-6 py-2 bg-green-500 text-white rounded-lg font-medium"
+            className="px-6 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700"
           >
             Sign In
           </Link>
           <Link
             href="/signup"
-            className="px-6 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700"
+            className="px-6 py-2 bg-green-500 text-white rounded-lg font-medium"
           >
             Sign Up
           </Link>
         </div>
 
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-center mb-12 bg-gradient-to-r from-white to-gray-400 text-transparent bg-clip-text">
-          Sign In
+          Create Account
         </h1>
 
         <div className="space-y-6">
-          {/* Google Sign In */}
+          {/* Google Sign Up */}
           <button
             className="flex items-center justify-center w-full px-4 py-3 text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors"
             onClick={signInWithGoogle}
@@ -120,7 +95,7 @@ export default function Login() {
                 d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"
               />
             </svg>
-            Sign in with Google
+            Sign up with Google
           </button>
 
           <div className="relative">
@@ -133,7 +108,7 @@ export default function Login() {
           </div>
 
           {/* Email/Password Form */}
-          <form onSubmit={handleEmailSignIn} className="space-y-4">
+          <form onSubmit={handleEmailSignUp} className="space-y-4">
             <div>
               <input
                 type="email"
@@ -176,21 +151,12 @@ export default function Login() {
               disabled={isLoading}
               className="w-full px-4 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-900"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Creating account..." : "Create account"}
             </button>
           </form>
 
-          <div className="text-center">
-            <button 
-              onClick={() => window.location.href = '/reset-password'}
-              className="text-sm text-gray-400 hover:text-white"
-            >
-              Forgot your password?
-            </button>
-          </div>
-
           <p className="mt-8 text-center text-sm text-gray-400">
-            By signing in, you agree to our{" "}
+            By signing up, you agree to our{" "}
             <Link href="/tos" className="text-white hover:underline">
               Terms of Service
             </Link>{" "}
@@ -203,4 +169,4 @@ export default function Login() {
       </div>
     </main>
   );
-}
+} 
