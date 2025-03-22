@@ -7,7 +7,7 @@ const config = {
   appDescription:
     "Prospectr is an AI-powered LinkedIn prospecting tool that helps you find and connect with the right leads for your business.",
   // REQUIRED (no https://, not trialing slash at the end, just the naked domain)
-  domainName: "prospectr.vercel.app",
+  domainName: "leadsprospectr.com",
   crisp: {
     // Crisp website ID. IF YOU DON'T USE CRISP: just remove this => Then add a support email in this config file (mailgun.supportEmail) otherwise customer support won't work.
     id: "4001a365-4a61-4b7e-a71e-01af4dc2ce52",
