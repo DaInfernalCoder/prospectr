@@ -20,14 +20,11 @@ export async function GET(request) {
     const supabase = await createClient();
 
     try {
-      let error = null;
-
-      // Exchange the code for a session
+      // Exchange the code for a session with persistence enabled
       const { error: exchangeError } =
         await supabase.auth.exchangeCodeForSession(code);
-      error = exchangeError;
 
-      if (!error) {
+      if (!exchangeError) {
         // Get the current domain
         const forwardedHost = request.headers.get("x-forwarded-host");
         const host = forwardedHost || request.headers.get("host");
@@ -35,16 +32,26 @@ export async function GET(request) {
           process.env.NODE_ENV === "production" ? "https" : "http";
         const baseUrl = `${protocol}://${host}`;
 
-        // Redirect to /dashboard after successful login
-        return NextResponse.redirect(`${baseUrl}/dashboard`);
+        // Create response with redirect
+        const response = NextResponse.redirect(`${baseUrl}/dashboard`);
+
+        // Set cookie attributes for better persistence
+        response.cookies.set("sb-auth-token", code, {
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          httpOnly: true,
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+        });
+
+        return response;
       } else {
-        console.error("Error during authentication callback:", error);
-        // Redirect to login with an error message
+        console.error("Error during authentication callback:", exchangeError);
         return NextResponse.redirect(
           `${
             process.env.NEXT_PUBLIC_APP_URL
           }/signin?error=auth-failed&message=${encodeURIComponent(
-            error.message
+            exchangeError.message
           )}`
         );
       }
