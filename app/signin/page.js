@@ -25,7 +25,7 @@ export default function Login() {
         email,
         password,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
           persistSession: true,
         },
       });
@@ -47,9 +47,6 @@ export default function Login() {
         } else {
           toast.error(error.message);
         }
-      } else if (data.session) {
-        // If we have a session, redirect to callback for consistent handling
-        window.location.href = `/auth/callback?code=${data.session.access_token}`;
       }
     } catch (error) {
       console.log(error);
