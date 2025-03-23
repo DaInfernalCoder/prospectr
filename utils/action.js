@@ -15,6 +15,7 @@ const signInWith = (provider) => async () => {
   // Use https for production (including Vercel) and http for localhost
   const protocol = host.includes("localhost") ? "http" : "https";
 
+  // Ensure consistent redirect path for all auth methods
   const auth_callback = `${protocol}://${host}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -25,7 +26,11 @@ const signInWith = (provider) => async () => {
       queryParams: {
         access_type: "offline",
         prompt: "consent",
-      }
+      },
+      emailConfirmationRequired: true, // Explicitly require email confirmation
+      data: {
+        // User metadata can be added here
+      },
     },
   });
 
