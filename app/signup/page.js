@@ -1,25 +1,77 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useState, useEffect } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import config from "@/config";
 import { signInWithGoogle } from "@/utils/action";
+import { createCheckoutSession } from "@/utils/stripe-client";
 
 export default function Signup() {
-  const supabase = createClientComponentClient();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPendingCheckout = searchParams.get("checkout") === "pending";
+
+  // Load checkout data from localStorage if redirected from pricing
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
+
+  useEffect(() => {
+    // If we're in checkout flow, check localStorage for plan ID
+    if (isPendingCheckout) {
+      const storedPlanId = localStorage.getItem("selectedPlanId");
+      if (storedPlanId) {
+        setSelectedPlanId(storedPlanId);
+      }
+    }
+  }, [isPendingCheckout]);
+
+  // Function to handle checkout after signup if needed
+  const handleCheckoutAfterSignup = async () => {
+    try {
+      // Check if there was a pending checkout
+      const selectedPlanId = localStorage.getItem("selectedPlanId");
+      const returnUrl = localStorage.getItem("checkoutReturnUrl");
+
+      if (selectedPlanId) {
+        // Clear localStorage items
+        localStorage.removeItem("selectedPlanId");
+        localStorage.removeItem("checkoutReturnUrl");
+
+        // Create a checkout session with the saved plan
+        const { url } = await createCheckoutSession({
+          priceId: selectedPlanId,
+          successUrl: `${window.location.origin}/dashboard?checkout=success`,
+          cancelUrl: `${window.location.origin}${
+            returnUrl || "/"
+          }?checkout=cancel`,
+        });
+
+        // Redirect to checkout
+        window.location.href = url;
+      } else {
+        // Normal redirect to dashboard if no pending checkout
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error handling checkout after signup:", error);
+      toast.error("Could not process checkout. Please try again.");
+      router.push("/dashboard");
+    }
+  };
 
   const handleEmailSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -36,6 +88,11 @@ export default function Signup() {
         toast.error(error.message);
       } else {
         toast.success("Check your email to confirm your account!");
+
+        // If this was part of a checkout flow, handle it
+        if (isPendingCheckout && data?.user) {
+          await handleCheckoutAfterSignup();
+        }
       }
     } catch (error) {
       console.log(error);
@@ -43,6 +100,29 @@ export default function Signup() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Custom Google sign-in that handles checkout after auth
+  const handleGoogleSignIn = async () => {
+    // Create a FormData object to pass data to the server action
+    const formData = new FormData();
+
+    if (isPendingCheckout) {
+      formData.append("redirectToCheckout", "true");
+
+      // Get the selected plan ID from localStorage
+      const planId = localStorage.getItem("selectedPlanId");
+      if (planId) {
+        formData.append("selectedPlanId", planId);
+
+        // Clear localStorage after submitting to server action
+        localStorage.removeItem("selectedPlanId");
+        localStorage.removeItem("checkoutReturnUrl");
+      }
+    }
+
+    // Call the server action with the form data
+    await signInWithGoogle(formData);
   };
 
   return (
@@ -71,11 +151,30 @@ export default function Signup() {
           Create Account
         </h1>
 
+        {isPendingCheckout && (
+          <div className="alert alert-info mb-6">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="stroke-current shrink-0 w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Create an account to continue with your subscription</span>
+          </div>
+        )}
+
         <div className="space-y-6">
           {/* Google Sign Up */}
           <button
             className="flex items-center justify-center w-full px-4 py-3 text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors"
-            onClick={signInWithGoogle}
+            onClick={handleGoogleSignIn}
             disabled={isLoading}
           >
             <svg

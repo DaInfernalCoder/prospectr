@@ -17,15 +17,18 @@ const Pricing = () => {
           </h2>
         </div>
 
-        <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch gap-8">
+        <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch">
           {config.stripe.plans.map((plan, index) => (
-            <div key={`plan-${plan.name}-${index}`} className="relative w-full max-w-lg">
+            <div
+              key={`plan-${plan.name}-${index}`}
+              className="relative w-full max-w-lg"
+            >
               {plan.isFeatured && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
                   <span
                     className={`badge text-xs text-white font-semibold border-0 bg-red-500`}
                   >
-                    POPULAR
+                    MOST POPULAR
                   </span>
                 </div>
               )}
@@ -86,7 +89,9 @@ const Pricing = () => {
                           />
                         </svg>
 
-                        <span>{typeof feature === 'string' ? feature : feature.name}</span>
+                        <span>
+                          {typeof feature === "string" ? feature : feature.name}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -95,12 +100,13 @@ const Pricing = () => {
                   <ButtonCheckout
                     priceId={plan.priceId}
                     productLink={plan.link}
+                    theme="red"
                   >
-                    {plan.name === "Premium" ? "Start 7-Day Free Trial" : null}
+                    Get Started
                   </ButtonCheckout>
 
                   <p className="flex items-center justify-center gap-2 text-sm text-center text-white/80 font-medium relative">
-                    {plan.name === "Premium" ? "$0.00 due today for 7 days, cancel anytime" : "$0.00 due today, cancel anytime"}
+                    $0.00 due today, cancel anytime
                   </p>
                 </div>
               </div>

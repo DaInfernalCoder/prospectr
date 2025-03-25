@@ -15,10 +15,27 @@ export async function createCheckoutSession({
     }),
   });
 
+  const data = await response.json();
+
+  // If the user is not authenticated, we need to redirect to signup
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to create checkout session");
+    if (data.redirectToSignup && data.status === 401) {
+      // Save the plan info to localStorage
+      localStorage.setItem("selectedPlanId", priceId);
+      localStorage.setItem(
+        "checkoutReturnUrl",
+        window.location.pathname + window.location.search
+      );
+
+      // Return object with redirect info
+      return {
+        redirectToSignup: true,
+        url: "/signup?checkout=pending",
+      };
+    }
+
+    throw new Error(data.error || "Failed to create checkout session");
   }
 
-  return response.json();
+  return data;
 }

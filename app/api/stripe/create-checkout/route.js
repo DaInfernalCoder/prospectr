@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // This function is used to create a Stripe Checkout Session (one-time payment or subscription)
 // It's called by the <ButtonCheckout /> component
-// Users must be authenticated. It will prefill the Checkout data with their email and/or credit card (if any)
+// Users must be authenticated. If not, it will return a response indicating the user should create an account
 export async function POST(req) {
   try {
     const { priceId, successUrl, cancelUrl } = await req.json();
@@ -15,11 +15,19 @@ export async function POST(req) {
     // Get authenticated user
     const user = await getUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      // Return a response indicating the user needs to sign up
+      return NextResponse.json(
+        {
+          error: "Authentication required",
+          redirectToSignup: true,
+          status: 401,
+        },
+        { status: 401 }
+      );
     }
 
     // Determine if this is the Premium plan (to add trial period)
-    const premiumPlan = config.stripe.plans.find(plan => plan.isFeatured);
+    const premiumPlan = config.stripe.plans.find((plan) => plan.isFeatured);
     const isPremiumPlan = premiumPlan && premiumPlan.priceId === priceId;
 
     // Create checkout session
