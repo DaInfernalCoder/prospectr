@@ -19,10 +19,8 @@ const CTA = () => {
 
   // Get the plans from config
   const plans = config.stripe.plans;
-  // Get the premium plan (featured plan)
-  const premiumPlan = plans.find((plan) => plan.isFeatured) || plans[1];
-  // Get the pro plan (non-featured plan)
-  const proPlan = plans.find((plan) => !plan.isFeatured) || plans[0];
+  // Get the pro plan
+  const proPlan = plans[0];
 
   return (
     <section className="relative hero overflow-hidden min-h-screen">
@@ -41,7 +39,7 @@ const CTA = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
-              Limited Time Offer
+              Special Offer: $15/month
             </div>
 
             <h2 className="font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">
@@ -72,74 +70,49 @@ const CTA = () => {
 
           <div className="bg-zinc-900/80 p-8 rounded-2xl border border-zinc-800 backdrop-blur-sm shadow-xl">
             <div className="text-center mb-8">
-              <h3 className="font-bold text-2xl mb-2">Choose Your Plan</h3>
+              <h3 className="font-bold text-2xl mb-2">Pro Plan</h3>
               <p className="text-gray-400">
-                Select the plan that fits your growth needs
+                Everything you need for powerful LinkedIn automation
               </p>
             </div>
 
             <div className="flex flex-col space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col rounded-lg bg-zinc-800/50 p-4 border border-zinc-700/30">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-medium">{proPlan?.name}</p>
-                    <span className="text-lg font-bold text-red-500">
-                      ${proPlan?.price}
-                      {proPlan?.priceDetails}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-400 mb-3">
-                    {proPlan?.description}
-                  </p>
-                  <ul className="space-y-1 mb-4">
-                    {proPlan?.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                        <Check className="w-3 h-3 text-red-500" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <ButtonCheckout
-                    priceId={proPlan?.priceId}
-                    productLink={proPlan?.link}
-                    className="mt-auto btn btn-sm bg-zinc-700 hover:bg-zinc-600 text-white border-0"
-                  >
-                    Get Started with Pro
-                  </ButtonCheckout>
+              <div className="flex flex-col rounded-lg bg-red-500/10 p-6 border border-red-500/30 relative">
+                <div className="absolute -top-3 right-3 bg-red-500 text-xs font-bold px-2 py-1 rounded text-white">
+                  BEST VALUE
                 </div>
-
-                <div className="flex flex-col rounded-lg bg-red-500/10 p-4 border border-red-500/30 relative">
-                  {premiumPlan?.isFeatured && (
-                    <div className="absolute -top-3 right-3 bg-red-500 text-xs font-bold px-2 py-1 rounded text-white">
-                      BEST VALUE
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-medium">{premiumPlan?.name}</p>
-                    <span className="text-lg font-bold text-red-500">
-                      ${premiumPlan?.price}
-                      {premiumPlan?.priceDetails}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-400 mb-3">
-                    {premiumPlan?.description}
-                  </p>
-                  <ul className="space-y-1 mb-4">
-                    {premiumPlan?.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-gray-300">
-                        <Check className="w-3 h-3 text-red-500" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <ButtonCheckout
-                    priceId={premiumPlan?.priceId}
-                    productLink={premiumPlan?.link}
-                    className="mt-auto bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white border-0 btn btn-sm"
-                  >
-                    Start 7-Day Free Trial
-                  </ButtonCheckout>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="font-medium text-xl">{proPlan?.name}</p>
+                  <span className="text-2xl font-bold text-red-500">
+                    ${proPlan?.price}
+                    <span className="text-sm font-normal">/month</span>
+                  </span>
                 </div>
+                <p className="text-gray-300 mb-4">{proPlan?.description}</p>
+                <ul className="space-y-3 mb-6">
+                  {proPlan?.features.map((feature, i) => (
+                    <li
+                      key={i}
+                      className="flex items-center gap-3 text-gray-300"
+                    >
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-red-500" />
+                      </div>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <ButtonCheckout
+                  priceId={proPlan?.priceId}
+                  productLink={proPlan?.link}
+                  className="mt-auto bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white border-0 btn"
+                  theme="red"
+                >
+                  Get Started
+                </ButtonCheckout>
+                <p className="text-center text-sm text-gray-400 mt-4">
+                  $0.00 due today, cancel anytime
+                </p>
               </div>
 
               <p className="text-center text-sm text-gray-400">

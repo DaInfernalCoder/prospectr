@@ -17,26 +17,13 @@ const Pricing = () => {
           </h2>
         </div>
 
-        <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch gap-8">
+        <div className="relative flex justify-center flex-col lg:flex-row items-center lg:items-stretch">
           {config.stripe.plans.map((plan, index) => (
-            <div key={`plan-${plan.name}-${index}`} className="relative w-full max-w-lg">
-              {plan.isFeatured && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                  <span
-                    className={`badge text-xs text-white font-semibold border-0 bg-red-500`}
-                  >
-                    POPULAR
-                  </span>
-                </div>
-              )}
-
-              {plan.isFeatured && (
-                <div
-                  className={`absolute -inset-[1px] rounded-[9px] bg-red-500 z-10`}
-                ></div>
-              )}
-
-              <div className="relative flex flex-col h-full gap-5 lg:gap-8 z-10 bg-zinc-900 p-8 rounded-lg">
+            <div
+              key={`plan-${plan.name}-${index}`}
+              className="relative w-full max-w-lg mx-auto"
+            >
+              <div className="relative flex flex-col h-full gap-5 lg:gap-8 z-10 bg-zinc-900 p-8 rounded-lg border border-red-500">
                 <div className="flex justify-between items-center gap-4">
                   <div>
                     <p className="text-lg lg:text-xl font-bold text-white">
@@ -58,9 +45,7 @@ const Pricing = () => {
                       </p>
                     </div>
                   )}
-                  <p
-                    className={`text-5xl tracking-tight font-extrabold text-white`}
-                  >
+                  <p className="text-5xl tracking-tight font-extrabold text-white">
                     ${plan.price}
                   </p>
                   <div className="flex flex-col justify-end mb-[4px]">
@@ -86,7 +71,9 @@ const Pricing = () => {
                           />
                         </svg>
 
-                        <span>{typeof feature === 'string' ? feature : feature.name}</span>
+                        <span>
+                          {typeof feature === "string" ? feature : feature.name}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -95,12 +82,13 @@ const Pricing = () => {
                   <ButtonCheckout
                     priceId={plan.priceId}
                     productLink={plan.link}
+                    theme="red"
                   >
-                    {plan.name === "Premium" ? "Start 7-Day Free Trial" : null}
+                    Get Started
                   </ButtonCheckout>
 
                   <p className="flex items-center justify-center gap-2 text-sm text-center text-white/80 font-medium relative">
-                    {plan.name === "Premium" ? "$0.00 due today for 7 days, cancel anytime" : "$0.00 due today, cancel anytime"}
+                    $0.00 due today, cancel anytime
                   </p>
                 </div>
               </div>

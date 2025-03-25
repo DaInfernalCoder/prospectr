@@ -1,0 +1,212 @@
+---
+description: shows the tech stack for easy AI use
+globs: 
+alwaysApply: false
+---
+**Update this rule if user requested changes to the project requirement, etc.**
+
+# Prospectr Tech Stack Document
+
+**Note**: This document should be updated whenever there are changes to the project's tech stack or requirements to ensure it remains accurate and useful.
+
+This document outlines the technology choices behind Prospectr, a lead finder web application that leverages AI to automate LinkedIn outreach campaigns. The goal is to provide a clear understanding of how each component contributes to the application's functionality and user experience, making it a valuable resource for developers and stakeholders. Below, we break down the tech stack into key areas with specific details, including version numbers, configurations, and links to official documentation.
+
+---
+
+## Frontend Technologies
+
+The frontend of Prospectr is designed to deliver a responsive, intuitive, and visually appealing user interface using modern web technologies.
+
+- **Next.js (v15.2.2)**  
+  A React framework enabling server-side rendering (SSR), static site generation (SSG), and API routes for optimal performance and SEO. Prospectr uses Next.js for routing, rendering, and server-side logic.  
+  - **Configuration**: Uses App Router, Turbopack for development (via `next dev --turbopack`), and custom headers for Open Graph images (see `next.config.js`).  
+  - [Next.js Documentation](mdc:https:/nextjs.org/docs)
+
+- **React (v18.2.0)**  
+  A JavaScript library for building user interfaces with a component-based architecture. Manages the component lifecycle and state in Prospectr.  
+  - [React Documentation](mdc:https:/react.dev)
+
+- **Tailwind CSS (v3.4.3)**  
+  A utility-first CSS framework for rapid UI development, focusing on customization and responsiveness. Provides Prospectr’s styling foundation.  
+  - **Configuration**: Extended with custom animations, gradients, and DaisyUI integration (see `tailwind.config.js`).  
+  - [Tailwind CSS Documentation](mdc:https:/tailwindcss.com/docs)
+
+- **DaisyUI (v4.12.23)**  
+  A component library built on Tailwind CSS, offering pre-designed UI components for consistency and ease of development. Used for buttons, modals, and other UI elements.  
+  - **Configuration**: Theme set to "black" (see `config.js`).  
+  - [DaisyUI Documentation](mdc:https:/daisyui.com/docs)
+
+- **Radix UI (Multiple Packages)**  
+  Provides accessible, customizable UI primitives for complex interfaces. Includes `@radix-ui/react-select` (v2.1.5), `@radix-ui/react-slot` (v1.1.1), and `@radix-ui/react-tabs` (v1.1.3).  
+  - [Radix UI Documentation](mdc:https:/www.radix-ui.com/docs)
+
+- **Lucide React (v0.473.0)**  
+  An icon library for React offering customizable icons. Used throughout Prospectr for visual elements.  
+  - [Lucide Documentation](mdc:https:/lucide.dev/docs)
+
+These technologies ensure a seamless user experience, with Next.js and React handling rendering and state, while Tailwind CSS and DaisyUI provide consistent, responsive styling.
+
+---
+
+## Backend Technologies
+
+Prospectr’s backend leverages serverless functions and third-party services for data storage, authentication, payments, and LinkedIn integrations.
+
+- **Supabase (v2.49.1 via `@supabase/supabase-js`, v0.5.2 via `@supabase/ssr`)**  
+  An open-source Firebase alternative providing a Postgres database, authentication, and real-time subscriptions. Prospectr uses Supabase for user authentication, data persistence, and profile management.  
+  - **Configuration Example**:  
+    ```javascript
+    import { createClient } from '@supabase/ssr';
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      { cookies: { getAll: () => cookieStore.getAll(), setAll: (cookies) => cookies.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } }
+    );
+    ```  
+  - [Supabase Documentation](mdc:https:/supabase.com/docs)
+
+- **Stripe (v13.11.0)**  
+  A payment processing platform for handling subscriptions and payments. Integrated for Prospectr’s monetization.  
+  - **Configuration**: Uses `NEXT_PUBLIC_STRIPE_PRICE_ID` for subscription plans (see `.env.local`).  
+  - [Stripe Documentation](mdc:https:/stripe.com/docs)
+
+- **Unipile (v1.9.2 via `unipile-node-sdk`)**  
+  An API for LinkedIn integrations, enabling profile search and connection requests.  
+  - **Configuration Example**:  
+    ```javascript
+    import { UnipileClient } from 'unipile-node-sdk';
+    const client = new UnipileClient(process.env.UNIPILE_API_URL, process.env.UNIPILE_API_TOKEN);
+    ```  
+  - [Unipile Documentation](mdc:https:/docs.unipile.com)
+
+- **Node.js (v20.x implied via Next.js)**  
+  The runtime environment for executing JavaScript on the server, used with Next.js API routes for server-side logic.  
+  - [Node.js Documentation](mdc:https:/nodejs.org/en/docs)
+
+These backend technologies ensure secure data management, payment processing, and efficient LinkedIn API interactions.
+
+---
+
+## Infrastructure and Deployment
+
+Prospectr is designed for scalability and ease of deployment.
+
+- **Vercel**  
+  A platform optimized for Next.js applications, providing hosting, domain management, and automatic deployments. Prospectr is deployed on Vercel.  
+  - **Configuration**: Defined in `vercel.json` with cron jobs and function settings.  
+  - [Vercel Documentation](mdc:https:/vercel.com/docs)
+
+- **GitHub**  
+  Used for version control and collaboration, with CI/CD pipelines automating testing and deployment.  
+  - [GitHub Documentation](mdc:https:/docs.github.com)
+
+This setup supports rapid development cycles and reliable updates.
+
+---
+
+## Third-Party Integrations
+
+Prospectr integrates external services to enhance functionality.
+
+- **Resend (v4.1.2)**  
+  An email API for sending transactional emails, such as reconnection emails.  
+  - **Configuration Example**:  
+    ```javascript
+    import { Resend } from 'resend';
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({ from: 'prospectr@customerservice.peakvaluebusiness.com', to: email, subject: 'Reconnect LinkedIn Account', html: `<a href="${reconnectionUrl}">Reconnect Now</a>` });
+    ```  
+  - [Resend Documentation](mdc:https:/resend.com/docs)
+
+- **Crisp (v1.0.25 via `crisp-sdk-web`)**  
+  A customer support platform integrated for user assistance.  
+  - **Configuration**: ID set in `config.js` as `4001a365-4a61-4b7e-a71e-01af4dc2ce52`.  
+  - [Crisp Documentation](mdc:https:/docs.crisp.chat)
+
+These integrations improve user communication and support.
+
+---
+
+## Security and Performance Considerations
+
+Security and performance are critical to Prospectr’s design.
+
+- **Authentication**  
+  Handled by Supabase Auth with secure session management and token refreshing (see `utils/supabase/middleware.js`).  
+
+- **Data Encryption**  
+  Sensitive data (e.g., LinkedIn tokens) is encrypted using Supabase’s built-in features.  
+
+- **Rate Limiting**  
+  Implemented for API requests to prevent abuse, with tier-based limits (e.g., 20 connects/day for free users).  
+
+- **Performance Optimizations**  
+  Leverages Next.js features like SSG, ISR, and Turbopack for fast page loads. Image optimization is configured in `next.config.js`.  
+
+These measures ensure data security and efficient performance.
+
+---
+
+## Dependencies
+
+Below is a complete list of packages from `package.json`:
+
+### Production Dependencies
+- `@headlessui/react` (v1.7.18)  
+- `@radix-ui/react-select` (v2.1.5)  
+- `@radix-ui/react-slot` (v1.1.1)  
+- `@radix-ui/react-tabs` (v1.1.3)  
+- `@splinetool/react-spline` (v4.0.0)  
+- `@splinetool/runtime` (v1.9.59)  
+- `@supabase/auth-helpers-nextjs` (v0.10.0) - Legacy, not used in favor of `@supabase/ssr`  
+- `@supabase/ssr` (v0.5.2)  
+- `@supabase/supabase-js` (v2.49.1)  
+- `@tanstack/react-query` (v5.68.0)  
+- `@vercel/analytics` (v1.5.0)  
+- `@vercel/speed-insights` (v1.2.0)  
+- `axios` (v1.6.8)  
+- `class-variance-authority` (v0.7.1)  
+- `clsx` (v2.1.1)  
+- `crisp-sdk-web` (v1.0.25)  
+- `eslint` (v8.47.0)  
+- `eslint-config-next` (v13.4.19)  
+- `form-data` (v4.0.0)  
+- `framer-motion` (v12.5.0)  
+- `jsonwebtoken` (v9.0.2)  
+- `lucide-react` (v0.473.0)  
+- `mailgun.js` (v9.4.1)  
+- `next` (v15.2.2)  
+- `next-plausible` (v3.12.0)  
+- `next-sitemap` (v4.2.3)  
+- `nextjs-toploader` (v1.6.11)  
+- `nodemailer` (v6.9.13)  
+- `react` (v18.2.0)  
+- `react-dom` (v18.2.0)  
+- `react-hot-toast` (v2.4.1)  
+- `react-syntax-highlighter` (v15.6.1)  
+- `react-tooltip` (v5.26.3)  
+- `react-type-animation` (v3.2.0)  
+- `resend` (v4.1.2)  
+- `stripe` (v13.11.0)  
+- `tailwind-merge` (v2.6.0)  
+- `tailwindcss-animate` (v1.0.7)  
+- `unipile-node-sdk` (v1.9.2)  
+- `zustand` (v5.0.3)  
+
+### Development Dependencies
+- `@types/react` (v19.0.8)  
+- `autoprefixer` (v10.4.19)  
+- `daisyui` (v4.12.23)  
+- `postcss` (v8.4.38)  
+- `tailwindcss` (v3.4.3)  
+
+---
+
+## Conclusion
+
+Prospectr’s tech stack is meticulously selected to automate LinkedIn outreach while delivering a user-friendly experience. By integrating modern frontend frameworks (Next.js, React, Tailwind CSS, DaisyUI), robust backend services (Supabase, Stripe, Unipile), and strategic third-party integrations (Resend, Crisp), Prospectr provides a powerful lead generation tool. This document, with its specific version numbers, configurations, and code snippets, serves as a comprehensive guide for maintaining and iterating on the application.
+
+**Additional Notes**  
+- All dependencies and versions are sourced from `package.json`.  
+- Environment variables are managed via `.env.local` (e.g., `NEXT_PUBLIC_SUPABASE_URL`, `STRIPE_SECRET_KEY`).  
+- Next.js API routes provide a full-stack JavaScript solution.

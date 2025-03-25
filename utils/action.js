@@ -3,10 +3,12 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "./supabase/server";
+import { cookies } from "next/headers";
 
-const signInWith = (provider) => async () => {
+const signInWith = (provider) => async (formData) => {
   const supabase = await createClient();
   const headersList = await headers();
+  const cookieStore = cookies();
 
   // Get the host, with fallbacks for Vercel and local development
   const host =
@@ -17,6 +19,29 @@ const signInWith = (provider) => async () => {
 
   // Ensure consistent redirect path for all auth methods
   const auth_callback = `${protocol}://${host}/auth/callback`;
+
+  // Parse form data values in a way that works on the server
+  // Instead of using formData.get() which causes client reference issues
+  const redirectToCheckout =
+    Object.fromEntries(formData.entries())?.redirectToCheckout === "true";
+  const selectedPlanId = Object.fromEntries(formData.entries())?.selectedPlanId;
+
+  // Set cookies for checkout flow if needed
+  if (redirectToCheckout) {
+    // Set a cookie to indicate we should redirect to checkout after auth
+    cookieStore.set("redirectToCheckoutAfterAuth", "true", {
+      maxAge: 60 * 10, // 10 minutes
+      path: "/",
+    });
+
+    // Store the selected plan ID if we have it
+    if (selectedPlanId) {
+      cookieStore.set("selectedPlanId", selectedPlanId, {
+        maxAge: 60 * 10, // 10 minutes
+        path: "/",
+      });
+    }
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -42,6 +67,7 @@ const signInWith = (provider) => async () => {
   redirect(data.url);
 };
 
+// For normal Google sign-in
 const signInWithGoogle = signInWith("google");
 
 export { signInWithGoogle };

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/utils/supabase/client";
 import toast from "react-hot-toast";
 import config from "@/config";
 import { signInWithGoogle } from "@/utils/action";
@@ -10,7 +10,6 @@ import { signInWithGoogle } from "@/utils/action";
 // This a login/singup page for Supabase Auth.
 // Successfull login redirects to /api/auth/callback where the Code Exchange is processed (see app/api/auth/callback/route.js).
 export default function Login() {
-  const supabase = createClientComponentClient();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +20,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      const supabase = createClient();
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -60,8 +60,13 @@ export default function Login() {
     }
   };
 
-  // This function is not being used and has incorrect redirect path
-  // Removing it as signInWithGoogle from utils/action.js is used instead
+  // Handler for Google sign-in to properly prepare form data
+  const handleGoogleSignIn = async () => {
+    // Create an empty FormData object for the server action
+    const formData = new FormData();
+    // No special parameters needed for basic sign-in
+    await signInWithGoogle(formData);
+  };
 
   return (
     <main
@@ -93,7 +98,7 @@ export default function Login() {
           {/* Google Sign In */}
           <button
             className="flex items-center justify-center w-full px-4 py-3 text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors"
-            onClick={signInWithGoogle}
+            onClick={handleGoogleSignIn}
             disabled={isLoading}
           >
             <svg

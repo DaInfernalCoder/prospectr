@@ -19,33 +19,10 @@ const config = {
     plans: [
       {
         priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_1R2tZJGGMtZacA5oHJvko1rj"
-            : "price_1R2tZJGGMtZacA5oHJvko1rj",
-        price: 19.99,
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || "prod_S0PrWEtJP90ffJ",
+        price: 15,
         name: "Pro",
-        description: "Perfect for getting started with LinkedIn automation",
-        priceDetails: "/month",
-        connectionLimit: 100,
-        features: [
-          "100 connection requests/month",
-          "Automatic connection requests",
-          "Basic Auto Reply capabilities",
-          "1 active campaign"
-        ],
-      },
-      {
-        link:
-          process.env.NODE_ENV === "development"
-            ? "https://buy.stripe.com/test_fZe16q0u61tkfQYdQR"
-            : "https://buy.stripe.com/test_fZe16q0u61tkfQYdQR",
-        priceId:
-          process.env.NODE_ENV === "development"
-            ? "price_1R2tZJGGMtZacA5oHJvko1rj"
-            : "price_1R2tZJGGMtZacA5oHJvko1rj",
-        price: 49.99,
-        name: "Premium",
-        description: "Advanced LinkedIn automation with 7-day free trial",
+        description: "Everything you need for LinkedIn automation",
         priceDetails: "/month",
         connectionLimit: 500,
         isFeatured: true,
@@ -55,7 +32,6 @@ const config = {
           "Advanced Auto Reply capabilities",
           "AI message personalization",
           "Priority support",
-          "7-day free trial"
         ],
       },
     ],

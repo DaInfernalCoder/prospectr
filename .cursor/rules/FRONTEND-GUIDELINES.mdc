@@ -1,0 +1,135 @@
+---
+description: fronend guidelines for the AI
+globs: 
+alwaysApply: false
+---
+FRONTEND GUIDELINES
+Update this rule if user requested changes to the project requirement, etc.
+Introduction
+These frontend guidelines ensure consistency, maintainability, and a high-quality user experience across the Prospectr application. They provide detailed rules and best practices for developers working on the frontend, aligning with the project’s technical stack and design philosophy.
+Purpose:
+Maintain a cohesive design language throughout the application.
+Ensure accessibility, performance, and scalability standards are met.
+Provide a precise reference for developers to implement consistent UI elements and layouts.
+How to Use:
+Consult these guidelines when developing new features or updating existing ones.
+Adhere to the specified design system for fonts, colors, spacing, components, and icons.
+Follow the best practices to ensure a seamless and efficient user experience.
+Design System
+a. Fonts
+Primary Font Family: Prospectr uses the default sans-serif font stack provided by Tailwind CSS (sans), which typically resolves to system fonts like -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif. This ensures cross-browser consistency and optimal performance. No custom font imports are defined in app/globals.css or tailwind.config.js.
+Note: If a custom font is introduced (e.g., for branding), import it in app/globals.css using @import or @font-face and update this section accordingly.
+Font Sizes and Weights:
+Headings:
+h1: text-4xl (2.25rem / 36px), font-bold (700).
+h2: text-3xl (1.875rem / 30px), font-bold (700).
+h3: text-2xl (1.5rem / 24px), font-semibold (600).
+h4: text-xl (1.25rem / 20px), font-semibold (600).
+h5: text-lg (1.125rem / 18px), font-medium (500).
+h6: text-base (1rem / 16px), font-medium (500).
+Body Text: text-base (1rem / 16px) with font-normal (400) for paragraphs and primary content.
+Secondary Text: text-sm (0.875rem / 14px) with font-normal (400) for captions, labels, or footnotes.
+Small Text: text-xs (0.75rem / 12px) with font-normal (400) for minor details or fine print.
+Line Heights: Use Tailwind’s default line heights (e.g., leading-normal for body text, leading-tight for headings) unless overridden for specific components.
+b. Color Palette
+The color palette is driven by the DaisyUI theme "black" (configured in tailwind.config.js) with custom CSS variables defined in app/globals.css. These variables allow for theming flexibility and consistency across the application.
+Key Colors (from tailwind.config.js and DaisyUI "black" theme):
+background: hsl(var(--background)) - Main application background (default: dark gray, e.g., #1a1a1a).
+foreground: hsl(var(--foreground)) - Primary text and foreground elements (default: light gray, e.g., #e0e0e0).
+primary: hsl(var(--primary)) - Primary actions (e.g., buttons, links; default: #0ea5e9 - a vibrant blue).
+primary-foreground: hsl(var(--primary-foreground)) - Text/icons on primary backgrounds (default: #ffffff).
+secondary: hsl(var(--secondary)) - Secondary actions or backgrounds (default: #4b5563 - muted gray).
+secondary-foreground: hsl(var(--secondary-foreground)) - Text/icons on secondary backgrounds (default: #ffffff).
+muted: hsl(var(--muted)) - Subtle text or backgrounds (default: #6b7280 - soft gray).
+muted-foreground: hsl(var(--muted-foreground)) - Text on muted backgrounds (default: #d1d5db).
+accent: hsl(var(--accent)) - Highlights or interactive states (default: #f59e0b - warm yellow).
+accent-foreground: hsl(var(--accent-foreground)) - Text/icons on accent backgrounds (default: #ffffff).
+destructive: hsl(var(--destructive)) - Error states or destructive actions (default: #ef4444 - red).
+destructive-foreground: hsl(var(--destructive-foreground)) - Text/icons on destructive backgrounds (default: #ffffff).
+border: hsl(var(--border)) - Borders and dividers (default: #374151 - dark gray).
+input: hsl(var(--input)) - Input fields (default: #374151 - matches border for consistency).
+ring: hsl(var(--ring)) - Focus rings (default: #0ea5e9 - matches primary).
+Usage Guidelines:
+Primary: Apply to main call-to-action buttons (e.g., <button class="btn btn-primary">).
+Secondary: Use for less prominent actions or subtle backgrounds (e.g., <button class="btn btn-secondary">).
+Muted: Use for placeholder text, disabled states, or low-emphasis elements.
+Accent: Highlight interactive elements like hover states or selected items.
+Destructive: Reserve for error messages, delete buttons, or warnings.
+Ensure sufficient contrast (WCAG AA compliant) between foreground and background (e.g., ratio ≥ 4.5:1).
+Customization: Adjust colors by modifying CSS variables in app/globals.css under the :root selector or updating the DaisyUI theme in tailwind.config.js.
+c. Spacing and Layout
+Spacing Scale: Leverage Tailwind’s default spacing scale (multiples of 4px up to 96px, then larger increments), accessible via utility classes:
+p-4 (16px padding), m-2 (8px margin), gap-6 (24px gap).
+Full scale: 0, px (1px), 0.5 (2px), 1 (4px), 1.5 (6px), 2 (8px), ..., 24 (96px), 28 (112px), etc.
+Layout Conventions:
+Containers: Use container class for centered content with responsive max-widths (e.g., max-w-7xl at 1280px).
+Example: <div class="container mx-auto px-4">.
+Flexbox: Use flex, flex-row (horizontal), or flex-col (vertical) for flexible layouts.
+Example: <div class="flex flex-col gap-4"> for stacked items with 16px spacing.
+Grid: Use grid with grid-cols-{n} for column-based layouts (e.g., grid grid-cols-1 md:grid-cols-2 gap-6).
+Padding and Margins:
+Cards: p-4 (16px) for internal padding.
+Sections: py-8 (32px vertical) or py-12 (48px vertical) for vertical spacing.
+Elements: my-2 (8px vertical margin) for consistent spacing between items.
+Breakpoints: Use Tailwind’s responsive prefixes (sm:, md:, lg:, xl:) for mobile-first design:
+sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px.
+d. UI Components
+Preferred Component Library:
+DaisyUI: Use DaisyUI components (e.g., btn, card, input, modal) for pre-styled, themeable UI elements integrated with Tailwind CSS.
+Configured in tailwind.config.js with the "black" theme.
+Example: <button class="btn btn-primary">Click Me</button>.
+Custom Components: Build custom components with Tailwind CSS utility classes when DaisyUI components don’t suffice.
+Store in components/ui/ or components/ with PascalCase naming (e.g., ButtonLead.js).
+Guidelines for New Components:
+Structure: Follow existing patterns in components/ (e.g., exported main component, subcomponents, helpers).
+Example:
+jsx
+export function ButtonLead({ children, ...props }) {
+  return <button className="btn btn-primary" {...props}>{children}</button>;
+}
+Styling: Use Tailwind utility classes exclusively (e.g., flex items-center gap-2 text-sm font-medium).
+Accessibility: Include ARIA attributes (e.g., aria-label), ensure focus states (e.g., focus:ring-2 focus:ring-offset-2 focus:ring-primary), and use semantic HTML.
+Props: Support standard HTML attributes and custom props for flexibility.
+e. Icons
+Icon Library: Lucide (lucide-react), specified in components.json as "iconLibrary": "lucide".
+Installed via package.json dependency: "lucide-react": "^0.473.0".
+Usage Guidelines:
+Import: Import icons individually from lucide-react:
+jsx
+import { User, ChevronDown } from "lucide-react";
+Rendering: Use with Tailwind classes for sizing and color:
+jsx
+<User className="h-5 w-5 text-muted-foreground" />
+Sizes: Standard sizes: h-4 w-4 (16px), h-5 w-5 (20px), h-6 w-6 (24px).
+Accessibility: Add aria-hidden="true" for decorative icons or aria-label for interactive ones.
+Consistency: Match icon color to surrounding text (e.g., text-primary for primary buttons).
+Best Practices
+Accessibility:
+Use semantic HTML (e.g., <nav>, <main>, <button>).
+Ensure keyboard navigation with visible focus states (e.g., focus:ring).
+Provide alt text for images via next/image (e.g., <Image alt="Description" src={...} />).
+Validate contrast ratios using tools like WebAIM Contrast Checker.
+Performance:
+Use next/image for optimized images with sizes, loading="lazy", and WebP format where possible.
+Minimize 'use client' directives; prefer server components (React Server Components) for data fetching.
+Example: Fetch data in app/dashboard/page.js server-side with Supabase instead of client-side.
+Dynamically import non-critical components:
+jsx
+import dynamic from "next/dynamic";
+const HeavyComponent = dynamic(() => import("./HeavyComponent"), { ssr: false });
+Wrap client-side hooks (e.g., useSearchParams) in <Suspense>:
+jsx
+import { Suspense } from "react";
+<Suspense fallback={<div>Loading...</div>}>
+  <ComponentWithHooks />
+</Suspense>
+Responsive Design:
+Use Tailwind’s mobile-first approach with responsive utilities (e.g., md:flex, lg:text-lg).
+Test across breakpoints: 640px (sm), 768px (md), 1024px (lg), 1280px (xl).
+Example: <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">.
+Updating the Guidelines
+Process for Changes:
+Propose updates via pull requests to this document in the repository.
+Discuss significant changes (e.g., new font families, theme switches) in team design reviews.
+Document all updates with a changelog and notify the team via agreed communication channels (e.g., Slack).
+This document provides a detailed, specific framework for building and maintaining the Prospectr frontend, ensuring alignment with its Next.js, Tailwind CSS, DaisyUI, and Lucide-based architecture. Adhering to these guidelines will result in a consistent, performant, and accessible user interface tailored to Prospectr’s LinkedIn integration and campaign management features.

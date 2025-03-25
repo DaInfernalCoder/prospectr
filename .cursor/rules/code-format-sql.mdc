@@ -1,6 +1,6 @@
 ---
 description: Guidelines for writing Postgres SQL
-globs: **/*.sql
+globs: 
 alwaysApply: false
 ---
 # Postgres SQL Style Guide

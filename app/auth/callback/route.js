@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/server";
+import Stripe from "stripe";
+import { cookies } from "next/headers";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -32,19 +36,54 @@ export async function GET(request) {
           process.env.NODE_ENV === "production" ? "https" : "http";
         const baseUrl = `${protocol}://${host}`;
 
-        // Create response with redirect
-        const response = NextResponse.redirect(`${baseUrl}/dashboard`);
+        // Check for checkout redirection cookie
+        const cookieStore = cookies();
 
-        // Set cookie attributes for better persistence
-        response.cookies.set("sb-auth-token", code, {
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          httpOnly: true,
-          maxAge: 60 * 60 * 24 * 7, // 7 days
-        });
+        // If this was a sign-in from the checkout process, get the selected plan ID
+        // and create a checkout session
+        if (cookieStore.has("redirectToCheckoutAfterAuth")) {
+          cookieStore.delete("redirectToCheckoutAfterAuth");
 
-        return response;
+          // Try to extract the selectedPlanId from the cookie
+          const selectedPlanId = cookieStore.get("selectedPlanId")?.value;
+
+          if (selectedPlanId) {
+            cookieStore.delete("selectedPlanId");
+
+            // Get user info needed for checkout
+            const {
+              data: { user },
+            } = await supabase.auth.getUser();
+
+            if (user) {
+              // Create a Stripe checkout session
+              const session = await stripe.checkout.sessions.create({
+                mode: "subscription",
+                payment_method_types: ["card"],
+                line_items: [
+                  {
+                    price: selectedPlanId,
+                    quantity: 1,
+                  },
+                ],
+                success_url: `${baseUrl}/dashboard?checkout=success`,
+                cancel_url: `${baseUrl}?checkout=cancel`,
+                client_reference_id: user.id,
+                customer_email: user.email,
+                // Add trial period for Premium plan
+                subscription_data: {
+                  trial_period_days: 7,
+                },
+              });
+
+              // Redirect to Stripe checkout
+              return NextResponse.redirect(session.url);
+            }
+          }
+        }
+
+        // Default redirect to dashboard
+        return NextResponse.redirect(`${baseUrl}/dashboard`);
       } else {
         console.error("Error during authentication callback:", exchangeError);
         return NextResponse.redirect(
