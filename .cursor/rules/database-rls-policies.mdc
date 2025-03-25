@@ -1,6 +1,6 @@
 ---
 description: Guidelines for writing Postgres Row Level Security policies
-globs: "**/*.sql"
+globs: 
 alwaysApply: false
 ---
 

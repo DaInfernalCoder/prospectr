@@ -1,0 +1,155 @@
+---
+description: Below is a Product Requirements Document (PRD) for Prospectr. This document summarizes the overall vision, core user journeys, technical components, and scope boundaries in a clean, concise format that can be easily iterated upon.
+globs: 
+alwaysApply: false
+---
+Update this rule if user requested changes to the project requirement, etc.
+
+Below is a comprehensive Product Requirements Document (PRD) for the **Prospectr** project, tailored to the provided codebase and project requirements. This PRD is designed to be clean, concise, and easy to iterate with, while being painfully specific to ensure clarity for development teams and AI-assisted workflows.
+
+---
+
+## Prospectr Product Requirements Document (PRD)
+
+**Last Updated:** 3/24/25
+
+### 1. App Overview
+Prospectr is a web application designed to streamline lead generation by enabling users to search for LinkedIn profiles, automate connection requests with personalized messages, and manage outreach campaigns. Leveraging AI and automation, it empowers users to efficiently grow their professional network and generate business opportunities.
+
+### 2. User Flows
+The following user flows outline the primary interactions within Prospectr:
+
+#### 2.1 LinkedIn Search and Connection Request
+1. **User Action:** Navigates to `/dashboard/campaigns/new/leads` via the dashboard sidebar.
+2. **Input:** Enters search criteria (e.g., job title, company, location, industry) in the search form.
+3. **System Response:** Submits a POST request to `/api/linkedin/search`, returning a paginated list of matching LinkedIn profiles.
+4. **User Action:** Selects profiles using checkboxes in the search results table.
+5. **Navigation:** Clicks "Create Campaign" to proceed to `/dashboard/campaigns/new/sequence`.
+6. **Input:** Crafts a personalized connection message in the message editor, using templates and variables (e.g., `{firstName}`, `{company}`).
+7. **Configuration:** Optionally enables auto follow-up with a secondary message and delay (e.g., 3 days).
+8. **Review:** Proceeds to `/dashboard/campaigns/new/review` to confirm campaign details.
+9. **System Action:** Initiates connection requests via `/api/auths/linkedin/connect`, spacing requests ~1 minute apart per LinkedIn policy.
+10. **Monitoring:** Views campaign progress and connection statuses at `/dashboard/campaigns/[id]`.
+
+#### 2.2 Campaign Management
+1. **User Action:** Accesses `/dashboard/campaigns` to view a list of all campaigns.
+2. **Display:** Sees campaign names, statuses (e.g., active, paused, completed), and basic stats (sent, accepted).
+3. **Detail View:** Clicks a campaign to navigate to `/dashboard/campaigns/[id]` for detailed analytics (e.g., acceptance rates, response rates).
+4. **Edit:** Modifies campaign settings or messages directly from the detail view.
+5. **Control:** Pauses or resumes campaigns using toggle buttons.
+
+#### 2.3 Settings and Account Management
+1. **User Action:** Navigates to `/dashboard/settings`.
+2. **LinkedIn Connection:** Connects or reconnects their LinkedIn account via OAuth at `/api/auths/linkedin/connect`.
+3. **Subscription Management:** Views current plan, upgrades/downgrades via `/dashboard/upgrade`, and manages billing with Stripe.
+4. **Profile Updates:** Edits personal information stored in the `profiles` Supabase table.
+
+### 3. Tech Stack & APIs
+- **Frontend:**
+  - **Next.js 14:** App Router for server-side rendering and routing (`app/` directory).
+  - **React:** Interactive components (version 18.2.0).
+  - **Tailwind CSS & DaisyUI:** Styling with the "black" theme (`tailwind.config.js`).
+- **Backend:**
+  - **Supabase:** Database (`profiles`, `linkedin_connections`) and authentication (`supabase/`).
+  - **Node.js:** Server-side logic in API routes (`app/api/`).
+- **APIs:**
+  - **Unipile API:** LinkedIn operations (search, connections) via `unipile-node-sdk` (`utils/unipileClient.js`).
+  - **Stripe API:** Subscription and payment processing (`utils/stripe-client.js`).
+  - **Resend API:** Email notifications (e.g., reconnection emails in `utils/email/reconnectionEmail.js`).
+- **Infrastructure:**
+  - **Vercel:** Hosting and deployment (`vercel.json`).
+  - **Cron Jobs:** Scheduled tasks (e.g., `/api/cron/check-invitations`) every 6 hours.
+
+### 4. Core Features
+#### 4.1 LinkedIn Profile Search
+- **Filters:** Job title, company, location, industry, connection degree.
+- **Options:** Exclude profiles without photos, limit results to 1000 leads.
+- **UI:** Table with profile details (name, headline), checkboxes, and pagination controls (`app/dashboard/campaigns/new/leads/page.js`).
+- **API:** POST `/api/linkedin/search` returns JSON with profile list and metadata.
+
+#### 4.2 Connection Request Automation
+- **Messages:** Templates with variables (`{firstName}`, `{lastName}`, `{company}`).
+- **Limits:** Free tier: 20 connects/day; Premium: 40 connects/day; Sales Navigator: 40 connects/day + InMail.
+- **Spacing:** ~1-minute delay between requests, managed via a queue in `/api/auths/linkedin/connect/route.js`.
+- **API Response:** JSON with status, errors, and rate limit info.
+
+#### 4.3 Campaign Management
+- **Creation:** From selected profiles at `/dashboard/campaigns/new`.
+- **Tracking:** Status (pending, sent, accepted, failed) and stats (sent, accepted, replied) in `linkedin_connections` table.
+- **Analytics:** Acceptance and response rates displayed at `/dashboard/campaigns/[id]`.
+- **Editing:** Update messages or pause/resume via PUT requests to `/api/linkedin/invitations/send`.
+
+#### 4.4 Message Editor
+- **Templates:** Predefined options or custom input at `/dashboard/campaigns/new/sequence`.
+- **Editing:** Rich text with variable buttons and a 300-character limit counter.
+- **Follow-Up:** Toggle for auto follow-up with delay configuration (e.g., 3 days post-acceptance).
+- **Storage:** Saved in `campaigns` table (hypothetical, to be implemented).
+
+#### 4.5 Account and Subscription Management
+- **LinkedIn:** OAuth connection via `/api/auths/linkedin/connect`, token stored in `profiles.linkedin_token`.
+- **Subscription:** Plans (Pro: $19.99/month, Premium: $49.99/month) managed via Stripe at `/dashboard/upgrade`.
+- **Billing:** Invoices and updates via `/api/stripe/customer-portal`.
+
+### 5. In-Scope vs Out-of-Scope Items
+#### In-Scope:
+- LinkedIn search with basic filters (job title, company, location, industry, connection degree).
+- Connection request automation with personalized messages and rate limiting.
+- Campaign creation, management, and basic analytics (sent, accepted, replied).
+- Subscription management with Stripe integration (Pro and Premium plans).
+- Email notifications for LinkedIn reconnection (`utils/email/reconnectionEmail.js`).
+
+#### Out-of-Scope:
+- Advanced search filters (e.g., mutual connections, profile languages).
+- A/B testing for connection messages.
+- Integration with other platforms (e.g., Twitter, CRM systems).
+- Advanced analytics (e.g., predictive lead scoring, detailed response tracking).
+- Mobile app development.
+
+### 6. Implementation Plan
+#### Phase 1: Environment Setup
+1. **Clone Repository:** Use ShipFast boilerplate from `config.js` as the base.
+2. **Dependencies:** Install Next.js 14, Tailwind CSS, Supabase, and Unipile SDK (`package.json`).
+3. **Environment Variables:** Configure `.env.local` with Supabase, Unipile, Stripe, and Resend keys.
+4. **Supabase Schema:** Create `profiles` and `linkedin_connections` tables per `schema.txt`.
+5. **Branch:** Create `development` branch for ongoing work.
+
+#### Phase 2: Frontend Development
+1. **Landing Page:** Build `/app/page.js` with hero section and CTA using DaisyUI components.
+2. **Auth Pages:** Implement `/app/signin/page.js` and `/app/signup/page.js` with Supabase auth.
+3. **Dashboard:** Develop `/app/dashboard/layout.js` with sidebar navigation (`components/ui/sidebar.jsx`).
+4. **Search UI:** Create `/app/dashboard/campaigns/new/leads/page.js` with filter inputs and results table.
+5. **Message Editor:** Build `/app/dashboard/campaigns/new/sequence/page.js` with template dropdown and variable insertion.
+6. **Campaign UI:** Implement `/app/dashboard/campaigns/page.js` and `/app/dashboard/campaigns/[id]/page.js` for list and detail views.
+7. **Settings:** Develop `/app/dashboard/settings/page.js` with LinkedIn connection modal.
+8. **Validation:** Run `npm run dev` and verify all pages load correctly.
+
+#### Phase 3: Backend Development
+1. **Search API:** Implement POST `/app/api/linkedin/search/route.js` using `unipileClient.js`.
+2. **Connection API:** Build POST `/app/api/auths/linkedin/connect/route.js` with queue system for spacing requests.
+3. **Campaign API:** Develop endpoints for creation and updates (e.g., `/app/api/linkedin/invitations/send/route.js`).
+4. **Stripe Integration:** Set up `/app/api/stripe/create-checkout/route.js` and webhooks at `/app/api/webhook/stripe/route.js`.
+5. **Cron Jobs:** Configure `/app/api/cron/check-invitations/route.js` to run every 6 hours via `vercel.json`.
+6. **Validation:** Test APIs with Postman to ensure correct responses.
+
+#### Phase 4: Integration and Testing
+1. **Frontend-Backend:** Connect search UI to `/api/linkedin/search` using `@tanstack/react-query`.
+2. **Error Handling:** Implement toast notifications for API errors (`react-hot-toast`).
+3. **End-to-End Testing:** Test flows (search → campaign → connection) with sample data.
+4. **Security Audit:** Verify OAuth token storage and Supabase RLS policies.
+
+#### Phase 5: Deployment and Monitoring
+1. **Deploy:** Push to Vercel with `vercel.json` configurations.
+2. **Monitoring:** Set up Vercel analytics and Supabase logs for performance tracking.
+3. **Validation:** Test production URLs (e.g., `https://leadsprospectr.com/dashboard`) for all features.
+4. **Documentation:** Update `README.md` with API endpoints and deployment notes.
+
+---
+
+### Notes for Development Team and AI
+- **Specificity:** All endpoints, UI paths, and data models are explicitly defined for AI compatibility.
+- **Iteration:** Update this PRD in `.cursor/rules/project-overview.mdc` if requirements change.
+- **Dependencies:** Backend APIs must be developed alongside frontend to enable integration.
+- **Security:** Encrypt `linkedin_token` in `profiles` using `pgcrypto` and enforce RLS.
+- **Rate Limits:** Implement a queue system in `/api/auths/linkedin/connect` to handle Unipile API limits.
+
+This PRD provides a detailed roadmap for building Prospectr, ensuring all critical features are implemented while maintaining flexibility for future iterations.

@@ -1,0 +1,123 @@
+---
+description: helps agent know what to do next
+globs: 
+alwaysApply: false
+---
+**Update this rule if user requested changes to the project requirement, etc.**
+
+Implementation Plan
+Below is a detailed, actionable plan with 50+ specific steps to address the requested enhancements: fixing authentication, adding Google Auth and simple sign-in, improving LinkedIn sign-in and URL handling, and implementing two Stripe plans. These steps are designed for manual execution or AI-assisted development with tools like Cursor or Windsurf.
+1. Fix Authentication Flow
+Audit Supabase Config: Review NEXT_PUBLIC_SUPABASE_URL and SUPABASE_ANON_KEY in .env.local for correctness.
+
+Enable Email Confirmations: Update Supabase Auth settings to require email verification (auth.email.enable_confirmations = true in supabase/config.toml).
+
+Set Up Resend: Verify RESEND_API_KEY in .env.local and test email sending with a dummy message.
+
+Create Email Templates: Add HTML templates in supabase/templates/ for sign-up, password reset, and confirmation emails.
+
+Update Sign-Up Route: Modify /app/signup/page.js to trigger email confirmation post-registration.
+
+Test Sign-Up Flow: Register a test user and verify email receipt and confirmation link functionality.
+
+Fix Session Persistence: Adjust utils/supabase/middleware.js to extend maxAge to 30 days and handle expired sessions gracefully.
+
+Add Session Refresh Logic: In middleware.js, implement a retry mechanism for session refresh on 401 errors.
+
+Test Session Stability: Simulate a logout after 24 hours and ensure users remain authenticated post-refresh.
+
+Log Errors: Add error logging in utils/supabase/server.js to capture authentication failures.
+
+2. Add Google Auth and Simple Sign-In
+Set Up Google OAuth: Register an app in Google Cloud Console and obtain client ID/secret.
+
+Configure Supabase: Add Google provider in Supabase dashboard with credentials from step 11.
+
+Update .env.local: Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.
+
+Modify Sign-In Page: Edit /app/signin/page.js to include a "Sign in with Google" button using signInWithGoogle from utils/action.js.
+
+Implement Callback: Ensure /app/auth/callback/route.js handles Google OAuth redirects and sets session cookies.
+
+Test Google Auth: Sign in with a Google account and verify user creation in Supabase.
+
+Add Simple Sign-In: Update /app/signin/page.js to support email/password login if not already present.
+
+Validate Simple Sign-In: Test email/password login with a test account and confirm session persistence.
+
+Style Auth Pages: Use Tailwind CSS in /app/signin/page.js and /app/signup/page.js for consistent UI.
+
+Document Auth Flow: Update docs/ with a new auth-flow.md detailing both methods.
+
+3. Fix LinkedIn Sign-In Edge Cases
+Review Unipile Config: Verify UNIPILE_API_TOKEN and UNIPILE_REDIRECT_URI in .env.local.
+
+Test Current Flow: Attempt LinkedIn sign-in via /api/auths/linkedin/connect/route.js and log failures.
+
+Handle Token Expiry: Add logic in utils/unipileClient.js to refresh Unipile tokens if expired.
+
+Update Connect Route: Modify /api/auths/linkedin/connect/route.js to retry on 401 errors with a refreshed token.
+
+Add Reconnection Logic: Use utils/email/reconnectionEmail.js to send reconnect prompts on persistent failures.
+
+Test Edge Cases: Simulate network interruptions and expired tokens, ensuring sign-in succeeds.
+
+Log Unipile Errors: Add console logs in utils/unipileClient.js for debugging API responses.
+
+Improve Status Check: Enhance /api/auths/linkedin/status/route.js to return detailed error codes.
+
+Update Settings UI: Modify /app/dashboard/settings/page.js to display LinkedIn connection status clearly.
+
+Test Reconnection: Disconnect and reconnect a LinkedIn account, verifying email and UI updates.
+
+4. Handle LinkedIn URLs Better
+Analyze Current Handling: Review /utils/linkedin/searchParameters.js for URL parsing logic.
+
+Define URL Patterns: Research LinkedIn URL structures (e.g., linkedin.com/in/username) and document in docs/linkedin-integration.md.
+
+Create Parser Function: Add a parseLinkedInUrl function in utils/linkedin/ to extract profile IDs.
+
+Update Search Endpoint: Modify /api/linkedin/search/route.js to use parseLinkedInUrl for input validation.
+
+Test URL Parsing: Input various LinkedIn URLs (e.g., with/without trailing slashes) and verify profile extraction.
+
+Enhance Invitation Sending: Update /api/linkedin/invitations/send/route.js to use parsed IDs for connections.
+
+Add Fallback Logic: If URL parsing fails, fetch profile data via Unipile API as a backup.
+
+Rate Limit Requests: Implement a 1-minute delay between requests in /api/linkedin/invitations/send/route.js.
+
+Store Parsed Data: Save extracted profile IDs in Supabase linkedin_connections table.
+
+Test Connection Flow: Send a connection request using a pasted URL and confirm success.
+
+5. Implement Stripe for Two Plans
+Define Plans: Create "Basic" ($19.99/month, 100 connections) and "Premium" ($49.99/month, 500 connections) in Stripe dashboard.
+
+Update Config: Edit config.js to reflect new plans with priceId from Stripe.
+
+Modify Checkout Route: Update /api/stripe/create-checkout/route.js to accept a planType parameter and select the correct priceId.
+
+Create Pricing Page: Add /app/pricing/page.js with Tailwind-styled plan options and checkout buttons.
+
+Handle Webhooks: Enhance /api/webhook/stripe/route.js to update profiles.subscription_tier on subscription events.
+
+Restrict Features: Modify utils/check-subscription.js to limit connections based on subscription_tier.
+
+Test Checkout: Subscribe to each plan and verify redirection to /dashboard.
+
+Update Dashboard: Edit /app/dashboard/page.js to display current plan and connection limits.
+
+Test Access Control: Attempt to exceed connection limits on Basic plan and confirm restriction.
+
+Document Plans: Add a stripe-plans.md in docs/ detailing plan features and integration steps.
+
+6. Additional Enhancements
+Add Campaign Analytics: Update /api/linkedin/analytics/route.js to track sent/accepted invitations.
+
+Test Campaign Flow: Create a campaign in /app/dashboard/campaigns/new/ and verify tracking.
+
+Optimize UI: Use DaisyUI components in /components/ui/ for consistent dashboard styling.
+
+Secure Routes: Ensure all /dashboard/* routes redirect unauthenticated users to /signin.
+
