@@ -41,7 +41,7 @@ export default function UpgradePage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold text-white mb-2">
-              Upgrade Your Plan
+              Prospectr Pro Plan
             </h1>
             <p className="text-[#A1A1AA]">
               Get access to all Prospectr features and take your LinkedIn
@@ -53,9 +53,7 @@ export default function UpgradePage() {
             {/* Pro Plan */}
             <div
               className={`bg-[#0F0F0F] rounded-lg border ${
-                subscriptionTier === "pro"
-                  ? "border-red-500"
-                  : "border-[#1A1A1A]"
+                isSubscribed ? "border-red-500" : "border-[#1A1A1A]"
               } overflow-hidden`}
             >
               <div className="bg-gradient-to-r from-red-500 to-red-700 text-white text-xs font-medium text-center py-1">
@@ -70,7 +68,7 @@ export default function UpgradePage() {
                     </h2>
                     <p className="text-[#A1A1AA] mt-2">{proPlan.description}</p>
                   </div>
-                  {subscriptionTier === "pro" && (
+                  {isSubscribed && (
                     <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded-full">
                       Current Plan
                     </span>
@@ -91,19 +89,17 @@ export default function UpgradePage() {
                     priceId={proPlan.priceId}
                     productLink={proPlan.link}
                     className={`w-full btn ${
-                      subscriptionTier === "pro"
+                      isSubscribed
                         ? "btn-disabled bg-[#2A2A2A] text-[#A1A1AA]"
                         : "bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
                     }`}
-                    disabled={subscriptionTier === "pro"}
+                    disabled={isSubscribed}
                     theme="red"
                   >
-                    {subscriptionTier === "pro"
-                      ? "Current Plan"
-                      : "Upgrade Now"}
+                    {isSubscribed ? "Current Plan" : "Get Pro Plan"}
                   </ButtonCheckout>
 
-                  {!subscriptionTier && (
+                  {!isSubscribed && (
                     <p className="text-center text-sm text-[#A1A1AA] mt-2">
                       $0.00 due today, cancel anytime
                     </p>

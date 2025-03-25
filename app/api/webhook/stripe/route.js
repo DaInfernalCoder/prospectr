@@ -60,8 +60,8 @@ export async function POST(req) {
         const plan = configFile.stripe.plans.find((p) => p.priceId === priceId);
         console.log({ plan });
 
-        // Determine subscription tier based on plan name
-        const subscriptionTier = plan?.name?.toLowerCase() === 'premium' ? 'premium' : 'pro';
+        // Set subscription tier to pro
+        const subscriptionTier = "pro";
 
         // Get subscription data to check trial status
         const subscriptionId = session?.subscription;
@@ -195,10 +195,10 @@ export async function POST(req) {
 
         // Get the price ID from the subscription
         const priceId = subscription.items.data[0]?.price.id;
-        
+
         // Find the plan and determine the tier
         const plan = configFile.stripe.plans.find((p) => p.priceId === priceId);
-        const subscriptionTier = plan?.name?.toLowerCase() === 'premium' ? 'premium' : 'pro';
+        const subscriptionTier = "pro";
 
         // Check if trial status changed
         const trialEndsAt = subscription.trial_end
@@ -250,14 +250,18 @@ export async function POST(req) {
         break;
       }
 
-      case "invoice.paid": {
-        // Recurring payment success - extend access
-        const customerId = data.object.customer;
+      case "invoice.payment_succeeded": {
+        // Invoice paid, update access if needed
+        const invoice = data.object;
+        const customerId = invoice.customer;
+        const subscriptionId = invoice.subscription;
 
-        // Find profile
+        // Skip one-time payments with no subscription
+        if (!subscriptionId) break;
+
         const { data: user } = await supabase
           .from("profiles")
-          .select("user_id, price_id")
+          .select("user_id, subscription_status")
           .eq("customer_id", customerId)
           .single();
 
@@ -266,13 +270,20 @@ export async function POST(req) {
           break;
         }
 
-        // Grant access and update records
+        // Get subscription to check plan details
+        const subscription = await stripe.subscriptions.retrieve(
+          subscriptionId
+        );
+        const priceId = subscription.items.data[0]?.price.id;
+        const subscriptionTier = "pro";
+
         await supabase
           .from("profiles")
           .update({
             has_access: true,
             subscription_status: "active",
-            last_payment_at: new Date().toISOString(),
+            subscription_tier: subscriptionTier,
+            last_payment_date: new Date().toISOString(),
           })
           .eq("user_id", user.user_id);
 
