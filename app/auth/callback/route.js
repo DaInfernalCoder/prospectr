@@ -24,11 +24,14 @@ export async function GET(request) {
     const supabase = await createClient();
 
     try {
-      // Exchange the code for a session with persistence enabled
+      let error = null;
+
+      // Exchange the code for a session
       const { error: exchangeError } =
         await supabase.auth.exchangeCodeForSession(code);
+      error = exchangeError;
 
-      if (!exchangeError) {
+      if (!error) {
         // Get the current domain
         const forwardedHost = request.headers.get("x-forwarded-host");
         const host = forwardedHost || request.headers.get("host");
@@ -41,14 +44,18 @@ export async function GET(request) {
 
         // If this was a sign-in from the checkout process, get the selected plan ID
         // and create a checkout session
-        if (cookieStore.has("redirectToCheckoutAfterAuth")) {
-          cookieStore.delete("redirectToCheckoutAfterAuth");
+        const hasRedirectCookie = await cookieStore.has(
+          "redirectToCheckoutAfterAuth"
+        );
+        if (hasRedirectCookie) {
+          await cookieStore.delete("redirectToCheckoutAfterAuth");
 
           // Try to extract the selectedPlanId from the cookie
-          const selectedPlanId = cookieStore.get("selectedPlanId")?.value;
+          const selectedPlanId = (await cookieStore.get("selectedPlanId"))
+            ?.value;
 
           if (selectedPlanId) {
-            cookieStore.delete("selectedPlanId");
+            await cookieStore.delete("selectedPlanId");
 
             // Get user info needed for checkout
             const {
@@ -85,12 +92,12 @@ export async function GET(request) {
         // Default redirect to dashboard
         return NextResponse.redirect(`${baseUrl}/dashboard`);
       } else {
-        console.error("Error during authentication callback:", exchangeError);
+        console.error("Error during authentication callback:", error);
         return NextResponse.redirect(
           `${
             process.env.NEXT_PUBLIC_APP_URL
           }/signin?error=auth-failed&message=${encodeURIComponent(
-            exchangeError.message
+            error.message
           )}`
         );
       }

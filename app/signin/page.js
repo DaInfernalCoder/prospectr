@@ -27,10 +27,6 @@ export default function Login() {
         options: {
           redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
           persistSession: true,
-          sessionConfig: {
-            lifetime: 60 * 60 * 24 * 7, // 7 days
-            rememberMe: true,
-          },
         },
       });
 

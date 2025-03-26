@@ -1,55 +1,14 @@
-import { createServerClient } from "@supabase/ssr";
+import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
 import { NextResponse } from "next/server";
 
-export async function middleware(request) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+export async function middleware(req) {
+  const res = NextResponse.next();
+  const supabase = createMiddlewareClient({ req, res });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
+  // Refresh session if expired
+  await supabase.auth.getSession();
 
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  // IMPORTANT: DO NOT REMOVE auth.getUser()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Protected routes - redirect to signin if not authenticated
-  if (
-    !user &&
-    (request.nextUrl.pathname.startsWith("/dashboard") ||
-      request.nextUrl.pathname.startsWith("/survey"))
-  ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/signin";
-    return NextResponse.redirect(url);
-  }
-
-  return supabaseResponse;
+  return res;
 }
 
 export const config = {
