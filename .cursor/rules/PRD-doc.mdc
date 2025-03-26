@@ -1,7 +1,7 @@
 ---
-description: Below is a Product Requirements Document (PRD) for Prospectr. This document summarizes the overall vision, core user journeys, technical components, and scope boundaries in a clean, concise format that can be easily iterated upon.
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 Update this rule if user requested changes to the project requirement, etc.
 

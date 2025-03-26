@@ -1,7 +1,7 @@
 ---
-description: Coding rules for Supabase Edge Functions
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Writing Supabase Edge Functions
 

@@ -1,7 +1,7 @@
 ---
-description: Guidelines for writing Postgres SQL
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Postgres SQL Style Guide
 

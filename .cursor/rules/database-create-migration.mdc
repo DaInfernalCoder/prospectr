@@ -1,7 +1,7 @@
 ---
-description: Guidelines for writing Postgres migrations
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Database: Create migration

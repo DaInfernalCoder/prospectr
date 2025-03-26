@@ -1,7 +1,7 @@
 ---
-description: helps ai understand the backend just that little bit better
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 BACKEND STRUCTURE DOCUMENT
 Overview

@@ -1,7 +1,7 @@
 ---
-description: shows the tech stack for easy AI use
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 **Update this rule if user requested changes to the project requirement, etc.**
 

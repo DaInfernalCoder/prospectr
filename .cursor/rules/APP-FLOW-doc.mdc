@@ -1,7 +1,7 @@
 ---
-description: shows the flow of app for AI to use 
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Prospectr App Flow Document
 

@@ -1,7 +1,7 @@
 ---
-description: fronend guidelines for the AI
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 FRONTEND GUIDELINES
 Update this rule if user requested changes to the project requirement, etc.

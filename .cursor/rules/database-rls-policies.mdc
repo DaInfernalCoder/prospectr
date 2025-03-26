@@ -1,7 +1,7 @@
 ---
-description: Guidelines for writing Postgres Row Level Security policies
+description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Database: Create RLS policies
