@@ -6,11 +6,11 @@ export async function GET(request) {
   try {
     const user = await getUser();
 
-    console.log(user.id, "userId");
-
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    console.log(user.id, "userId");
 
     const analytics = await getLinkedInAnalytics(user.id);
 

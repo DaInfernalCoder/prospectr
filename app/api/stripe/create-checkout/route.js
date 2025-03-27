@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getUser } from "@/utils/supabase/getUser";
 import config from "@/config";
+import { createClient } from "@/utils/supabase/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -13,17 +14,40 @@ export async function POST(req) {
     const { priceId, successUrl, cancelUrl } = await req.json();
 
     // Get authenticated user
-    const user = await getUser();
+    let user = await getUser();
+
+    // If no user, try to refresh the session
     if (!user) {
-      // Return a response indicating the user needs to sign up
-      return NextResponse.json(
-        {
-          error: "Authentication required",
-          redirectToSignup: true,
-          status: 401,
-        },
-        { status: 401 }
-      );
+      const supabase = await createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        // Try to refresh the session
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (!refreshError) {
+          // Get the user again after refresh
+          const {
+            data: { user: refreshedUser },
+          } = await supabase.auth.getUser();
+          if (refreshedUser) {
+            user = refreshedUser;
+          }
+        }
+      }
+
+      // If still no user after refresh, return signup redirect
+      if (!user) {
+        return NextResponse.json(
+          {
+            error: "Authentication required",
+            redirectToSignup: true,
+            status: 401,
+          },
+          { status: 401 }
+        );
+      }
     }
 
     // Determine if this is the Premium plan (to add trial period)

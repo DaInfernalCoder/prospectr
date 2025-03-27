@@ -18,8 +18,7 @@ const config = {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
     plans: [
       {
-        priceId:
-          process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || "prod_S0PrWEtJP90ffJ",
+        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
         price: 15,
         name: "Pro",
         description: "Everything you need for LinkedIn automation",
