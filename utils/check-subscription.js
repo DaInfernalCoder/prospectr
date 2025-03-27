@@ -51,6 +51,7 @@ export async function checkSubscription(
     const sessionOptions = {
       mode: "subscription",
       payment_method_types: ["card"],
+      allow_promotion_codes: true,
       line_items: [
         {
           price: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
