@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useCampaignStore } from "@/app/store/campaignStore";
 import { useMutation } from "@tanstack/react-query";
+import UpdateFrequencyInfo from "../../../../components/UpdateFrequencyInfo";
 
 export default function ReviewPage() {
   const router = useRouter();
@@ -286,10 +287,13 @@ export default function ReviewPage() {
             <h2 className="text-2xl font-bold text-white mb-2">
               Campaign Published!
             </h2>
-            <p className="text-[#A3A3A3] max-w-md mx-auto">
+            <p className="text-[#A3A3A3] max-w-md mx-auto mb-6">
               Your connection requests will be sent to {selectedLeads.length}{" "}
               leads. You can track the progress in your campaigns dashboard.
             </p>
+            <div className="max-w-md mx-auto">
+              <UpdateFrequencyInfo />
+            </div>
           </div>
 
           <div className="flex justify-center space-x-4">
