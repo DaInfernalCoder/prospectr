@@ -9,7 +9,7 @@ export async function POST(request) {
     const payload = await request.json();
     console.log({ payload });
 
-    if (!payload.account_id || !payload.name) {
+    if (!payload.account_id || !payload.name || !payload.event) {
       return NextResponse.json({ error: "Bad request" }, { status: 400 });
     }
 
@@ -27,12 +27,29 @@ export async function POST(request) {
     }
     console.log("Found user:", user);
 
+    // Handle different webhook events
+    const updateData = {
+      unipile_account_id: payload.account_id,
+      updated_at: new Date().toISOString(),
+    };
+
+    switch (payload.event) {
+      case "account.connected":
+        updateData.linkedin_status = true;
+        break;
+      case "account.disconnected":
+      case "account.expired":
+      case "account.revoked":
+        updateData.linkedin_status = false;
+        break;
+      default:
+        console.log("Unhandled webhook event:", payload.event);
+        return NextResponse.json({ success: true });
+    }
+
     const { data, error } = await supabase
       .from("profiles")
-      .update({
-        unipile_account_id: payload.account_id,
-        linkedin_status: true,
-      })
+      .update(updateData)
       .eq("user_id", payload.name)
       .select();
 

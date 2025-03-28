@@ -35,14 +35,57 @@ export async function POST(request) {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("unipile_account_id")
+      .select("unipile_account_id, linkedin_status")
       .eq("user_id", user.id)
       .single();
 
-    if (!profile?.unipile_account_id) {
+    if (!profile?.unipile_account_id || !profile?.linkedin_status) {
       return NextResponse.json(
-        { error: "LinkedIn not connected" },
+        { error: "LinkedIn not connected or connection expired" },
         { status: 400 }
+      );
+    }
+
+    // Verify connection status with Unipile
+    try {
+      const statusResponse = await fetch(
+        `${process.env.UNIPILE_API_URL}/api/v1/accounts/status?account_id=${profile.unipile_account_id}`,
+        {
+          headers: {
+            "X-API-KEY": process.env.UNIPILE_API_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!statusResponse.ok) {
+        // Update connection status in database
+        await supabase
+          .from("profiles")
+          .update({
+            linkedin_status: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id);
+
+        return NextResponse.json(
+          { error: "LinkedIn connection has expired" },
+          { status: 401 }
+        );
+      }
+
+      const statusData = await statusResponse.json();
+      if (statusData.status !== "active") {
+        return NextResponse.json(
+          { error: "LinkedIn connection is not active" },
+          { status: 401 }
+        );
+      }
+    } catch (error) {
+      console.error("Failed to verify LinkedIn connection:", error);
+      return NextResponse.json(
+        { error: "Failed to verify LinkedIn connection" },
+        { status: 500 }
       );
     }
 

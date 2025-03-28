@@ -16,7 +16,7 @@ export async function GET(request) {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("linkedin_status, linkedin_token")
+      .select("linkedin_status, linkedin_token, unipile_account_id")
       .eq("user_id", user.id)
       .single();
 
@@ -24,37 +24,47 @@ export async function GET(request) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // if (profile.linkedin_token) {
-    //   try {
-    //     const response = await fetch(
-    //       `${process.env.UNIPILE_API_URL}/accounts/status`,
-    //       {
-    //         headers: {
-    //           "X-API-KEY": process.env.UNIPILE_API_TOKEN,
-    //           "Content-Type": "application/json",
-    //         },
-    //       }
-    //     );
+    if (profile.linkedin_token || profile.unipile_account_id) {
+      try {
+        const response = await fetch(
+          `${process.env.UNIPILE_API_URL}/api/v1/accounts/status?account_id=${profile.unipile_account_id}`,
+          {
+            headers: {
+              "X-API-KEY": process.env.UNIPILE_API_TOKEN,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-    //     if (!response.ok) {
-    //       // Update status if token is invalid
-    //       await supabase
-    //         .from("profiles")
-    //         .update({
-    //           linkedin_status: false,
-    //           updated_at: new Date().toISOString(),
-    //         })
-    //         .eq("user_id", user.id);
+        if (!response.ok) {
+          // Update status if token is invalid
+          await supabase
+            .from("profiles")
+            .update({
+              linkedin_status: false,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("user_id", user.id);
 
-    //       return NextResponse.json({
-    //         connected: false,
-    //         last_connected: profile.updated_at,
-    //       });
-    //     }
-    //   } catch (error) {
-    //     console.error("Unipile status check error:", error);
-    //   }
-    // }
+          return NextResponse.json({
+            connected: false,
+            last_connected: profile.updated_at,
+          });
+        }
+
+        const data = await response.json();
+        return NextResponse.json({
+          connected: data.status === "active",
+          last_connected: profile.updated_at,
+        });
+      } catch (error) {
+        console.error("Unipile status check error:", error);
+        return NextResponse.json({
+          connected: false,
+          error: "Failed to check connection status",
+        });
+      }
+    }
 
     return NextResponse.json({
       connected: profile.linkedin_status,
