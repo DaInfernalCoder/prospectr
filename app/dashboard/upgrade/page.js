@@ -5,8 +5,10 @@ import { Check } from "lucide-react";
 import ButtonCheckout from "@/components/ButtonCheckout";
 import config from "@/config";
 import TrackdeskScriptWrapper from "@/components/TrackdeskScriptWrapper";
+import { useRouter } from "next/navigation";
 
 export default function UpgradePage() {
+  const router = useRouter();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +26,12 @@ export default function UpgradePage() {
 
         setIsSubscribed(data.user?.isSubscribed || false);
         setSubscriptionTier(data.user?.subscriptionTier || null);
+
+        // If user is already subscribed, redirect to dashboard
+        if (data.user?.isSubscribed) {
+          router.push("/dashboard");
+          return;
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
@@ -32,7 +40,21 @@ export default function UpgradePage() {
     };
 
     fetchUserData();
-  }, []);
+  }, [router]);
+
+  // Show loading state while checking subscription
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+      </div>
+    );
+  }
+
+  // If somehow the subscribed user sees this page, show a message
+  if (isSubscribed) {
+    return null; // This will prevent any flash of content before redirect
+  }
 
   return (
     <>

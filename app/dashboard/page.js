@@ -158,9 +158,9 @@ function DashboardContent() {
         >
           New Campaign
         </Button>
-        {!isSubscribed && (
+        {!isSubscribed && !isLoading && (
           <Button
-            onClick={() => router.push("/dashboard/settings")}
+            onClick={() => router.push("/dashboard/upgrade")}
             className="text-sm sm:text-base py-2 px-3 sm:px-4 bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
           >
             <span className="flex items-center justify-center gap-1">

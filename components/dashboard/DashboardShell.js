@@ -72,8 +72,18 @@ export default function DashboardShell({ children }) {
     checkSubscription();
   }, []);
 
-  // Determine if user needs to upgrade (not subscribed)
-  const needsUpgrade = !isSubscribed;
+  // Get navigation links based on subscription status
+  const getNavigationLinks = () => {
+    const links = [...navigationLinks];
+    if (!isSubscribed) {
+      links.push({
+        href: "/dashboard/upgrade",
+        label: "Upgrade",
+        icon: Zap,
+      });
+    }
+    return links;
+  };
 
   return (
     <div
@@ -135,7 +145,7 @@ export default function DashboardShell({ children }) {
           )}
 
           <nav className="flex-1 px-4 py-2 space-y-1">
-            {navigationLinks.map((item) => {
+            {getNavigationLinks().map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
