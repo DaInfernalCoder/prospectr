@@ -74,15 +74,15 @@ export default function DashboardShell({ children }) {
 
   // Get navigation links based on subscription status
   const getNavigationLinks = () => {
-    const links = [...navigationLinks];
-    if (!isSubscribed) {
-      links.push({
-        href: "/dashboard/upgrade",
-        label: "Upgrade",
-        icon: Zap,
-      });
-    }
-    return links;
+    return navigationLinks;
+  };
+
+  const getPageTitle = () => {
+    if (pathname === "/dashboard") return "Dashboard";
+    if (pathname === "/dashboard/campaigns") return "Campaigns";
+    if (pathname === "/dashboard/analytics") return "Analytics";
+    if (pathname === "/dashboard/settings") return "Settings";
+    return "";
   };
 
   return (
@@ -171,7 +171,7 @@ export default function DashboardShell({ children }) {
         <header className="hidden md:flex items-center justify-between h-16 px-6 border-b border-[#1A1A1A] sticky top-0 bg-black z-10">
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-medium tracking-tight">
-              {getPageTitle(pathname)}
+              {getPageTitle()}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -199,7 +199,7 @@ export default function DashboardShell({ children }) {
         {/* Mobile header title and actions */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A] mt-16">
           <h1 className="text-lg font-medium tracking-tight">
-            {getPageTitle(pathname)}
+            {getPageTitle()}
           </h1>
           <div className="flex items-center gap-2">
             {!linkedInStatus.connected &&
@@ -222,21 +222,5 @@ export default function DashboardShell({ children }) {
         </div>
       </main>
     </div>
-  );
-}
-
-// Helper function to get page title based on pathname
-function getPageTitle(pathname) {
-  if (pathname === "/dashboard") return "Dashboard";
-  if (pathname === "/dashboard/campaigns") return "Campaigns";
-  if (pathname === "/dashboard/analytics") return "Analytics";
-  if (pathname === "/dashboard/settings") return "Settings";
-  if (pathname === "/dashboard/upgrade") return "Upgrade";
-
-  // Extract the last part of the pathname as a fallback
-  const segments = pathname.split("/");
-  return (
-    segments[segments.length - 1].charAt(0).toUpperCase() +
-    segments[segments.length - 1].slice(1)
   );
 }

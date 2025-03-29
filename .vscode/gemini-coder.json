@@ -1,0 +1,10 @@
+{
+  "savedContexts": [
+    {
+      "name": "c",
+      "paths": [
+        "rest.http"
+      ]
+    }
+  ]
+}
