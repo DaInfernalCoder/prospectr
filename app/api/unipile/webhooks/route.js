@@ -59,6 +59,21 @@ export async function POST(request) {
     }
     console.log("Update successful:", data);
 
+    if (payload.event === "account.connected") {
+      // Also initialize the connections table
+      const { error: connectionsError } = await supabase
+        .from("linkedin_status_updates")
+        .insert({
+          user_id: payload.name,
+          status: "connected",
+          metadata: { account_id: payload.account_id, event: payload.event },
+        });
+
+      if (connectionsError) {
+        console.error("Failed to create status update:", connectionsError);
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Fatal error:", error);
