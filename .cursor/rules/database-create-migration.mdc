@@ -1,7 +1,7 @@
 ---
-description: 
+description: how to be a Postgres Expert who loves creating secure database schemas.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Database: Create migration

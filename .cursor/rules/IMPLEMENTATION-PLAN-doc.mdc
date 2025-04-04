@@ -3,121 +3,75 @@ description:
 globs: 
 alwaysApply: true
 ---
+---
+description: 
+globs: 
+alwaysApply: true
+---
 **Update this rule if user requested changes to the project requirement, etc.**
 
-Implementation Plan
-Below is a detailed, actionable plan with 50+ specific steps to address the requested enhancements: fixing authentication, adding Google Auth and simple sign-in, improving LinkedIn sign-in and URL handling, and implementing two Stripe plans. These steps are designed for manual execution or AI-assisted development with tools like Cursor or Windsurf.
-1. Fix Authentication Flow
-Audit Supabase Config: Review NEXT_PUBLIC_SUPABASE_URL and SUPABASE_ANON_KEY in .env.local for correctness.
+# Prospectr Implementation Status & Plan
 
-Enable Email Confirmations: Update Supabase Auth settings to require email verification (auth.email.enable_confirmations = true in supabase/config.toml).
+**Last Updated:** 2024-04-04
 
-Set Up Resend: Verify RESEND_API_KEY in .env.local and test email sending with a dummy message.
+**Note**: This document reflects the current implementation status based on the codebase and outlines potential next steps or areas matching the original plan.
 
-Create Email Templates: Add HTML templates in supabase/templates/ for sign-up, password reset, and confirmation emails.
+## 1. Authentication Flow
 
-Update Sign-Up Route: Modify /app/signup/page.js to trigger email confirmation post-registration.
+*   **Supabase Config:** `.env.local` contains `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. **Status: Implemented.**
+*   **Email Confirmations:** `supabase/config.toml` has `auth.email.enable_confirmations = false`. **Status: Configured (Disabled).** *Plan Mismatch: Original plan intended to enable this.*
+*   **Resend Setup:** `RESEND_API_KEY` exists in `.env.local`. `utils/email/reconnectionEmail.js` uses Resend. **Status: Implemented.**
+*   **Email Templates:** No custom templates found in `supabase/templates/`. **Status: Not Implemented.**
+*   **Sign-Up Flow:** `app/signup/SignupForm.js` handles email/password signup via Supabase client. Confirmation depends on Supabase config. **Status: Implemented.**
+*   **Session Persistence:** `middleware.js` uses `@supabase/ssr` with a 7-day `maxAge`. **Status: Implemented.**
+*   **Session Refresh Logic:** `middleware.js` includes logic to attempt session refresh if `user` is null but `session` exists. **Status: Implemented.**
+*   **Error Logging:** Basic `console.error` exists in various auth-related files. **Status: Partially Implemented.**
 
-Test Sign-Up Flow: Register a test user and verify email receipt and confirmation link functionality.
+## 2. Google Auth and Simple Sign-In
 
-Fix Session Persistence: Adjust utils/supabase/middleware.js to extend maxAge to 30 days and handle expired sessions gracefully.
+*   **Google OAuth Setup:** No `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` in `.env.local`. Supabase config doesn't explicitly enable Google. **Status: Not Implemented.** *Plan Mismatch: Google Auth was planned.*
+*   **Sign-In Page:** `app/signin/page.js` includes a "Sign in with Google" button calling `signInWithGoogle` from `utils/action.js`. **Status: Frontend Implemented, Backend Config Missing.**
+*   **Callback Handling:** `app/auth/callback/route.js` handles the Supabase code exchange. It needs configuration to handle Google specifically if required beyond Supabase's default handling. **Status: Implemented (Generic).**
+*   **Simple Sign-In:** `app/signin/page.js` supports email/password login. **Status: Implemented.**
+*   **Auth Page Styling:** Tailwind/DaisyUI used in `signin` and `signup` pages. **Status: Implemented.**
+*   **Auth Flow Documentation:** `docs/` directory does not contain `auth-flow.md`. **Status: Not Implemented.**
 
-Add Session Refresh Logic: In middleware.js, implement a retry mechanism for session refresh on 401 errors.
+## 3. LinkedIn Sign-In (via Unipile)
 
-Test Session Stability: Simulate a logout after 24 hours and ensure users remain authenticated post-refresh.
+*   **Unipile Config:** `UNIPILE_API_URL`, `UNIPILE_API_TOKEN`, `UNIPILE_REDIRECT_URI` exist in `.env.local`. `utils/unipileClient.js` initializes the client. **Status: Implemented.**
+*   **Connect Flow:** `/api/auths/linkedin/connect/route.js` generates Unipile hosted auth link. `/api/unipile/webhooks/route.js` handles callbacks to update `profiles`. **Status: Implemented.**
+*   **Token Expiry Handling:** `/api/auths/linkedin/status/route.js` checks status and updates `linkedin_status` if connection fails. Reconnection flow initiated via `/api/auths/linkedin/reconnect/route.js` using `utils/email/reconnectionEmail.js`. **Status: Implemented.**
+*   **Reconnection Logic:** `/api/auths/linkedin/reconnect` generates token, sends email. `/api/reconnect` handles the link click and redirects to Unipile reconnect flow. **Status: Implemented.**
+*   **Error Logging:** `console.error` used in API routes and `unipileClient.js`. **Status: Partially Implemented.**
+*   **Status Check:** `/api/auths/linkedin/status/route.js` fetches status from Unipile and updates Supabase if needed. **Status: Implemented.**
+*   **Settings UI:** `app/dashboard/settings/page.js` uses `useLinkedIn` context and `ButtonLinkedin.js` to display status and trigger connect/reconnect. **Status: Implemented.**
 
-Log Errors: Add error logging in utils/supabase/server.js to capture authentication failures.
+## 4. LinkedIn URL Handling
 
-2. Add Google Auth and Simple Sign-In
-Set Up Google OAuth: Register an app in Google Cloud Console and obtain client ID/secret.
+*   **URL Parsing Logic:** No specific `parseLinkedInUrl` function found in `utils/linkedin/`. Search (`/api/linkedin/search/route.js`) and invitation sending (`/lib/invitation-service.js`) seem to rely on `identifier` or `provider_id` from Unipile results or passed data. **Status: Not Implemented as planned.**
+*   **Search Endpoint:** `/api/linkedin/search/route.js` accepts various parameters (keywords, IDs, names) and passes them to Unipile. **Status: Implemented (using Unipile parameters).**
+*   **Invitation Sending:** `lib/invitation-service.js` uses `provider_id` or fetches profile via `identifier` before sending. **Status: Implemented (using Unipile IDs).**
+*   **Rate Limiting:** `lib/invitation-service.js` implements a random delay between 2-5 minutes between invitation sends within a job. **Status: Implemented.**
+*   **Data Storage:** `invitation_users` stores `linkedin_user_id` (provider_id) and `linkedin_profile_url`. `saved_profiles` stores `profile_id`. **Status: Implemented.**
 
-Configure Supabase: Add Google provider in Supabase dashboard with credentials from step 11.
+## 5. Stripe Integration
 
-Update .env.local: Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.
+*   **Plan Definition:** Only one plan (Pro) defined in `config.js` with `priceId` from `.env.local`. **Status: Partially Implemented (One Plan).** *Plan Mismatch: Original plan specified two plans.*
+*   **Checkout Route:** `/api/stripe/create-checkout/route.js` exists, accepts `priceId`, handles logged-in/out users, adds trial period based on `config.js`. **Status: Implemented.**
+*   **Pricing Page:** `components/Pricing.js` displays the plan from `config.js`. Used on `app/page.js`. **Status: Implemented.**
+*   **Webhooks:** `/api/webhook/stripe/route.js` handles various events (`checkout.session.completed`, `customer.subscription.*`, `invoice.*`) to update `profiles` table (`has_access`, `subscription_status`, `customer_id`, etc.). **Status: Implemented.**
+*   **Feature Restriction:** `utils/check-subscription.js` checks `profiles.has_access` and can initiate checkout if needed. Used in various API routes (`connect`, `search`, `invitations/send`). **Status: Implemented.**
+*   **Customer Portal:** `/api/stripe/create-portal/route.js` creates Stripe Billing Portal session. Accessed from `app/dashboard/settings/page.js`. **Status: Implemented.**
+*   **Stripe Plans Documentation:** `docs/` directory does not contain `stripe-plans.md`. **Status: Not Implemented.**
 
-Modify Sign-In Page: Edit /app/signin/page.js to include a "Sign in with Google" button using signInWithGoogle from utils/action.js.
+## 6. Additional Enhancements
 
-Implement Callback: Ensure /app/auth/callback/route.js handles Google OAuth redirects and sets session cookies.
+*   **Campaign Analytics:** `/api/linkedin/analytics/route.js` calculates summary stats, campaign performance, and monthly trends from `invitation_jobs` and `invitation_users`. Data provided via `AnalyticsContext`. **Status: Implemented.**
+*   **UI Optimization:** DaisyUI and shadcn/ui components are used throughout the dashboard. **Status: Implemented.**
+*   **Route Security:** `middleware.js` protects `/dashboard/*` routes, redirecting unauthenticated users to `/signin`. **Status: Implemented.**
 
-Test Google Auth: Sign in with a Google account and verify user creation in Supabase.
+## Summary of Status vs. Original Plan
 
-Add Simple Sign-In: Update /app/signin/page.js to support email/password login if not already present.
-
-Validate Simple Sign-In: Test email/password login with a test account and confirm session persistence.
-
-Style Auth Pages: Use Tailwind CSS in /app/signin/page.js and /app/signup/page.js for consistent UI.
-
-Document Auth Flow: Update docs/ with a new auth-flow.md detailing both methods.
-
-3. Fix LinkedIn Sign-In Edge Cases
-Review Unipile Config: Verify UNIPILE_API_TOKEN and UNIPILE_REDIRECT_URI in .env.local.
-
-Test Current Flow: Attempt LinkedIn sign-in via /api/auths/linkedin/connect/route.js and log failures.
-
-Handle Token Expiry: Add logic in utils/unipileClient.js to refresh Unipile tokens if expired.
-
-Update Connect Route: Modify /api/auths/linkedin/connect/route.js to retry on 401 errors with a refreshed token.
-
-Add Reconnection Logic: Use utils/email/reconnectionEmail.js to send reconnect prompts on persistent failures.
-
-Test Edge Cases: Simulate network interruptions and expired tokens, ensuring sign-in succeeds.
-
-Log Unipile Errors: Add console logs in utils/unipileClient.js for debugging API responses.
-
-Improve Status Check: Enhance /api/auths/linkedin/status/route.js to return detailed error codes.
-
-Update Settings UI: Modify /app/dashboard/settings/page.js to display LinkedIn connection status clearly.
-
-Test Reconnection: Disconnect and reconnect a LinkedIn account, verifying email and UI updates.
-
-4. Handle LinkedIn URLs Better
-Analyze Current Handling: Review /utils/linkedin/searchParameters.js for URL parsing logic.
-
-Define URL Patterns: Research LinkedIn URL structures (e.g., linkedin.com/in/username) and document in docs/linkedin-integration.md.
-
-Create Parser Function: Add a parseLinkedInUrl function in utils/linkedin/ to extract profile IDs.
-
-Update Search Endpoint: Modify /api/linkedin/search/route.js to use parseLinkedInUrl for input validation.
-
-Test URL Parsing: Input various LinkedIn URLs (e.g., with/without trailing slashes) and verify profile extraction.
-
-Enhance Invitation Sending: Update /api/linkedin/invitations/send/route.js to use parsed IDs for connections.
-
-Add Fallback Logic: If URL parsing fails, fetch profile data via Unipile API as a backup.
-
-Rate Limit Requests: Implement a 1-minute delay between requests in /api/linkedin/invitations/send/route.js.
-
-Store Parsed Data: Save extracted profile IDs in Supabase linkedin_connections table.
-
-Test Connection Flow: Send a connection request using a pasted URL and confirm success.
-
-5. Implement Stripe for Two Plans
-Define Plans: Create "Basic" ($19.99/month, 100 connections) and "Premium" ($49.99/month, 500 connections) in Stripe dashboard.
-
-Update Config: Edit config.js to reflect new plans with priceId from Stripe.
-
-Modify Checkout Route: Update /api/stripe/create-checkout/route.js to accept a planType parameter and select the correct priceId.
-
-Create Pricing Page: Add /app/pricing/page.js with Tailwind-styled plan options and checkout buttons.
-
-Handle Webhooks: Enhance /api/webhook/stripe/route.js to update profiles.subscription_tier on subscription events.
-
-Restrict Features: Modify utils/check-subscription.js to limit connections based on subscription_tier.
-
-Test Checkout: Subscribe to each plan and verify redirection to /dashboard.
-
-Update Dashboard: Edit /app/dashboard/page.js to display current plan and connection limits.
-
-Test Access Control: Attempt to exceed connection limits on Basic plan and confirm restriction.
-
-Document Plans: Add a stripe-plans.md in docs/ detailing plan features and integration steps.
-
-6. Additional Enhancements
-Add Campaign Analytics: Update /api/linkedin/analytics/route.js to track sent/accepted invitations.
-
-Test Campaign Flow: Create a campaign in /app/dashboard/campaigns/new/ and verify tracking.
-
-Optimize UI: Use DaisyUI components in /components/ui/ for consistent dashboard styling.
-
-Secure Routes: Ensure all /dashboard/* routes redirect unauthenticated users to /signin.
-
+*   **Implemented:** Basic Auth (Email/Pass), Unipile/LinkedIn Integration (Connect, Status, Reconnect), Stripe Integration (Single Pro Plan, Checkout, Portal, Webhooks), Feature Restriction, Campaign Creation Flow (Search, Sequence, Review, Send), Basic Analytics, Core UI/Dashboard Structure.
+*   **Partially Implemented/Mismatch:** Email confirmation (configured off), Google Auth (frontend exists, backend config missing), Only one Stripe plan implemented, Detailed error logging could be improved.
+*   **Not Implemented:** Custom email templates, Specific LinkedIn URL parser function, Documentation files (`auth-flow.md`, `stripe-plans.md`).

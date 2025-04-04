@@ -50,6 +50,7 @@ Directory Structure
     APP-FLOW-doc.mdc
     BACKEND-STRUCTURES-doc.mdc
     code-format-sql.mdc
+    Coding_Guidelines.mdc
     database-create-migration.mdc
     database-functions.mdc
     database-rls-policies.mdc
@@ -144,6 +145,7 @@ app/
     page.js
   components/
     SectionBiography.tsx
+    UpdateFrequencyInfo.jsx
   dashboard/
     analytics/
       page.js
@@ -160,9 +162,6 @@ app/
         page.js
       page.js
     settings/
-      page.js
-    upgrade/
-      layout.js
       page.js
     layout.js
     page.js
@@ -676,12 +675,140 @@ order by
 ```
 
 ================
-File: .cursor/rules/database-create-migration.mdc
+File: .cursor/rules/Coding_Guidelines.mdc
 ================
 ---
 description: 
 globs: 
 alwaysApply: true
+---
+# Cursor Development Rules & AI Collaboration Guide
+ 
+## 📜 Core Philosophy
+ 
+1.  **Simplicity:** Prioritize simple, clear, and maintainable solutions. Avoid unnecessary complexity or over-engineering.
+2.  **Iterate:** Prefer iterating on existing, working code rather than building entirely new solutions from scratch, unless fundamentally necessary or explicitly requested.
+3.  **Focus:** Concentrate efforts on the specific task assigned. Avoid unrelated changes or scope creep.
+4.  **Quality:** Strive for a clean, organized, well-tested, and secure codebase.
+5.  **Collaboration:** This document guides both human developers and the AI assistant for effective teamwork.
+ 
+## 📚 Project Context & Understanding
+ 
+1.  **Documentation First:**
+    *   **Always** check for and thoroughly review relevant project documentation *before* starting any task. This includes:
+        *   `.cursor/rules/APP-FLOW-doc.mdc` (Application flow and routing documentation)
+        *   `.cursor/rules/BACKEND-STRUCTURES-doc.mdc` (Backend architecture and database schema)
+        *   `.cursor/rules/PRD-doc.mdc` (Product Requirements Document)
+        *   `.cursor/rules/TECH-STACK-doc.mdc` (Technology stack and dependencies)
+        *   `.cursor/rules/IMPLEMENTATION-PLAN-doc.mdc` (Technical specifications and implementation steps)
+        *   `.cursor/rules/FRONTEND-GUIDELINES.mdc` (Frontend development standards)
+        *   `.cursor/rules/code-format-sql.mdc` (SQL coding standards)
+        *   `.cursor/rules/database-create-migration.mdc` (Database migration guidelines)
+        *   `.cursor/rules/database-functions.mdc` (Database functions documentation)
+        *   `.cursor/rules/database-rls-policies.mdc` (Row Level Security policies)
+        *   `.cursor/rules/edge-functions.mdc` (Edge functions implementation guide)
+        *   `.cursor/rules/nextjs-supabase-auth.mdc` (Authentication implementation guide)
+    *   If documentation is missing, unclear, or conflicts with the request, **ask for clarification**.
+2.  **Architecture Adherence:**
+    *   Understand and respect module boundaries, data flow, system interfaces, and component dependencies outlined in `.cursor/rules/APP-FLOW-doc.mdc`.
+    *   Validate that changes comply with the established architecture. Warn and propose compliant solutions if a violation is detected.
+3.  **Pattern & Tech Stack Awareness:**
+    *   Reference `.cursor/rules/TECH-STACK-doc.mdc` and `.cursor/rules/FRONTEND-GUIDELINES.mdc` to understand and utilize existing patterns and technologies.
+    *   Exhaust options using existing implementations before proposing new patterns or libraries.
+ 
+## ⚙️ Task Execution & Workflow
+ 
+1.  **Task Definition:**
+    *   Clearly understand the task requirements, acceptance criteria, and any dependencies from `.cursor/rules/PRD-doc.mdc` and `.cursor/rules/IMPLEMENTATION-PLAN-doc.mdc`.
+2.  **Systematic Change Protocol:** Before making significant changes:
+    *   **Identify Impact:** Determine affected components, dependencies, and potential side effects.
+    *   **Plan:** Outline the steps. Tackle one logical change or file at a time.
+    *   **Verify Testing:** Confirm how the change will be tested. Add tests if necessary *before* implementing (see TDD).
+3.  **Progress Tracking:**
+    *   Keep track of changes and their impact on the system architecture and implementation plan.
+    *   Update relevant documentation in `.cursor/rules/` upon task completion or if requirements change during implementation.
+ 
+## 🤖 AI Collaboration & Prompting
+ 
+1.  **Clarity is Key:** Provide clear, specific, and unambiguous instructions to the AI. Define the desired outcome, constraints, and context.
+2.  **Context Referencing:** If a task spans multiple interactions, explicitly remind the AI of relevant previous context, decisions, or code snippets.
+3.  **Suggest vs. Apply:** Clearly state whether the AI should *suggest* a change for human review or *apply* a change directly (use only when high confidence and task is well-defined). Use prefixes like "Suggestion:" or "Applying fix:".
+4.  **Question AI Output:** Human developers should critically review AI-generated code. Question assumptions, verify logic, and don't blindly trust confident-sounding but potentially incorrect suggestions (hallucinations).
+5.  **Focus the AI:** Guide the AI to work on specific, focused parts of the task. Avoid overly broad requests that might lead to architectural or logical errors.
+6.  **Leverage Strengths:** Use the AI for tasks it excels at (boilerplate generation, refactoring specific patterns, finding syntax errors, generating test cases) but maintain human oversight for complex logic, architecture, and security.
+7.  **Incremental Interaction:** Break down complex tasks into smaller steps for the AI. Review and confirm each step before proceeding.
+8.  **Standard Check-in (for AI on large tasks):** Before providing significant code suggestions:
+    *   "Confirming understanding: I've reviewed [specific document/previous context]. The goal is [task goal], adhering to [key pattern/constraint]. Proceeding with [planned step]." (This replaces the more robotic "STOP AND VERIFY").
+ 
+## ✨ Code Quality & Style
+ 
+1.  **TypeScript Guidelines:** Use strict typing (avoid `any`). Document complex logic or public APIs with JSDoc.
+2.  **Readability & Maintainability:** Write clean, well-organized code.
+3.  **Small Files & Components:**
+    *   Keep files under **300 lines**. Refactor proactively.
+    *   Break down large React components into smaller, single-responsibility components.
+4.  **Avoid Duplication (DRY):** Actively look for and reuse existing functionality. Refactor to eliminate duplication.
+5.  **No Bazel:** Bazel is not permitted. Use project-specified build tools.
+6.  **Linting/Formatting:** Ensure all code conforms to project's ESLint/Prettier rules.
+7.  **Pattern Consistency:** Adhere to established project patterns. Don't introduce new ones without discussion/explicit instruction. If replacing an old pattern, ensure the old implementation is fully removed.
+8.  **File Naming:** Use clear, descriptive names. Avoid "temp", "refactored", "improved", etc., in permanent file names.
+9.  **No One-Time Scripts:** Do not commit one-time utility scripts into the main codebase.
+ 
+## ♻️ Refactoring
+ 
+1.  **Purposeful Refactoring:** Refactor to improve clarity, reduce duplication, simplify complexity, or adhere to architectural goals.
+2.  **Holistic Check:** When refactoring, look for duplicate code, similar components/files, and opportunities for consolidation across the affected area.
+3.  **Edit, Don't Copy:** Modify existing files directly. Do not duplicate files and rename them (e.g., `component-v2.tsx`).
+4.  **Verify Integrations:** After refactoring, ensure all callers, dependencies, and integration points function correctly. Run relevant tests.
+ 
+## ✅ Testing & Validation
+ 
+1.  **Test-Driven Development (TDD):**
+    *   **New Features:** Outline tests, write failing tests, implement code, refactor.
+    *   **Bug Fixes:** Write a test reproducing the bug *before* fixing it.
+2.  **Comprehensive Tests:** Write thorough unit, integration, and/or end-to-end tests covering critical paths, edge cases, and major functionality.
+3.  **Tests Must Pass:** All tests **must** pass before committing or considering a task complete. Notify the human developer immediately if tests fail and cannot be easily fixed.
+4.  **No Mock Data (Except Tests):** Use mock data *only* within test environments. Development and production should use real or realistic data sources.
+5.  **Manual Verification:** Supplement automated tests with manual checks where appropriate, especially for UI changes.
+ 
+## 🐛 Debugging & Troubleshooting
+ 
+1.  **Fix the Root Cause:** Prioritize fixing the underlying issue causing an error, rather than just masking or handling it, unless a temporary workaround is explicitly agreed upon.
+2.  **Console/Log Analysis:** Always check browser and server console output for errors, warnings, or relevant logs after making changes or when debugging. Report findings.
+3.  **Targeted Logging:** For persistent or complex issues, add specific `console.log` statements (or use a project logger) to trace execution and variable states. *Remember to check the output.*
+4.  **Document Complex Issues:** If a bug requires significant effort (multiple iterations, complex logic) to fix, document the problem, investigation steps, and the solution in the relevant `.cursor/rules` documentation.
+5.  **Research:** Use available tools (documentation search, etc.) to research solutions or best practices when stuck or unsure.
+ 
+## 🔒 Security
+ 
+1.  **Server-Side Authority:** Keep sensitive logic, validation, and data manipulation strictly on the server-side. Use secure API endpoints.
+2.  **Input Sanitization/Validation:** Always sanitize and validate user input on the server-side.
+3.  **Dependency Awareness:** Be mindful of the security implications of adding or updating dependencies.
+4.  **Credentials:** Never hardcode secrets or credentials in the codebase. Use environment variables or a secure secrets management solution.
+ 
+## 🌳 Version Control & Environment
+ 
+1.  **Git Hygiene:**
+    *   Commit frequently with clear, atomic messages.
+    *   Keep the working directory clean; ensure no unrelated or temporary files are staged or committed.
+    *   Use `.gitignore` effectively.
+2.  **Branching Strategy:** Follow the project's established branching strategy. Do not create new branches unless requested or necessary for the workflow (e.g., feature branches).
+3.  **.env Files:** **Never** commit `.env` files. Use `.env.example` for templates. Do not overwrite local `.env` files without confirmation.
+4.  **Environment Awareness:** Code should function correctly across different environments (dev, test, prod). Use environment variables for configuration.
+5.  **Server Management:** Kill related running servers before starting new ones. Restart servers after relevant configuration or backend changes.
+ 
+## 📄 Documentation Maintenance
+ 
+1.  **Update Docs:** If code changes impact architecture, technical decisions, established patterns, or task status, update the relevant documentation in `.cursor/rules/`.
+2.  **Keep Rules Updated:** The files in `.cursor/rules/` should be reviewed and updated periodically to reflect learned best practices and project evolution.
+
+================
+File: .cursor/rules/database-create-migration.mdc
+================
+---
+description: how to be a Postgres Expert who loves creating secure database schemas.
+globs: 
+alwaysApply: false
 ---
 
 # Database: Create migration
@@ -734,9 +861,9 @@ The generated SQL code should be production-ready, well-documented, and aligned 
 File: .cursor/rules/database-functions.mdc
 ================
 ---
-description: 
+description: How to Generate **high-quality PostgreSQL functions** that adhere to the following best practices
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Database: Create functions
@@ -874,9 +1001,9 @@ $$;
 File: .cursor/rules/database-rls-policies.mdc
 ================
 ---
-description: 
+description: how to generate a policy with the constraints given by the user.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Database: Create RLS policies
@@ -1127,9 +1254,9 @@ This prevents the policy `( (select auth.uid()) = user_id )` from running for an
 File: .cursor/rules/edge-functions.mdc
 ================
 ---
-description: 
+description: how to Generate **high-quality Supabase Edge Functions** that adhere to the following best practices:
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Writing Supabase Edge Functions
 
@@ -1510,9 +1637,9 @@ Secure Routes: Ensure all /dashboard/* routes redirect unauthenticated users to 
 File: .cursor/rules/nextjs-supabase-auth.mdc
 ================
 ---
-description: 
+description: how to implement supabase auth
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Bootstrap Next.js app with Supabase Auth
@@ -2350,7 +2477,7 @@ export async function GET(request) {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("linkedin_status, linkedin_token")
+      .select("linkedin_status, linkedin_token, unipile_account_id")
       .eq("user_id", user.id)
       .single();
 
@@ -2358,37 +2485,47 @@ export async function GET(request) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // if (profile.linkedin_token) {
-    //   try {
-    //     const response = await fetch(
-    //       `${process.env.UNIPILE_API_URL}/accounts/status`,
-    //       {
-    //         headers: {
-    //           "X-API-KEY": process.env.UNIPILE_API_TOKEN,
-    //           "Content-Type": "application/json",
-    //         },
-    //       }
-    //     );
+    if (profile.linkedin_token || profile.unipile_account_id) {
+      try {
+        const response = await fetch(
+          `${process.env.UNIPILE_API_URL}/api/v1/accounts/status?account_id=${profile.unipile_account_id}`,
+          {
+            headers: {
+              "X-API-KEY": process.env.UNIPILE_API_TOKEN,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-    //     if (!response.ok) {
-    //       // Update status if token is invalid
-    //       await supabase
-    //         .from("profiles")
-    //         .update({
-    //           linkedin_status: false,
-    //           updated_at: new Date().toISOString(),
-    //         })
-    //         .eq("user_id", user.id);
+        if (!response.ok) {
+          // Update status if token is invalid
+          await supabase
+            .from("profiles")
+            .update({
+              linkedin_status: false,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("user_id", user.id);
 
-    //       return NextResponse.json({
-    //         connected: false,
-    //         last_connected: profile.updated_at,
-    //       });
-    //     }
-    //   } catch (error) {
-    //     console.error("Unipile status check error:", error);
-    //   }
-    // }
+          return NextResponse.json({
+            connected: false,
+            last_connected: profile.updated_at,
+          });
+        }
+
+        const data = await response.json();
+        return NextResponse.json({
+          connected: data.status === "active",
+          last_connected: profile.updated_at,
+        });
+      } catch (error) {
+        console.error("Unipile status check error:", error);
+        return NextResponse.json({
+          connected: false,
+          error: "Failed to check connection status",
+        });
+      }
+    }
 
     return NextResponse.json({
       connected: profile.linkedin_status,
@@ -3460,14 +3597,57 @@ export async function POST(request) {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("unipile_account_id")
+      .select("unipile_account_id, linkedin_status")
       .eq("user_id", user.id)
       .single();
 
-    if (!profile?.unipile_account_id) {
+    if (!profile?.unipile_account_id || !profile?.linkedin_status) {
       return NextResponse.json(
-        { error: "LinkedIn not connected" },
+        { error: "LinkedIn not connected or connection expired" },
         { status: 400 }
+      );
+    }
+
+    // Verify connection status with Unipile
+    try {
+      const statusResponse = await fetch(
+        `${process.env.UNIPILE_API_URL}/api/v1/accounts/status?account_id=${profile.unipile_account_id}`,
+        {
+          headers: {
+            "X-API-KEY": process.env.UNIPILE_API_TOKEN,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!statusResponse.ok) {
+        // Update connection status in database
+        await supabase
+          .from("profiles")
+          .update({
+            linkedin_status: false,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id);
+
+        return NextResponse.json(
+          { error: "LinkedIn connection has expired" },
+          { status: 401 }
+        );
+      }
+
+      const statusData = await statusResponse.json();
+      if (statusData.status !== "active") {
+        return NextResponse.json(
+          { error: "LinkedIn connection is not active" },
+          { status: 401 }
+        );
+      }
+    } catch (error) {
+      console.error("Failed to verify LinkedIn connection:", error);
+      return NextResponse.json(
+        { error: "Failed to verify LinkedIn connection" },
+        { status: 500 }
       );
     }
 
@@ -3665,6 +3845,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getUser } from "@/utils/supabase/getUser";
 import config from "@/config";
+import { createClient } from "@/utils/supabase/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -3676,17 +3857,40 @@ export async function POST(req) {
     const { priceId, successUrl, cancelUrl } = await req.json();
 
     // Get authenticated user
-    const user = await getUser();
+    let user = await getUser();
+
+    // If no user, try to refresh the session
     if (!user) {
-      // Return a response indicating the user needs to sign up
-      return NextResponse.json(
-        {
-          error: "Authentication required",
-          redirectToSignup: true,
-          status: 401,
-        },
-        { status: 401 }
-      );
+      const supabase = await createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        // Try to refresh the session
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (!refreshError) {
+          // Get the user again after refresh
+          const {
+            data: { user: refreshedUser },
+          } = await supabase.auth.getUser();
+          if (refreshedUser) {
+            user = refreshedUser;
+          }
+        }
+      }
+
+      // If still no user after refresh, return signup redirect
+      if (!user) {
+        return NextResponse.json(
+          {
+            error: "Authentication required",
+            redirectToSignup: true,
+            status: 401,
+          },
+          { status: 401 }
+        );
+      }
     }
 
     // Determine if this is the Premium plan (to add trial period)
@@ -3697,6 +3901,7 @@ export async function POST(req) {
     const sessionOptions = {
       mode: "subscription",
       payment_method_types: ["card"],
+      allow_promotion_codes: true,
       line_items: [
         {
           price: priceId,
@@ -3874,7 +4079,7 @@ export async function POST(request) {
     const payload = await request.json();
     console.log({ payload });
 
-    if (!payload.account_id || !payload.name) {
+    if (!payload.account_id || !payload.name || !payload.event) {
       return NextResponse.json({ error: "Bad request" }, { status: 400 });
     }
 
@@ -3892,12 +4097,29 @@ export async function POST(request) {
     }
     console.log("Found user:", user);
 
+    // Handle different webhook events
+    const updateData = {
+      unipile_account_id: payload.account_id,
+      updated_at: new Date().toISOString(),
+    };
+
+    switch (payload.event) {
+      case "account.connected":
+        updateData.linkedin_status = true;
+        break;
+      case "account.disconnected":
+      case "account.expired":
+      case "account.revoked":
+        updateData.linkedin_status = false;
+        break;
+      default:
+        console.log("Unhandled webhook event:", payload.event);
+        return NextResponse.json({ success: true });
+    }
+
     const { data, error } = await supabase
       .from("profiles")
-      .update({
-        unipile_account_id: payload.account_id,
-        linkedin_status: true,
-      })
+      .update(updateData)
       .eq("user_id", payload.name)
       .select();
 
@@ -3906,6 +4128,21 @@ export async function POST(request) {
       throw error;
     }
     console.log("Update successful:", data);
+
+    if (payload.event === "account.connected") {
+      // Also initialize the connections table
+      const { error: connectionsError } = await supabase
+        .from("linkedin_status_updates")
+        .insert({
+          user_id: payload.name,
+          status: "connected",
+          metadata: { account_id: payload.account_id, event: payload.event },
+        });
+
+      if (connectionsError) {
+        console.error("Failed to create status update:", connectionsError);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -4363,6 +4600,7 @@ export async function GET(request) {
               const session = await stripe.checkout.sessions.create({
                 mode: "subscription",
                 payment_method_types: ["card"],
+                allow_promotion_codes: true,
                 line_items: [
                   {
                     price: selectedPlanId,
@@ -5773,6 +6011,28 @@ function SectionBiography() {
 export default SectionBiography
 
 ================
+File: app/components/UpdateFrequencyInfo.jsx
+================
+import { Info } from "lucide-react";
+
+export default function UpdateFrequencyInfo() {
+  return (
+    <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-4">
+      <div className="flex items-start gap-3">
+        <Info className="w-5 h-5 text-blue-400 mt-0.5" />
+        <div>
+          <h4 className="text-sm font-medium text-white mb-1">Campaign Update Frequencies</h4>
+          <div className="space-y-2 text-sm text-[#A1A1AA]">
+            <p>• Connection requests are checked every 2 hours</p>
+            <p>• Response tracking updates every 4 hours</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+================
 File: app/dashboard/analytics/page.js
 ================
 "use client";
@@ -6042,10 +6302,11 @@ File: app/dashboard/campaigns/[id]/page.js
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, BarChart2, Calendar, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import UpdateFrequencyInfo from "../../../components/UpdateFrequencyInfo";
 
 // Mock data - replace with real data later
 const mockCampaigns = {
-  "1": {
+  1: {
     id: "1",
     name: "Q1 Outreach",
     status: "active",
@@ -6057,14 +6318,14 @@ const mockCampaigns = {
     lastActive: "2025-01-23",
     description: "Q1 outreach campaign targeting tech decision makers",
   },
-  "2": {
+  2: {
     id: "2",
     name: "Tech Founders",
     status: "draft",
     lastEdited: "2 days ago",
     description: "Campaign targeting startup founders in the tech industry",
   },
-  "3": {
+  3: {
     id: "3",
     name: "December Outreach",
     status: "completed",
@@ -6074,7 +6335,7 @@ const mockCampaigns = {
     startDate: "2024-12-01",
     completedDate: "2024-12-31",
     description: "End of year outreach campaign",
-  }
+  },
 };
 
 export default function CampaignDetailsPage({ params }) {
@@ -6084,7 +6345,11 @@ export default function CampaignDetailsPage({ params }) {
   if (!campaign) {
     return (
       <div className="space-y-4">
-        <Button variant="ghost" onClick={() => router.back()} className="text-[#C9E5FF]">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="text-[#C9E5FF]"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Campaigns
         </Button>
@@ -6097,13 +6362,19 @@ export default function CampaignDetailsPage({ params }) {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-4">
-        <Button variant="ghost" onClick={() => router.back()} className="text-[#C9E5FF]">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="text-[#C9E5FF]"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Campaigns
         </Button>
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-[#C9E5FF]">{campaign.name}</h1>
+            <h1 className="text-2xl font-bold text-[#C9E5FF]">
+              {campaign.name}
+            </h1>
             <p className="text-sm text-[#A3A3A3]">{campaign.description}</p>
           </div>
           <div className="flex gap-2">
@@ -6123,14 +6394,18 @@ export default function CampaignDetailsPage({ params }) {
       {/* Campaign Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A] p-6">
-          <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">Campaign Overview</h3>
+          <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">
+            Campaign Overview
+          </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-[#A3A3A3]" />
                 <span className="text-[#A3A3A3]">Total Prospects</span>
               </div>
-              <span className="text-[#C9E5FF] font-medium">{campaign.prospects || "N/A"}</span>
+              <span className="text-[#C9E5FF] font-medium">
+                {campaign.prospects || "N/A"}
+              </span>
             </div>
             {campaign.status === "active" && (
               <div className="flex items-center justify-between">
@@ -6138,27 +6413,36 @@ export default function CampaignDetailsPage({ params }) {
                   <BarChart2 className="w-4 h-4 text-[#A3A3A3]" />
                   <span className="text-[#A3A3A3]">Progress</span>
                 </div>
-                <span className="text-[#C9E5FF] font-medium">{campaign.progress}%</span>
+                <span className="text-[#C9E5FF] font-medium">
+                  {campaign.progress}%
+                </span>
               </div>
             )}
-            {(campaign.status === "active" || campaign.status === "completed") && (
+            {(campaign.status === "active" ||
+              campaign.status === "completed") && (
               <>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#A3A3A3]" />
                     <span className="text-[#A3A3A3]">Start Date</span>
                   </div>
-                  <span className="text-[#C9E5FF] font-medium">{campaign.startDate}</span>
+                  <span className="text-[#C9E5FF] font-medium">
+                    {campaign.startDate}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#A3A3A3]" />
                     <span className="text-[#A3A3A3]">
-                      {campaign.status === "active" ? "Last Active" : "Completed Date"}
+                      {campaign.status === "active"
+                        ? "Last Active"
+                        : "Completed Date"}
                     </span>
                   </div>
                   <span className="text-[#C9E5FF] font-medium">
-                    {campaign.status === "active" ? campaign.lastActive : campaign.completedDate}
+                    {campaign.status === "active"
+                      ? campaign.lastActive
+                      : campaign.completedDate}
                   </span>
                 </div>
               </>
@@ -6168,20 +6452,29 @@ export default function CampaignDetailsPage({ params }) {
 
         {(campaign.status === "active" || campaign.status === "completed") && (
           <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A] p-6">
-            <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">Performance</h3>
+            <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">
+              Performance
+            </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[#A3A3A3]">Total Replies</span>
-                <span className="text-[#C9E5FF] font-medium">{campaign.replies}</span>
+                <span className="text-[#C9E5FF] font-medium">
+                  {campaign.replies}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#A3A3A3]">Reply Rate</span>
-                <span className="text-[#C9E5FF] font-medium">{campaign.replyRate}%</span>
+                <span className="text-[#C9E5FF] font-medium">
+                  {campaign.replyRate}%
+                </span>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Update Frequency Info */}
+      <UpdateFrequencyInfo />
     </div>
   );
 }
@@ -7229,6 +7522,7 @@ import {
 } from "lucide-react";
 import { useCampaignStore } from "@/app/store/campaignStore";
 import { useMutation } from "@tanstack/react-query";
+import UpdateFrequencyInfo from "../../../../components/UpdateFrequencyInfo";
 
 export default function ReviewPage() {
   const router = useRouter();
@@ -7503,10 +7797,13 @@ export default function ReviewPage() {
             <h2 className="text-2xl font-bold text-white mb-2">
               Campaign Published!
             </h2>
-            <p className="text-[#A3A3A3] max-w-md mx-auto">
+            <p className="text-[#A3A3A3] max-w-md mx-auto mb-6">
               Your connection requests will be sent to {selectedLeads.length}{" "}
               leads. You can track the progress in your campaigns dashboard.
             </p>
+            <div className="max-w-md mx-auto">
+              <UpdateFrequencyInfo />
+            </div>
           </div>
 
           <div className="flex justify-center space-x-4">
@@ -7775,6 +8072,7 @@ import { Users, BarChart2 } from "lucide-react";
 import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAnalytics } from "@/components/contexts/AnalyticsContext";
+import UpdateFrequencyInfo from "../../components/UpdateFrequencyInfo";
 
 function CampaignsContent() {
   const [activeTab, setActiveTab] = useState("all");
@@ -7788,11 +8086,11 @@ function CampaignsContent() {
     }
 
     const campaigns = analyticsData.data.campaigns || [];
-    
+
     return {
-      active: campaigns.filter(camp => camp.status === 'processing'),
-      drafts: campaigns.filter(camp => camp.status === 'pending'),
-      completed: campaigns.filter(camp => camp.status === 'completed')
+      active: campaigns.filter((camp) => camp.status === "processing"),
+      drafts: campaigns.filter((camp) => camp.status === "pending"),
+      completed: campaigns.filter((camp) => camp.status === "completed"),
     };
   };
 
@@ -7808,56 +8106,61 @@ function CampaignsContent() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-white">Campaigns</h1>
-          <p className="text-sm text-[#A1A1AA]">Manage your LinkedIn outreach campaigns</p>
+          <p className="text-sm text-[#A1A1AA]">
+            Manage your LinkedIn outreach campaigns
+          </p>
         </div>
-        <Button 
+        <Button
           variant="outline"
-          onClick={() => router.push('/dashboard/campaigns/new/leads')}
+          onClick={() => router.push("/dashboard/campaigns/new/leads")}
         >
           New Campaign
         </Button>
       </div>
 
+      {/* Update Frequency Info */}
+      <UpdateFrequencyInfo />
+
       {/* Campaign Filters */}
       <div className="flex gap-4 pb-4 border-b border-[#1A1A1A]">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "all" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "all"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("all")}
         >
           All Campaigns
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "active" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "active"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("active")}
         >
           Active
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "drafts" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "drafts"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("drafts")}
         >
           Drafts
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "completed" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "completed"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("completed")}
@@ -7877,143 +8180,200 @@ function CampaignsContent() {
       {!analyticsData.isLoading && (
         <div className="space-y-4">
           {/* Active Campaigns */}
-          {(activeTab === "all" || activeTab === "active") && campaigns.active.length > 0 && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-white">Active Campaigns</h3>
-                    <p className="text-sm text-[#A1A1AA]">Currently running campaigns</p>
+          {(activeTab === "all" || activeTab === "active") &&
+            campaigns.active.length > 0 && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-white">
+                        Active Campaigns
+                      </h3>
+                      <p className="text-sm text-[#A1A1AA]">
+                        Currently running campaigns
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {campaigns.active.map((campaign) => (
+                      <div
+                        key={campaign.job_id}
+                        className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {campaign.name}
+                            </h4>
+                            <p className="text-sm text-[#A1A1AA]">
+                              {campaign.total_invitations} prospects •{" "}
+                              {Math.min(
+                                100,
+                                (campaign.accepted_connections /
+                                  campaign.total_invitations) *
+                                  100
+                              ).toFixed(0)}
+                              % complete
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-sm text-white">
+                              {campaign.accepted_connections} connections
+                            </p>
+                            <p className="text-xs text-[#A1A1AA]">
+                              {campaign.response_rate}% rate
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewDetails(campaign.job_id)}
+                          >
+                            <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {campaigns.active.map(campaign => (
-                    <div key={campaign.job_id} className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-white font-medium">{campaign.name}</h4>
-                          <p className="text-sm text-[#A1A1AA]">{campaign.total_invitations} prospects • {Math.min(100, campaign.accepted_connections / campaign.total_invitations * 100).toFixed(0)}% complete</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm text-white">{campaign.accepted_connections} connections</p>
-                          <p className="text-xs text-[#A1A1AA]">{campaign.response_rate}% rate</p>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleViewDetails(campaign.job_id)}
-                        >
-                          <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Draft Campaigns */}
-          {(activeTab === "all" || activeTab === "drafts") && campaigns.drafts.length > 0 && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-white">Draft Campaigns</h3>
-                    <p className="text-sm text-[#A1A1AA]">Campaigns in preparation</p>
+          {(activeTab === "all" || activeTab === "drafts") &&
+            campaigns.drafts.length > 0 && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-white">
+                        Draft Campaigns
+                      </h3>
+                      <p className="text-sm text-[#A1A1AA]">
+                        Campaigns in preparation
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {campaigns.drafts.map((campaign) => (
+                      <div
+                        key={campaign.job_id}
+                        className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {campaign.name}
+                            </h4>
+                            <p className="text-sm text-[#A1A1AA]">
+                              Draft • Last edited{" "}
+                              {campaign.created_at
+                                ? new Date(
+                                    campaign.created_at
+                                  ).toLocaleDateString()
+                                : "recently"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewDetails(campaign.job_id)}
+                          >
+                            Edit
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {campaigns.drafts.map(campaign => (
-                    <div key={campaign.job_id} className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-white font-medium">{campaign.name}</h4>
-                          <p className="text-sm text-[#A1A1AA]">
-                            Draft • Last edited {campaign.created_at ? new Date(campaign.created_at).toLocaleDateString() : "recently"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleViewDetails(campaign.job_id)}
-                        >
-                          Edit
-                        </Button>
-                        <Button variant="ghost" size="sm">Delete</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Completed Campaigns */}
-          {(activeTab === "all" || activeTab === "completed") && campaigns.completed.length > 0 && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-white">Completed</h3>
-                    <p className="text-sm text-[#A1A1AA]">Past campaigns</p>
+          {(activeTab === "all" || activeTab === "completed") &&
+            campaigns.completed.length > 0 && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-white">
+                        Completed
+                      </h3>
+                      <p className="text-sm text-[#A1A1AA]">Past campaigns</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {campaigns.completed.map((campaign) => (
+                      <div
+                        key={campaign.job_id}
+                        className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {campaign.name}
+                            </h4>
+                            <p className="text-sm text-[#A1A1AA]">
+                              {campaign.total_invitations} prospects • Completed
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-sm text-white">
+                              {campaign.accepted_connections} connections
+                            </p>
+                            <p className="text-xs text-[#A1A1AA]">
+                              {campaign.response_rate}% rate
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewDetails(campaign.job_id)}
+                          >
+                            <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {campaigns.completed.map(campaign => (
-                    <div key={campaign.job_id} className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-white font-medium">{campaign.name}</h4>
-                          <p className="text-sm text-[#A1A1AA]">{campaign.total_invitations} prospects • Completed</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm text-white">{campaign.accepted_connections} connections</p>
-                          <p className="text-xs text-[#A1A1AA]">{campaign.response_rate}% rate</p>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleViewDetails(campaign.job_id)}
-                        >
-                          <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* No Campaigns State */}
-          {!analyticsData.isLoading && 
-            analyticsData.data && 
-            (!analyticsData.data.campaigns || analyticsData.data.campaigns.length === 0) && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-12 text-center">
-              <p className="text-[#A1A1AA] mb-4">You don&apos;t have any campaigns yet</p>
-              <Button
-                onClick={() => router.push('/dashboard/campaigns/new/leads')}
-              >
-                Create your first campaign
-              </Button>
-            </div>
-          )}
+          {!analyticsData.isLoading &&
+            analyticsData.data &&
+            (!analyticsData.data.campaigns ||
+              analyticsData.data.campaigns.length === 0) && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-12 text-center">
+                <p className="text-[#A1A1AA] mb-4">
+                  You don&apos;t have any campaigns yet
+                </p>
+                <Button
+                  onClick={() => router.push("/dashboard/campaigns/new/leads")}
+                >
+                  Create your first campaign
+                </Button>
+              </div>
+            )}
         </div>
       )}
     </div>
@@ -8022,11 +8382,13 @@ function CampaignsContent() {
 
 export default function CampaignsPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      }
+    >
       <CampaignsContent />
     </Suspense>
   );
@@ -8298,191 +8660,6 @@ export default function SettingsPage() {
 }
 
 ================
-File: app/dashboard/upgrade/layout.js
-================
-import DashboardShell from "@/components/dashboard/DashboardShell";
-
-export default function UpgradeLayout({ children }) {
-  return <DashboardShell>{children}</DashboardShell>;
-}
-
-================
-File: app/dashboard/upgrade/page.js
-================
-"use client";
-
-import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
-import ButtonCheckout from "@/components/ButtonCheckout";
-import config from "@/config";
-import TrackdeskScriptWrapper from "@/components/TrackdeskScriptWrapper";
-
-export default function UpgradePage() {
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscriptionTier, setSubscriptionTier] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Get the pro plan
-  const proPlan = config.stripe.plans[0];
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch("/api/users");
-        if (!res.ok) throw new Error("Failed to fetch user data");
-        const data = await res.json();
-
-        setIsSubscribed(data.user?.isSubscribed || false);
-        setSubscriptionTier(data.user?.subscriptionTier || null);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-  return (
-    <>
-      <TrackdeskScriptWrapper />
-      <div className="container px-4 sm:px-6 max-w-6xl mx-auto">
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-white mb-2">
-              Prospectr Pro Plan
-            </h1>
-            <p className="text-[#A1A1AA]">
-              Get access to all Prospectr features and take your LinkedIn
-              outreach to the next level
-            </p>
-          </div>
-
-          <div className="max-w-xl mx-auto">
-            {/* Pro Plan */}
-            <div
-              className={`bg-[#0F0F0F] rounded-lg border ${
-                isSubscribed ? "border-red-500" : "border-[#1A1A1A]"
-              } overflow-hidden`}
-            >
-              <div className="bg-gradient-to-r from-red-500 to-red-700 text-white text-xs font-medium text-center py-1">
-                PROFESSIONAL PLAN
-              </div>
-
-              <div className="p-8">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-2xl font-bold text-white">
-                      {proPlan.name}
-                    </h2>
-                    <p className="text-[#A1A1AA] mt-2">{proPlan.description}</p>
-                  </div>
-                  {isSubscribed && (
-                    <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded-full">
-                      Current Plan
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-white">
-                    ${proPlan.price}
-                  </span>
-                  <span className="text-[#A1A1AA] ml-1">
-                    {proPlan.priceDetails}
-                  </span>
-                </div>
-
-                <div className="mt-8">
-                  <ButtonCheckout
-                    priceId={proPlan.priceId}
-                    productLink={proPlan.link}
-                    className={`w-full btn ${
-                      isSubscribed
-                        ? "btn-disabled bg-[#2A2A2A] text-[#A1A1AA]"
-                        : "bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
-                    }`}
-                    disabled={isSubscribed}
-                    theme="red"
-                  >
-                    {isSubscribed ? "Current Plan" : "Get Pro Plan"}
-                  </ButtonCheckout>
-
-                  {!isSubscribed && (
-                    <p className="text-center text-sm text-[#A1A1AA] mt-2">
-                      $0.00 due today, cancel anytime
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-8 space-y-3">
-                  <h3 className="text-sm font-medium text-white">
-                    Everything included:
-                  </h3>
-                  <ul className="space-y-3">
-                    {proPlan.features.map((feature, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-3 text-sm"
-                      >
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center mt-0.5">
-                          <Check className="w-3 h-3 text-red-500" />
-                        </div>
-                        <span className="text-[#A1A1AA]">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-6 mt-6 max-w-3xl mx-auto">
-            <h3 className="text-lg font-medium text-white mb-4">
-              Frequently Asked Questions
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-white font-medium mb-1">
-                  Can I cancel at any time?
-                </h4>
-                <p className="text-[#A1A1AA] text-sm">
-                  Yes, you can cancel your subscription at any time from your
-                  dashboard. Your access will remain until the end of your
-                  current billing period.
-                </p>
-              </div>
-              <div>
-                <h4 className="text-white font-medium mb-1">
-                  How do connection requests work?
-                </h4>
-                <p className="text-[#A1A1AA] text-sm">
-                  Connection requests are sent through your LinkedIn account.
-                  Your plan includes 500 connection requests per month that
-                  reset at the beginning of your billing cycle.
-                </p>
-              </div>
-              <div>
-                <h4 className="text-white font-medium mb-1">
-                  What happens if I need more connections?
-                </h4>
-                <p className="text-[#A1A1AA] text-sm">
-                  If you need additional connections beyond your monthly limit,
-                  please contact our support team to discuss options for your
-                  specific needs.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-================
 File: app/dashboard/layout.js
 ================
 import { redirect } from "next/navigation";
@@ -8695,17 +8872,6 @@ function DashboardContent() {
         >
           New Campaign
         </Button>
-        {!isSubscribed && (
-          <Button
-            onClick={() => router.push("/dashboard/settings")}
-            className="text-sm sm:text-base py-2 px-3 sm:px-4 bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
-          >
-            <span className="flex items-center justify-center gap-1">
-              <Zap className="w-3 h-3" />
-              Upgrade
-            </span>
-          </Button>
-        )}
       </div>
 
       {/* Recent Activity */}
@@ -11116,8 +11282,18 @@ export default function DashboardShell({ children }) {
     checkSubscription();
   }, []);
 
-  // Determine if user needs to upgrade (not subscribed)
-  const needsUpgrade = !isSubscribed;
+  // Get navigation links based on subscription status
+  const getNavigationLinks = () => {
+    return navigationLinks;
+  };
+
+  const getPageTitle = () => {
+    if (pathname === "/dashboard") return "Dashboard";
+    if (pathname === "/dashboard/campaigns") return "Campaigns";
+    if (pathname === "/dashboard/analytics") return "Analytics";
+    if (pathname === "/dashboard/settings") return "Settings";
+    return "";
+  };
 
   return (
     <div
@@ -11179,7 +11355,7 @@ export default function DashboardShell({ children }) {
           )}
 
           <nav className="flex-1 px-4 py-2 space-y-1">
-            {navigationLinks.map((item) => {
+            {getNavigationLinks().map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -11205,7 +11381,7 @@ export default function DashboardShell({ children }) {
         <header className="hidden md:flex items-center justify-between h-16 px-6 border-b border-[#1A1A1A] sticky top-0 bg-black z-10">
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-medium tracking-tight">
-              {getPageTitle(pathname)}
+              {getPageTitle()}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -11233,7 +11409,7 @@ export default function DashboardShell({ children }) {
         {/* Mobile header title and actions */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A] mt-16">
           <h1 className="text-lg font-medium tracking-tight">
-            {getPageTitle(pathname)}
+            {getPageTitle()}
           </h1>
           <div className="flex items-center gap-2">
             {!linkedInStatus.connected &&
@@ -11256,22 +11432,6 @@ export default function DashboardShell({ children }) {
         </div>
       </main>
     </div>
-  );
-}
-
-// Helper function to get page title based on pathname
-function getPageTitle(pathname) {
-  if (pathname === "/dashboard") return "Dashboard";
-  if (pathname === "/dashboard/campaigns") return "Campaigns";
-  if (pathname === "/dashboard/analytics") return "Analytics";
-  if (pathname === "/dashboard/settings") return "Settings";
-  if (pathname === "/dashboard/upgrade") return "Upgrade";
-
-  // Extract the last part of the pathname as a fallback
-  const segments = pathname.split("/");
-  return (
-    segments[segments.length - 1].charAt(0).toUpperCase() +
-    segments[segments.length - 1].slice(1)
   );
 }
 
@@ -18291,6 +18451,7 @@ export async function checkSubscription(
     const sessionOptions = {
       mode: "subscription",
       payment_method_types: ["card"],
+      allow_promotion_codes: true,
       line_items: [
         {
           price: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
@@ -18513,15 +18674,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzdnVtdHpncnB5b2h5anFtcmJiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNzMwNTAwNiwiZXhwIjoyMDUyODgxMDA2fQ.Z7cJIGKYXLMttjAuhjjVZdPtyKPsHG945rAtfEJVX4Q
 
 RESEND_API_KEY=re_Rwx3FLrx_JL7DQANtMj695fcyAQjaRv2j
-STRIPE_PUBLISHABLE_KEY=pk_live_51R4Z2RE37HnR1sjlZaLbYMYdbS2m9Yh672vWkwQ8aTog16oTvZrdbpx9j0eiE7QxDdDEZGsPvEmCoLcJCYi8Fe4g00GdrJjtXo
-NEXT_PUBLIC_STRIPE_PRICE_ID=prod_S0PrWEtJP90ffJ
-STRIPE_SECRET_KEY=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
+STRIPE_PUBLISHABLE_KEY=pk_test_51R4Z2RE37HnR1sjlZaLbYMYdbS2m9Yh672vWkwQ8aTog16oTvZrdbpx9j0eiE7QxDdDEZGsPvEmCoLcJCYi8Fe4g00GdrJjtXo
+NEXT_PUBLIC_STRIPE_PRICE_ID=price_1R6P1qE37HnR1sjlvkSplq8X
+STRIPE_SECRET_KEY=sk_test_51R4Z2RE37HnR1sjlGN7B8AIzEYofvnAefdcyMpGVzU1C6jiTVvXJl4Vo8vzESGmfcrUgL6zHrmKtuu5c8bwOGqyq00ODlo2c8w
 
-UNIPILE_BASE_URL=https://api12.unipile.com:14231/api/v1/hosted/accounts/link
+UNIPILE_BASE_URL=https://api12.unipile.com:14233/api/v1/hosted/accounts/link
 UNIPILE_LINK_URL=https://app.unipile.com/hosted/accounts/link
-UNIPILE_API_URL=https://api12.unipile.com:14231
-UNIPILE_API_TOKEN=e2rAM6wN.9LunkGk/Ltpq+is2gnZREpR7oJtWXVH4a3LjoCRWv7c=
-UNIPILE_DSN=api12.unipile.com:14231/api/v1/accounts
+UNIPILE_API_URL=https://api12.unipile.com:14233
+UNIPILE_API_TOKEN=DV+jIU4z.C5G19ogLnXeb0EF3A+kpI7TNk4DX6yuxHjPoZs6oIU0=
+UNIPILE_DSN=api12.unipile.com:14233/api/v1/accounts
 UNIPILE_REDIRECT_URI=https://leadsprospectr.com/api/auth/linkedin/callback
 
 
@@ -18645,8 +18806,7 @@ const config = {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
     plans: [
       {
-        priceId:
-          process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || "prod_S0PrWEtJP90ffJ",
+        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
         price: 15,
         name: "Pro",
         description: "Everything you need for LinkedIn automation",
@@ -18786,6 +18946,7 @@ export async function middleware(request) {
       !request.nextUrl.pathname.startsWith("/signin") &&
       !request.nextUrl.pathname.startsWith("/signup") &&
       !request.nextUrl.pathname.startsWith("/reset-password") &&
+      !request.nextUrl.pathname.startsWith("/api/stripe") && // Exclude Stripe API routes
       request.nextUrl.pathname !== "/"
     ) {
       const url = request.nextUrl.clone();
@@ -18822,7 +18983,6 @@ export const config = {
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-  runtime: "edge",
 };
 
 ================
@@ -19245,11 +19405,11 @@ File: vercel.json
   "crons": [
     {
       "path": "/api/cron/check-invitations",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/cron/check-responses",
-      "schedule": "0 */12 * * *"
+      "schedule": "0 */4 * * *"
     }
   ]
 }
