@@ -12,66 +12,389 @@ alwaysApply: true
 
 # Prospectr Implementation Status & Plan
 
-**Last Updated:** 2024-04-04
+**Last Updated:** 2024-04-05 (Launch Plan Update)
 
 **Note**: This document reflects the current implementation status based on the codebase and outlines potential next steps or areas matching the original plan.
 
-## 1. Authentication Flow
+## Launch Plan (Target: Tomorrow)
 
-*   **Supabase Config:** `.env.local` contains `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. **Status: Implemented.**
-*   **Email Confirmations:** `supabase/config.toml` has `auth.email.enable_confirmations = false`. **Status: Configured (Disabled).** *Plan Mismatch: Original plan intended to enable this.*
-*   **Resend Setup:** `RESEND_API_KEY` exists in `.env.local`. `utils/email/reconnectionEmail.js` uses Resend. **Status: Implemented.**
-*   **Email Templates:** No custom templates found in `supabase/templates/`. **Status: Not Implemented.**
-*   **Sign-Up Flow:** `app/signup/SignupForm.js` handles email/password signup via Supabase client. Confirmation depends on Supabase config. **Status: Implemented.**
-*   **Session Persistence:** `middleware.js` uses `@supabase/ssr` with a 7-day `maxAge`. **Status: Implemented.**
-*   **Session Refresh Logic:** `middleware.js` includes logic to attempt session refresh if `user` is null but `session` exists. **Status: Implemented.**
-*   **Error Logging:** Basic `console.error` exists in various auth-related files. **Status: Partially Implemented.**
+This section outlines the critical tasks to prepare Prospectr for launch.
 
-## 2. Google Auth and Simple Sign-In
+### 1. Authentication Email Verification
 
-*   **Google OAuth Setup:** No `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` in `.env.local`. Supabase config doesn't explicitly enable Google. **Status: Not Implemented.** *Plan Mismatch: Google Auth was planned.*
-*   **Sign-In Page:** `app/signin/page.js` includes a "Sign in with Google" button calling `signInWithGoogle` from `utils/action.js`. **Status: Frontend Implemented, Backend Config Missing.**
-*   **Callback Handling:** `app/auth/callback/route.js` handles the Supabase code exchange. It needs configuration to handle Google specifically if required beyond Supabase's default handling. **Status: Implemented (Generic).**
-*   **Simple Sign-In:** `app/signin/page.js` supports email/password login. **Status: Implemented.**
-*   **Auth Page Styling:** Tailwind/DaisyUI used in `signin` and `signup` pages. **Status: Implemented.**
-*   **Auth Flow Documentation:** `docs/` directory does not contain `auth-flow.md`. **Status: Not Implemented.**
+**Goal:** Ensure users receive verification emails upon signing up with email/password.
 
-## 3. LinkedIn Sign-In (via Unipile)
+*   **Verify Supabase Config:**
+    *   Check `supabase/config.toml` for email provider settings.
+    *   Confirm `auth.email.enable_confirmations = true` in the Supabase dashboard settings.
+    *   Verify SMTP credentials or Supabase's built-in email provider is correctly configured.
+*   **Check Email Templates:** Ensure default or custom email templates in Supabase are active and correctly formatted.
+*   **Test Signup Flow:** Perform test signups using email/password to confirm email delivery and verification link functionality.
+*   **Debug:** Investigate potential issues in Supabase logs, API routes (`/auth/callback`, signup actions), or email provider settings if emails fail.
 
-*   **Unipile Config:** `UNIPILE_API_URL`, `UNIPILE_API_TOKEN`, `UNIPILE_REDIRECT_URI` exist in `.env.local`. `utils/unipileClient.js` initializes the client. **Status: Implemented.**
-*   **Connect Flow:** `/api/auths/linkedin/connect/route.js` generates Unipile hosted auth link. `/api/unipile/webhooks/route.js` handles callbacks to update `profiles`. **Status: Implemented.**
-*   **Token Expiry Handling:** `/api/auths/linkedin/status/route.js` checks status and updates `linkedin_status` if connection fails. Reconnection flow initiated via `/api/auths/linkedin/reconnect/route.js` using `utils/email/reconnectionEmail.js`. **Status: Implemented.**
-*   **Reconnection Logic:** `/api/auths/linkedin/reconnect` generates token, sends email. `/api/reconnect` handles the link click and redirects to Unipile reconnect flow. **Status: Implemented.**
-*   **Error Logging:** `console.error` used in API routes and `unipileClient.js`. **Status: Partially Implemented.**
-*   **Status Check:** `/api/auths/linkedin/status/route.js` fetches status from Unipile and updates Supabase if needed. **Status: Implemented.**
-*   **Settings UI:** `app/dashboard/settings/page.js` uses `useLinkedIn` context and `ButtonLinkedin.js` to display status and trigger connect/reconnect. **Status: Implemented.**
+### 2. LinkedIn Outreach Logic Revamp
 
-## 4. LinkedIn URL Handling
+**Goal:** Implement robust and scalable LinkedIn connection request sending logic using Unipile, respecting user account status and aiming to work within LinkedIn's limits.
 
-*   **URL Parsing Logic:** No specific `parseLinkedInUrl` function found in `utils/linkedin/`. Search (`/api/linkedin/search/route.js`) and invitation sending (`/lib/invitation-service.js`) seem to rely on `identifier` or `provider_id` from Unipile results or passed data. **Status: Not Implemented as planned.**
-*   **Search Endpoint:** `/api/linkedin/search/route.js` accepts various parameters (keywords, IDs, names) and passes them to Unipile. **Status: Implemented (using Unipile parameters).**
-*   **Invitation Sending:** `lib/invitation-service.js` uses `provider_id` or fetches profile via `identifier` before sending. **Status: Implemented (using Unipile IDs).**
-*   **Rate Limiting:** `lib/invitation-service.js` implements a random delay between 2-5 minutes between invitation sends within a job. **Status: Implemented.**
-*   **Data Storage:** `invitation_users` stores `linkedin_user_id` (provider_id) and `linkedin_profile_url`. `saved_profiles` stores `profile_id`. **Status: Implemented.**
+*   **Account Status-Based Limits (From Unipile Docs):**
+    *   **Free Account:** ~15 invitations per week (200 characters) or 150 without a note
+    *   **Paid/Active Account:** 80-100 invitations per day, ~200 per week (300 characters)
+    *   **New/Inactive Accounts:** Start with lower quantities and gradually increase
+    *   **Accounts with <150 connections:** Limited invitation capability, some may not be delivered
+    *   **Profile Visit Limits:**
+        *   Free/Premium: ~100 profiles per day
+        *   Sales Navigator: Higher limits available via Sales Navigator API parameter
 
-## 5. Stripe Integration
+*   **Remove Hardcoded Limits:**
+    *   Locate and remove the current limit restricting sends to ~10 profiles at a time (check `lib/invitation-service.js` and `/api/linkedin/invitations/send/route.js`).
+    *   Replace with dynamic limits based on account status.
 
-*   **Plan Definition:** Only one plan (Pro) defined in `config.js` with `priceId` from `.env.local`. **Status: Partially Implemented (One Plan).** *Plan Mismatch: Original plan specified two plans.*
-*   **Checkout Route:** `/api/stripe/create-checkout/route.js` exists, accepts `priceId`, handles logged-in/out users, adds trial period based on `config.js`. **Status: Implemented.**
-*   **Pricing Page:** `components/Pricing.js` displays the plan from `config.js`. Used on `app/page.js`. **Status: Implemented.**
-*   **Webhooks:** `/api/webhook/stripe/route.js` handles various events (`checkout.session.completed`, `customer.subscription.*`, `invoice.*`) to update `profiles` table (`has_access`, `subscription_status`, `customer_id`, etc.). **Status: Implemented.**
-*   **Feature Restriction:** `utils/check-subscription.js` checks `profiles.has_access` and can initiate checkout if needed. Used in various API routes (`connect`, `search`, `invitations/send`). **Status: Implemented.**
-*   **Customer Portal:** `/api/stripe/create-portal/route.js` creates Stripe Billing Portal session. Accessed from `app/dashboard/settings/page.js`. **Status: Implemented.**
-*   **Stripe Plans Documentation:** `docs/` directory does not contain `stripe-plans.md`. **Status: Not Implemented.**
+*   **Implement Dynamic Sending Based on Account Status:**
+    *   Add account type detection to `lib/invitation-service.js`:
+        *   Check connection count
+        *   Verify account age/activity
+        *   Determine if Sales Navigator is available
+    *   Implement progressive limit increases:
+        *   Start conservatively for new accounts
+        *   Track successful sends and gradually increase limits
+        *   Store historical success rates in the database
+    *   Add error handling for HTTP 429 responses (LinkedIn's rate limit response)
 
-## 6. Additional Enhancements
+*   **Develop Anti-Detection Strategy (Based on Unipile Guidelines):**
+    *   **Timing Algorithm:**
+        *   Implement random delays between requests (~1 minute intervals)
+        *   Distribute actions across working hours
+        *   Add randomization to avoid pattern detection
+    *   **Profile Interaction Strategy:**
+        *   Implement profile views before connection requests
+        *   Use Sales Navigator API parameter when available
+        *   Track and respect the 100 profiles/day visit limit
+    *   **Request Distribution:**
+        *   Implement daily and weekly quota tracking
+        *   Add cool-down periods between batches
+        *   Store timing data in `invitation_jobs` table
 
-*   **Campaign Analytics:** `/api/linkedin/analytics/route.js` calculates summary stats, campaign performance, and monthly trends from `invitation_jobs` and `invitation_users`. Data provided via `AnalyticsContext`. **Status: Implemented.**
-*   **UI Optimization:** DaisyUI and shadcn/ui components are used throughout the dashboard. **Status: Implemented.**
-*   **Route Security:** `middleware.js` protects `/dashboard/*` routes, redirecting unauthenticated users to `/signin`. **Status: Implemented.**
+*   **Database Updates:**
+    *   Add fields to `profiles` table:
+        *   `linkedin_account_type` (free, premium, sales_navigator)
+        *   `linkedin_connection_count`
+        *   `daily_invitation_count`
+        *   `weekly_invitation_count`
+        *   `last_invitation_time`
+    *   Add fields to `invitation_jobs`:
+        *   `distribution_strategy` (immediate, distributed, progressive)
+        *   `time_window_start`
+        *   `time_window_end`
+        *   `delay_range_min`
+        *   `delay_range_max`
 
-## Summary of Status vs. Original Plan
+*   **Refactor & Test:**
+    *   Update services and API routes:
+        *   Modify `lib/invitation-service.js` to implement new timing logic
+        *   Update `/api/linkedin/invitations/send/route.js` with quota checks
+        *   Add rate limit handling to all LinkedIn-related API calls
+    *   Implement monitoring and logging:
+        *   Track success/failure rates
+        *   Log rate limit encounters
+        *   Monitor account warnings
+    *   Test scenarios:
+        *   New account ramping
+        *   Different account types
+        *   Rate limit handling
+        *   Distribution strategies
+        *   Error recovery
 
-*   **Implemented:** Basic Auth (Email/Pass), Unipile/LinkedIn Integration (Connect, Status, Reconnect), Stripe Integration (Single Pro Plan, Checkout, Portal, Webhooks), Feature Restriction, Campaign Creation Flow (Search, Sequence, Review, Send), Basic Analytics, Core UI/Dashboard Structure.
-*   **Partially Implemented/Mismatch:** Email confirmation (configured off), Google Auth (frontend exists, backend config missing), Only one Stripe plan implemented, Detailed error logging could be improved.
-*   **Not Implemented:** Custom email templates, Specific LinkedIn URL parser function, Documentation files (`auth-flow.md`, `stripe-plans.md`).
+### 3. Account Lifecycle Monitoring System
+
+**Goal:** Implement a robust account lifecycle monitoring system using Unipile's Account Status Webhook to track LinkedIn account health and connection status in real-time.
+
+#### Webhook Implementation
+```typescript
+interface AccountStatusPayload {
+  AccountStatus: {
+    account_id: string;
+    account_type: 'LINKEDIN';
+    message: AccountStatusType;
+  }
+}
+
+type AccountStatusType = 
+  | 'OK'               // Account healthy and syncing
+  | 'ERROR'            // Unexpected error during data fetch
+  | 'STOPPED'          // Sync stopped due to error
+  | 'CREDENTIALS'      // Invalid/expired credentials
+  | 'CONNECTING'       // Initial connection attempt
+  | 'DELETED'          // Account deleted
+  | 'CREATION_SUCCESS' // Account added successfully
+  | 'RECONNECTED'      // Account reconnected
+  | 'SYNC_SUCCESS';    // LinkedIn sync complete
+```
+
+#### Database Schema Updates
+- Add to `linkedin_accounts` table:
+  ```sql
+  ALTER TABLE linkedin_accounts
+  ADD COLUMN status AccountStatusType NOT NULL DEFAULT 'CONNECTING',
+  ADD COLUMN last_status_update TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  ADD COLUMN status_history JSONB DEFAULT '[]',
+  ADD COLUMN sync_failures INTEGER DEFAULT 0,
+  ADD COLUMN last_successful_sync TIMESTAMP WITH TIME ZONE;
+  ```
+
+#### Status Management System
+- **Real-time Monitoring:**
+  - Implement webhook endpoint `/api/webhooks/unipile/account-status`
+  - Store status updates in database
+  - Trigger notifications for critical status changes
+  - Track sync history and failure patterns
+
+- **Auto-Recovery System:**
+  ```typescript
+  interface RecoveryAction {
+    status: AccountStatusType;
+    action: 'NOTIFY' | 'RETRY' | 'PAUSE' | 'RECONNECT';
+    maxAttempts: number;
+    cooldownPeriod: number; // minutes
+  }
+  ```
+
+- **Status-Based Actions:**
+  1. **CREDENTIALS Issues:**
+     - Pause all outreach activities
+     - Notify user for re-authentication
+     - Track session duration for proactive renewal
+  
+  2. **ERROR/STOPPED:**
+     - Implement exponential backoff retry
+     - Log detailed error information
+     - Alert on repeated failures
+  
+  3. **Rate Limit Prevention:**
+     - Monitor sync failures for rate limit patterns
+     - Adjust request timing based on status history
+     - Implement progressive backoff strategy
+
+#### Integration with Existing Systems
+- **Outreach Logic:**
+  - Check account status before sending invitations
+  - Pause campaigns on non-OK status
+  - Resume with reduced rate after recovery
+
+- **User Dashboard:**
+  - Real-time account status display
+  - Historical status timeline
+  - Health metrics and recommendations
+  - Re-authentication workflow
+
+#### Monitoring & Alerts
+- **System Metrics:**
+  ```typescript
+  interface AccountHealthMetrics {
+    uptime_percentage: number;
+    sync_success_rate: number;
+    average_recovery_time: number;
+    status_change_frequency: number;
+  }
+  ```
+
+- **Alert Conditions:**
+  - Multiple accounts failing simultaneously
+  - Extended periods in non-OK status
+  - Unusual status change patterns
+  - Critical status transitions
+
+#### Implementation Phases
+1. **Phase 1: Core Monitoring**
+   - Webhook endpoint setup
+   - Basic status tracking
+   - Database schema updates
+   - Simple notification system
+
+2. **Phase 2: Advanced Features**
+   - Auto-recovery system
+   - Historical analysis
+   - Pattern detection
+   - User dashboard integration
+
+3. **Phase 3: Optimization**
+   - Machine learning for pattern prediction
+   - Automated recovery optimization
+   - Advanced health scoring
+   - Predictive maintenance
+
+### LinkedIn Search Integration
+
+#### Search API Implementation Strategy
+- **Multi-API Support**:
+  - Classic LinkedIn API
+    - Best for: Basic profile searches, company research
+    - Features: Basic filters, high daily limits
+    - Use Case: Initial prospect discovery
+  - Sales Navigator API
+    - Best for: Advanced targeting, lead generation
+    - Features: Advanced filters, detailed company insights
+    - Use Case: Specific industry/role targeting
+  - Recruiter API
+    - Best for: Skill-based searches, detailed profile analysis
+    - Features: Comprehensive skill filtering, role matching
+    - Use Case: Technical role targeting
+
+#### Search Parameters Configuration
+- **Core Search Parameters**:
+  ```typescript
+  interface SearchParams {
+    api: 'classic' | 'sales_navigator' | 'recruiter';
+    category: 'people' | 'companies' | 'posts';
+    keywords?: string;
+    network_distance?: [1, 2, 3];
+    profile_language?: string[];
+    tenure?: { min: number }[];
+  }
+  ```
+
+- **Advanced Filtering**:
+  - Industry Targeting:
+    ```typescript
+    industry: {
+      include: string[];  // Industry IDs
+      exclude: string[];  // Industry IDs to exclude
+    }
+    ```
+  - Role Matching:
+    ```typescript
+    role: [{
+      keywords: string;  // e.g., "developer OR engineer"
+      priority: "MUST_HAVE" | "NICE_TO_HAVE" | "DOESNT_HAVE";
+      scope: "CURRENT" | "PAST" | "CURRENT_OR_PAST";
+    }]
+    ```
+  - Skills Assessment:
+    ```typescript
+    skills: [{
+      id: string;        // Skill ID
+      priority: "MUST_HAVE" | "NICE_TO_HAVE" | "DOESNT_HAVE";
+    }]
+    ```
+
+#### Search Result Processing
+- **Pagination Handler**:
+  ```typescript
+  interface PaginationConfig {
+    cursor: string;      // Base64 encoded cursor
+    pageSize: number;    // Default: 10, Max: 100
+    totalCount: boolean; // Whether to fetch total results count
+  }
+  ```
+
+- **Profile Data Structure**:
+  ```typescript
+  interface ProfileData {
+    id: string;
+    type: 'PEOPLE' | 'COMPANY';
+    member_urn: string;
+    network_distance: string;
+    location: string;
+    current_positions: {
+      company: string;
+      role: string;
+      tenure_at_company: { years: number };
+    }[];
+    industry: string;
+    headline: string;
+  }
+  ```
+
+#### Search Strategy Implementation
+- **Template System**:
+  ```typescript
+  interface SearchTemplate {
+    name: string;
+    description: string;
+    params: SearchParams;
+    targeting_score: number;
+    success_rate: number;
+    last_used: Date;
+  }
+  ```
+
+- **Caching Strategy**:
+  - Cache Duration: 24 hours for search results
+  - Cache Keys: Hash of search parameters
+  - Invalidation: On template update or manual refresh
+
+### Enhanced Profile Targeting
+
+#### Target Profile Validation System
+- **Accessibility Check**:
+  ```typescript
+  interface ProfileAccessibility {
+    can_view_full_profile: boolean;
+    can_send_inmail: boolean;
+    can_send_invitation: boolean;
+    network_distance: number;
+    is_premium: boolean;
+  }
+  ```
+
+- **Connection Analysis**:
+  ```typescript
+  interface ConnectionMetrics {
+    mutual_connections: number;
+    mutual_companies: number;
+    mutual_schools: number;
+    shared_groups: number;
+  }
+  ```
+
+#### Profile Scoring Algorithm
+- **Base Score Components**:
+  ```typescript
+  interface ProfileScore {
+    relevance_score: number;    // 0-100
+    engagement_score: number;   // 0-100
+    response_score: number;     // 0-100
+    final_score: number;        // Weighted average
+  }
+  ```
+
+- **Scoring Weights**:
+  ```typescript
+  const SCORE_WEIGHTS = {
+    profile_match: 0.4,
+    activity_level: 0.2,
+    mutual_connections: 0.2,
+    response_likelihood: 0.2
+  };
+  ```
+
+- **Activity Scoring**:
+  ```typescript
+  interface ActivityMetrics {
+    post_frequency: number;     // Posts per month
+    comment_frequency: number;  // Comments per month
+    profile_updates: number;    // Updates in last 3 months
+    last_active: Date;
+  }
+  ```
+
+#### Implementation Phases
+1. **Phase 1: Basic Search & Validation**
+   - Implement core search APIs
+   - Basic profile validation
+   - Simple scoring system
+
+2. **Phase 2: Advanced Targeting**
+   - Template system
+   - Caching layer
+   - Enhanced scoring algorithm
+
+3. **Phase 3: Optimization**
+   - A/B testing different templates
+   - Success rate tracking
+   - Automated template optimization
+
+---
+
+*(Previous implementation notes, if any, would follow here)*
+
+

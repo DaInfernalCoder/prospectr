@@ -9,6 +9,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error_description = searchParams.get("error_description");
+  const type = searchParams.get("type"); // Get the type of auth callback
 
   // Handle error case first
   if (error_description) {
@@ -22,6 +23,8 @@ export async function GET(request) {
 
   if (code) {
     const supabase = await createClient();
+    const cookieStore = cookies();
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 
     try {
       let error = null;
@@ -32,21 +35,24 @@ export async function GET(request) {
       error = exchangeError;
 
       if (!error) {
-        // Get the current domain
-        const forwardedHost = request.headers.get("x-forwarded-host");
-        const host = forwardedHost || request.headers.get("host");
-        const protocol =
-          process.env.NODE_ENV === "production" ? "https" : "http";
-        const baseUrl = `${protocol}://${host}`;
+        // Get the user to check their email verification status
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-        // Check for checkout redirection cookie
-        const cookieStore = cookies();
+        // If this was an email confirmation
+        if (type === "signup" && user?.email_confirmed_at) {
+          // Show welcome message on dashboard
+          return NextResponse.redirect(
+            `${baseUrl}/dashboard?welcome=true&email_confirmed=true`
+          );
+        }
 
-        // If this was a sign-in from the checkout process, get the selected plan ID
-        // and create a checkout session
-        const hasRedirectCookie = await cookieStore.has(
+        // Check for checkout flow
+        const hasRedirectCookie = await cookieStore.get(
           "redirectToCheckoutAfterAuth"
         );
+
         if (hasRedirectCookie) {
           await cookieStore.delete("redirectToCheckoutAfterAuth");
 
@@ -95,18 +101,14 @@ export async function GET(request) {
       } else {
         console.error("Error during authentication callback:", error);
         return NextResponse.redirect(
-          `${
-            process.env.NEXT_PUBLIC_APP_URL
-          }/signin?error=auth-failed&message=${encodeURIComponent(
+          `${baseUrl}/signin?error=auth-failed&message=${encodeURIComponent(
             error.message
           )}`
         );
       }
     } catch (err) {
       console.error("Exception during auth callback:", err);
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/signin?error=unexpected-error`
-      );
+      return NextResponse.redirect(`${baseUrl}/signin?error=unexpected-error`);
     }
   }
 

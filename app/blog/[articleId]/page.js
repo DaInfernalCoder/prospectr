@@ -6,7 +6,8 @@ import Avatar from "../_assets/components/Avatar";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params;
   const article = articles.find((article) => article.slug === params.articleId);
 
   return getSEOTags({
@@ -32,7 +33,8 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Article({ params }) {
+export default async function Article(props) {
+  const params = await props.params;
   const article = articles.find((article) => article.slug === params.articleId);
   const articlesRelated = articles
     .filter(

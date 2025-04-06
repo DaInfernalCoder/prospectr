@@ -87,13 +87,16 @@ export default function SignupForm() {
       if (error) {
         toast.error(error.message);
         console.log(error);
+      } else if (data?.user?.identities?.length === 0) {
+        // User already exists but hasn't confirmed their email
+        toast.error(
+          "An account with this email already exists. Please check your email for the confirmation link or try signing in."
+        );
       } else {
-        toast.success("Check your email to confirm your account!");
-
-        // If this was part of a checkout flow, handle it
-        if (isPendingCheckout && data?.user) {
-          await handleCheckoutAfterSignup();
-        }
+        toast.success(
+          "Please check your email for a confirmation link to complete your registration."
+        );
+        // Don't redirect yet - user needs to confirm email first
       }
     } catch (error) {
       console.log(error);

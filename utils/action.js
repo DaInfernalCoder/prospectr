@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 const signInWith = (provider) => async (formData) => {
   const supabase = await createClient();
   const headersList = await headers();
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   // Get the host, with fallbacks for Vercel and local development
   const host =

@@ -7,7 +7,8 @@ import { NextResponse } from "next/server";
 //   method: 'DELETE'
 // });
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, props) {
+  const params = await props.params;
   const supabase = await createClient();
   const profileId = params.id;
 
