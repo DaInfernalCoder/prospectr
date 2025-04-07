@@ -1,4 +1,5 @@
-"use client";
+"use client";;
+import { use } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, BarChart2, Calendar, Clock } from "lucide-react";
@@ -39,7 +40,8 @@ const mockCampaigns = {
   },
 };
 
-export default function CampaignDetailsPage({ params }) {
+export default function CampaignDetailsPage(props) {
+  const params = use(props.params);
   const router = useRouter();
   const campaign = mockCampaigns[params.id];
 

@@ -40,7 +40,7 @@ export async function GET(request) {
         const baseUrl = `${protocol}://${host}`;
 
         // Check for checkout redirection cookie
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
 
         // If this was a sign-in from the checkout process, get the selected plan ID
         // and create a checkout session

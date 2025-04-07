@@ -4,7 +4,8 @@ import CardArticle from "../../_assets/components/CardArticle";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params;
   const author = authors.find((author) => author.slug === params.authorId);
 
   return getSEOTags({
@@ -14,7 +15,8 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Author({ params }) {
+export default async function Author(props) {
+  const params = await props.params;
   const author = authors.find((author) => author.slug === params.authorId);
   const articlesByAuthor = articles
     .filter((article) => article.author.slug === author.slug)

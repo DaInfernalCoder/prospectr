@@ -1,4 +1,3 @@
-import { getUser } from "@/utils/supabase/getUser";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
