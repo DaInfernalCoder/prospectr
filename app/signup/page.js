@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -9,7 +9,21 @@ import config from "@/config";
 import { signInWithGoogle } from "@/utils/action";
 import { createCheckoutSession } from "@/utils/stripe-client";
 
-export default function Signup() {
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white p-8 md:p-24 flex items-center justify-center">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      }
+    >
+      <Signup />
+    </Suspense>
+  );
+}
+
+function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
