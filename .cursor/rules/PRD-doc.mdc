@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 **Update this rule if user requested changes to the project requirement, etc.**
 
