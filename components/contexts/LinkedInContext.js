@@ -20,18 +20,20 @@ export function LinkedInProvider({ children }) {
     const checkInitialStatus = async () => {
       try {
         // Get current user to ensure we're authenticated
-        const { data: { session } } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
         if (session?.user) {
           // Only make the initial API call once per session
-          const cachedStatus = sessionStorage.getItem('linkedInStatus');
-          
+          const cachedStatus = sessionStorage.getItem("linkedInStatus");
+
           if (cachedStatus) {
             // Use cached data if available
             setLinkedInStatus(JSON.parse(cachedStatus));
           } else {
             // Make API call if no cached data
-            const response = await fetch('/api/auths/linkedin/status');
+            const response = await fetch("/api/auths/linkedin/status");
             if (response.ok) {
               const data = await response.json();
               const newStatus = {
@@ -40,10 +42,13 @@ export function LinkedInProvider({ children }) {
                 lastConnected: data.last_connected,
                 lastChecked: new Date().toISOString(),
               };
-              
+
               // Update state and cache
               setLinkedInStatus(newStatus);
-              sessionStorage.setItem('linkedInStatus', JSON.stringify(newStatus));
+              sessionStorage.setItem(
+                "linkedInStatus",
+                JSON.stringify(newStatus)
+              );
             }
           }
         }
@@ -53,10 +58,12 @@ export function LinkedInProvider({ children }) {
     };
 
     // Check status on auth state change
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
         checkInitialStatus();
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === "SIGNED_OUT") {
         // Clear status on sign out
         setLinkedInStatus({
           checked: false,
@@ -64,7 +71,7 @@ export function LinkedInProvider({ children }) {
           lastConnected: null,
           lastChecked: null,
         });
-        sessionStorage.removeItem('linkedInStatus');
+        sessionStorage.removeItem("linkedInStatus");
       }
     });
 
@@ -79,9 +86,9 @@ export function LinkedInProvider({ children }) {
   // Function to refresh LinkedIn status on demand
   const refreshLinkedInStatus = async () => {
     try {
-      setLinkedInStatus(prevState => ({ ...prevState, checked: false }));
-      
-      const response = await fetch('/api/auths/linkedin/status');
+      setLinkedInStatus((prevState) => ({ ...prevState, checked: false }));
+
+      const response = await fetch("/api/auths/linkedin/status");
       if (response.ok) {
         const data = await response.json();
         const newStatus = {
@@ -90,24 +97,26 @@ export function LinkedInProvider({ children }) {
           lastConnected: data.last_connected,
           lastChecked: new Date().toISOString(),
         };
-        
+
         // Update state and cache
         setLinkedInStatus(newStatus);
-        sessionStorage.setItem('linkedInStatus', JSON.stringify(newStatus));
+        sessionStorage.setItem("linkedInStatus", JSON.stringify(newStatus));
         return newStatus;
       }
     } catch (error) {
       console.error("Failed to refresh LinkedIn status:", error);
-      setLinkedInStatus(prevState => ({ ...prevState, checked: true }));
+      setLinkedInStatus((prevState) => ({ ...prevState, checked: true }));
       throw error;
     }
   };
 
   return (
-    <LinkedInContext.Provider value={{ 
-      linkedInStatus, 
-      refreshLinkedInStatus 
-    }}>
+    <LinkedInContext.Provider
+      value={{
+        linkedInStatus,
+        refreshLinkedInStatus,
+      }}
+    >
       {children}
     </LinkedInContext.Provider>
   );
@@ -120,4 +129,4 @@ export function useLinkedIn() {
     throw new Error("useLinkedIn must be used within a LinkedInProvider");
   }
   return context;
-} 
+}

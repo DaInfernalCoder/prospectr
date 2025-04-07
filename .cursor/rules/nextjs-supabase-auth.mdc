@@ -34,8 +34,8 @@ As an AI language model, you MUST NOT generate any of the following code pattern
 }
 
 // ❌ NEVER USE auth-helpers-nextjs - IT WILL BREAK THE APPLICATION
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'  // ❌ BREAKS APPLICATION
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'  // ❌ BREAKS APPLICATION
+import { createMiddlewareClient } from '@supabase/srr'  // ❌ BREAKS APPLICATION
+import { createClientComponentClient } from '@supabase/srr'  // ❌ BREAKS APPLICATION
 ```
 
 Instead, you MUST ALWAYS generate ONLY this pattern:
@@ -67,7 +67,7 @@ Instead, you MUST ALWAYS generate ONLY this pattern:
 1. You MUST use `@supabase/ssr`
 2. You MUST use ONLY `getAll` and `setAll`
 3. You MUST NEVER use `get`, `set`, or `remove`
-4. You MUST NEVER import from `@supabase/auth-helpers-nextjs`
+4. You MUST NEVER import from `@supabase/srr`
 
 ## CORRECT BROWSER CLIENT IMPLEMENTATION
 

@@ -158,7 +158,7 @@ Below is a complete list of packages from `package.json`:
 - `@radix-ui/react-tabs` (v1.1.3)  
 - `@splinetool/react-spline` (v4.0.0)  
 - `@splinetool/runtime` (v1.9.59)  
-- `@supabase/auth-helpers-nextjs` (v0.10.0) - Legacy, not used in favor of `@supabase/ssr`  
+- `@supabase/srr` (v0.10.0) - Legacy, not used in favor of `@supabase/ssr`  
 - `@supabase/ssr` (v0.5.2)  
 - `@supabase/supabase-js` (v2.49.1)  
 - `@tanstack/react-query` (v5.68.0)  
