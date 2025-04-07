@@ -1,7 +1,7 @@
 ---
-description: 
+description: how to generate a policy with the constraints given by the user.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Database: Create RLS policies

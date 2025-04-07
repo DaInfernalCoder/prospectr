@@ -1,9 +1,15 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
-Update this rule if user requested changes to the project requirement, etc.
+**Update this rule if user requested changes to the project requirement, etc.**
+
+# Prospectr Product Requirements Document
+
+**Last Updated:** 3/24/25
+
+**Note**: This document should be updated whenever there are changes to the project's tech stack or requirements to ensure it remains accurate and useful.
 
 Below is a comprehensive Product Requirements Document (PRD) for the **Prospectr** project, tailored to the provided codebase and project requirements. This PRD is designed to be clean, concise, and easy to iterate with, while being painfully specific to ensure clarity for development teams and AI-assisted workflows.
 

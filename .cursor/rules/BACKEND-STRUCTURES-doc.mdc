@@ -1,157 +1,218 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
-BACKEND STRUCTURE DOCUMENT
-Overview
-Prospectr's backend is powered by Supabase, providing a PostgreSQL database, authentication, and storage services. The database is organized into multiple schemas, with the public schema containing application-specific tables that manage user profiles, LinkedIn connections, invitation jobs, and subscription details. The backend ensures secure authentication, data integrity, and access control through Row Level Security (RLS) policies, integrating seamlessly with the frontend to deliver a robust LinkedIn prospecting tool.
-Database Schema
-The database leverages Supabase's PostgreSQL instance, with the public schema hosting the core application tables. Below is a detailed breakdown of each table, their purposes, key columns, and relationships.
-Tables
-profiles
-Purpose: Stores user profile information, LinkedIn connection status, and subscription details.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the profile.
-user_id (uuid, Primary Key, Foreign Key): References auth.users.id from Supabase Auth.
-linkedin_token (text): Stores the LinkedIn authentication token.
-linkedin_status (boolean): Indicates whether LinkedIn is connected.
-message_quota (integer, default: 50): Daily message limit for the user.
-subscription_tier (enum: FREE, PRO, PREMUIM, EXPIRED, default: FREE): User's subscription level.
-Subscription-related fields: customer_id (text), price_id (text), subscription_id (text), subscription_status (text).
-Timestamp fields: trial_ends_at (timestamptz), canceled_at (timestamptz), etc.
-Notes: Links directly to Supabase Auth via user_id.
-invitation_jobs
-Purpose: Tracks bulk LinkedIn invitation-sending jobs.
-Key Columns:
-job_id (text, Primary Key): Unique identifier for the job.
-id (uuid, Primary Key): Secondary unique identifier.
-user_id (uuid, Foreign Key): References auth.users.id.
-status (text): Current status of the job (e.g., pending, in-progress, completed).
-total_invitations (integer): Total number of invitations to send.
-invitations_sent (integer): Number of successfully sent invitations.
-invitations_failed (integer): Number of failed invitations.
-template_id (uuid, Foreign Key): References invitation_templates.id.
-Timestamp fields: created_at (timestamptz), started_at (timestamptz), completed_at (timestamptz).
-Notes: Ties invitation campaigns to specific users and templates.
-invitation_templates
-Purpose: Stores reusable message templates for LinkedIn invitations.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the template.
-user_id (uuid, Foreign Key): References auth.users.id.
-name (text): Name of the template.
-follow_up_message (text): Content of the follow-up message.
-Notes: Allows users to customize and reuse invitation messages.
-invitation_users
-Purpose: Tracks individual LinkedIn users targeted in invitation jobs.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the invitation record.
-job_id (text, Foreign Key): References invitation_jobs.job_id.
-linkedin_user_id (text): LinkedIn identifier of the target user.
-linkedin_profile_url (text): URL of the target LinkedIn profile.
-invitation_status (text, default: 'pending'): Status of the invitation (e.g., pending, sent, accepted).
-Timestamp fields: invitation_sent_at (timestamptz), invitation_accepted_at (timestamptz), follow_up_sent_at (timestamptz).
-has_responded (boolean): Indicates if the target user has responded.
-Notes: Links individual invitations to their respective jobs.
-linkedin_status_updates
-Purpose: Records status updates related to LinkedIn activities.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the update.
-user_id (uuid, Foreign Key): References auth.users.id.
-connection_id (uuid): Reference to a specific connection (context-specific).
-status (text): Description of the status update.
-metadata (jsonb): Additional data in JSON format.
-Notes: Provides a log of LinkedIn-related events for each user.
-saved_profiles
-Purpose: Stores LinkedIn profiles saved by users for later use.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the saved profile.
-user_id (uuid, Foreign Key): References auth.users.id.
-profile_data (jsonb): JSON data of the LinkedIn profile.
-profile_id (text): LinkedIn profile identifier.
-tags (array): Tags assigned to the profile.
-notes (text): User-added notes about the profile.
-Notes: Facilitates profile management and organization.
-linkedin_connections
-Purpose: Manages LinkedIn connections for each user.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the connection.
-user_id (uuid, Foreign Key): References auth.users.id.
-profile_id (text): LinkedIn profile identifier.
-name (text): Name of the connected individual.
-headline (text): LinkedIn headline of the connection.
-status (enum: PENDING, ACCEPTED, IGNORED): Connection status.
-Notes: Tracks the lifecycle of LinkedIn connections.
-leads
-Purpose: Simple table for capturing lead information.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the lead.
-email (text): Email address of the lead.
-created_at (timestamp): Timestamp of lead creation.
-Notes: Minimalist design for basic lead collection.
-Custom Types
-subscription_tier: Enum with values FREE, PRO, PREMUIM, EXPIRED.
-Used in profiles to define subscription levels.
-linkeding_status: Enum with values PENDING, ACCEPTED, IGNORED.
-Used in linkedin_connections to track connection status.
-Note: Typo in enum name (linkeding_status instead of linkedin_status) exists in the schema.
-Database Functions
-Several PostgreSQL functions enhance database operations:
-create_user_profile(): Trigger function to automatically create a profile in profiles upon user signup.
-handle_new_user(): Trigger function handling new user creation, likely linked to authentication events.
-update_updated_at() and update_updated_at_column(): Functions to update timestamp columns on record modifications.
-Row Level Security (RLS)
-RLS is enabled on several tables to enforce data access control:
-leads: Allows public insertion (e.g., anyone can add a lead).
-linkedin_status_updates: Restricts access to the user’s own updates (user_id = auth.uid()).
-linkedin_connections: RLS enabled, likely limiting access to the user’s own connections.
-saved_profiles: RLS enabled, restricting access to the user’s saved profiles.
-profiles: RLS policies defined but disabled:
-Insert/delete allowed based on user_id.
-Select/update permitted for authenticated users.
-Data Relationships
-Key foreign key relationships ensure data integrity:
-profiles.user_id → auth.users.id
-invitation_jobs.user_id → auth.users.id
-invitation_jobs.template_id → invitation_templates.id
-invitation_templates.user_id → auth.users.id
-invitation_users.job_id → invitation_jobs.job_id
-linkedin_status_updates.user_id → auth.users.id
-saved_profiles.user_id → auth.users.id
-linkedin_connections.user_id → auth.users.id
-These relationships link user data across tables, supporting features like invitation campaigns and connection tracking.
-Authentication Logic
-Prospectr leverages Supabase Auth for user authentication, integrated with the auth schema and its 16 tables (e.g., auth.users).
-Mechanism: 
-Managed via Supabase Auth, supporting email/password and OAuth (e.g., Google, LinkedIn via auth.external.linkedin_oidc configuration in supabase/config.toml).
-Configured in utils/supabase/ files (client.js, server.js, middleware.js) using @supabase/ssr.
-Profile Creation: 
-Upon signup, triggers like handle_new_user() or create_user_profile() create a corresponding entry in the profiles table, linking via user_id.
-Access Control: 
-RLS policies restrict data access to authenticated users’ own records (e.g., user_id = auth.uid()).
-Middleware (middleware.js) refreshes sessions and redirects unauthenticated users to /signin.
-Subscription Integration: 
-The profiles table tracks subscription status (subscription_tier, subscription_status), influencing feature access (e.g., message quotas).
-Storage Rules
-Supabase Storage: 
-Likely used for file uploads (e.g., user avatars or profile-related media), configured via supabase/config.toml:
-file_size_limit = "50MiB"
-Buckets not explicitly defined in the provided config but can be set up in the Supabase dashboard.
-Access Control: 
-RLS policies would govern access, aligning with user authentication (e.g., only authenticated users can upload/view their files).
-Notes: 
-Specific bucket configurations are not detailed in the codebase, suggesting default or dashboard-managed settings.
-Edge Cases
-The backend design accounts for several edge cases:
-Subscription Expiry: 
-Users with subscription_tier = EXPIRED or past trial_ends_at may lose access to premium features, enforced via checkSubscription() in utils/check-subscription.js.
-LinkedIn Token Expiry: 
-Invalid or expired linkedin_token in profiles requires reconnection, handled via sendReconnectionEmail() in utils/email/reconnectionEmail.js.
-Invitation Job Failures: 
-Partial failures in invitation_jobs are tracked (invitations_failed), ensuring accurate status reporting.
-Rate Limiting: 
-Enforces message quotas (message_quota) and LinkedIn API limits, with cron jobs (check-invitations, check-responses) monitoring compliance.
-Data Consistency: 
-Ensures integrity between invitation_jobs and invitation_users via foreign keys and triggers.
-Conclusion
-This Backend Structure Document provides a comprehensive overview of Prospectr's backend, detailing the Supabase-powered database schema, authentication logic, storage considerations, and key edge cases. It serves as a foundation for developers to maintain, extend, and troubleshoot the application, ensuring a secure and efficient LinkedIn prospecting tool. For further iterations or specific enhancements, please refer to this document and update as needed based on project requirements.
+# Prospectr Backend Structure Document
+
+**Last Updated:** 2024-04-04
+
+**Note**: This document reflects the current implementation status based on the actual database schema and codebase structure. Update it whenever necessary
+
+## Database Overview
+
+The Prospectr database is implemented in Supabase with the following schemas:
+
+- **auth** (1624 kB): Contains 16 tables for Supabase authentication
+- **public** (296 kB): Contains 8 tables for application data
+- **realtime** (136 kB): Contains 8 tables for Supabase realtime features
+- **storage** (144 kB): Contains 5 tables for file storage
+- **supabase_functions** (64 kB): Contains 2 tables for edge functions
+- **net** (48 kB): Contains 2 tables for networking features
+- **vault** (24 kB): Contains 1 table for secure storage
+- **extensions**, **graphql**, **graphql_public**: Empty schemas (0 bytes)
+
+## Public Schema Tables
+
+### `profiles`
+Primary user profile table linking Supabase Auth with application data.
+
+**Columns:**
+- `id` uuid PRIMARY KEY (auto-generated)
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid NOT NULL PRIMARY KEY REFERENCES auth.users(id)
+- `linkedin_token` text
+- `linkedin_status` boolean DEFAULT false
+- `message_quota` integer DEFAULT 50 (Daily message limit)
+- `stripe_customer_id` text
+- `subscription_tier` enum DEFAULT 'FREE'
+- `oauth_state` text
+- `unipile_account_id` text
+- `reconnect_token` text
+- `reconnect_expires_at` date
+- `customer_id` text
+- `price_id` text
+- `has_access` boolean DEFAULT false
+- `subscription_id` text
+- `subscription_status` text
+- `trial_ends_at` timestamptz
+- `cancel_at_period_end` timestamptz
+- `subscription_created_at` timestamptz
+- `last_payment_at` timestamptz
+- `canceled_at` timestamptz
+- `payment_failed` boolean DEFAULT false
+
+### `invitation_jobs`
+Tracks bulk LinkedIn invitation campaigns.
+
+**Columns:**
+- `job_id` text PRIMARY KEY DEFAULT ''
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid REFERENCES auth.users(id)
+- `status` text NOT NULL
+- `total_invitations` integer
+- `invitations_sent` integer DEFAULT 0
+- `invitations_failed` integer DEFAULT 0
+- `started_at` timestamptz
+- `last_updated` timestamptz
+- `completed_at` timestamptz
+- `error_message` text
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `template_id` uuid REFERENCES invitation_templates(id)
+- `message` text
+- `name` text
+
+### `invitation_users`
+Tracks individual LinkedIn connection requests within campaigns.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `linkedin_user_id` text
+- `linkedin_profile_url` text
+- `invitation_status` text DEFAULT 'pending'
+- `invitation_sent_at` timestamptz DEFAULT now()
+- `invitation_accepted_at` timestamptz
+- `follow_up_sent_at` timestamptz
+- `updated_at` timestamptz DEFAULT now()
+- `job_id` text NOT NULL REFERENCES invitation_jobs(job_id)
+- `has_responded` boolean DEFAULT false
+- `first_response_at` timestamptz
+
+### `invitation_templates`
+Stores message templates for connection requests and follow-ups.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid REFERENCES auth.users(id)
+- `name` text NOT NULL
+- `follow_up_message` text NOT NULL
+- `updated_at` timestamptz DEFAULT now()
+
+### `linkedin_status_updates`
+Logs LinkedIn connection status changes.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES auth.users(id)
+- `connection_id` uuid NOT NULL
+- `status` text NOT NULL
+- `account_id` text
+- `timestamp` timestamptz DEFAULT now()
+- `metadata` jsonb DEFAULT '{}'
+
+### `saved_profiles`
+Stores saved LinkedIn profiles for future reference.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `profile_data` jsonb NOT NULL
+- `tags` text[]
+- `notes` text
+- `profile_id` text NOT NULL
+- `user_id` uuid REFERENCES auth.users(id)
+
+### `linkedin_connections`
+Tracks LinkedIn connections (appears to be legacy/unused).
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid REFERENCES auth.users(id)
+- `profile_id` text
+- `name` text
+- `headline` text
+- `status` enum
+
+### `leads`
+Simple table for capturing lead information.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `email` text
+- `created_at` timestamptz NOT NULL DEFAULT timezone('utc'::text, now())
+
+## Table Relationships
+
+### Foreign Key Relationships
+- `profiles.user_id` → `auth.users.id`
+- `invitation_jobs.user_id` → `auth.users.id`
+- `invitation_jobs.template_id` → `invitation_templates.id`
+- `invitation_templates.user_id` → `auth.users.id`
+- `invitation_users.job_id` → `invitation_jobs.job_id`
+- `linkedin_status_updates.user_id` → `auth.users.id`
+- `saved_profiles.user_id` → `auth.users.id`
+- `linkedin_connections.user_id` → `auth.users.id`
+
+### Custom Types
+- `subscription_tier`: Enum type (FREE, PRO, PREMIUM)
+- Status enum for linkedin_connections table
+
+## Table Usage Statistics
+
+Based on current data:
+- `invitation_jobs`: 4 rows, 81920 bytes
+- `profiles`: 8 rows, 65536 bytes
+- `invitation_templates`: 3 rows, 32768 bytes
+- `invitation_users`: 6 rows, 32768 bytes
+- Other tables: 0 rows currently
+
+## Security and Access Control
+
+### Row Level Security (RLS)
+RLS policies should be implemented for:
+- `profiles`: Restrict access to user's own profile
+- `invitation_jobs`: Restrict access to user's own jobs
+- `invitation_users`: Restrict access based on job ownership
+- `invitation_templates`: Restrict access to user's own templates
+- `linkedin_status_updates`: Restrict access to user's own updates
+- `saved_profiles`: Restrict access to user's own saved profiles
+- `linkedin_connections`: Restrict access to user's own connections
+- `leads`: Allow public insertion, restrict reading
+
+### Authentication Flow
+- Uses Supabase Auth with email/password and potentially OAuth providers
+- Session management via `@supabase/ssr`
+- Profile creation triggered on user signup
+- LinkedIn connection managed separately via Unipile
+
+## API Routes
+
+The following API routes interact with the database:
+
+### Authentication
+- `/api/auth/*`: Supabase authentication endpoints
+- `/api/auths/linkedin/connect`: LinkedIn connection via Unipile
+- `/api/auths/linkedin/status`: Check LinkedIn connection status
+- `/api/auths/linkedin/reconnect`: Initiate LinkedIn reconnection
+
+### Campaign Management
+- `/api/linkedin/invitations/send`: Create new invitation campaigns
+- `/api/linkedin/invitations/status/[jobId]`: Check campaign status
+- `/api/linkedin/search`: Search LinkedIn profiles
+- `/api/linkedin/saved_profile`: Save/manage LinkedIn profiles
+
+### Subscription Management
+- `/api/stripe/create-checkout`: Create Stripe checkout session
+- `/api/stripe/create-portal`: Access Stripe customer portal
+- `/api/webhook/stripe`: Handle Stripe webhook events
+
+### Background Jobs
+- `/api/cron/check-invitations`: Update invitation statuses
+- `/api/cron/check-responses`: Check for LinkedIn responses
+
+## Conclusion
+
+This document reflects the current state of the Prospectr backend based on the actual Supabase database schema. The structure supports the core features of LinkedIn prospecting, campaign management, and subscription handling, with appropriate security measures and monitoring capabilities.

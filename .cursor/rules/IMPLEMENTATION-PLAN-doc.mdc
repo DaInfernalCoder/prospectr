@@ -1,123 +1,400 @@
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
 **Update this rule if user requested changes to the project requirement, etc.**
 
-Implementation Plan
-Below is a detailed, actionable plan with 50+ specific steps to address the requested enhancements: fixing authentication, adding Google Auth and simple sign-in, improving LinkedIn sign-in and URL handling, and implementing two Stripe plans. These steps are designed for manual execution or AI-assisted development with tools like Cursor or Windsurf.
-1. Fix Authentication Flow
-Audit Supabase Config: Review NEXT_PUBLIC_SUPABASE_URL and SUPABASE_ANON_KEY in .env.local for correctness.
+# Prospectr Implementation Status & Plan
 
-Enable Email Confirmations: Update Supabase Auth settings to require email verification (auth.email.enable_confirmations = true in supabase/config.toml).
+**Last Updated:** 2024-04-05 (Launch Plan Update)
 
-Set Up Resend: Verify RESEND_API_KEY in .env.local and test email sending with a dummy message.
+**Note**: This document reflects the current implementation status based on the codebase and outlines potential next steps or areas matching the original plan.
 
-Create Email Templates: Add HTML templates in supabase/templates/ for sign-up, password reset, and confirmation emails.
+## Launch Plan (Target: Tomorrow)
 
-Update Sign-Up Route: Modify /app/signup/page.js to trigger email confirmation post-registration.
+This section outlines the critical tasks to prepare Prospectr for launch.
 
-Test Sign-Up Flow: Register a test user and verify email receipt and confirmation link functionality.
+### 1. Authentication Email Verification
 
-Fix Session Persistence: Adjust utils/supabase/middleware.js to extend maxAge to 30 days and handle expired sessions gracefully.
+**Goal:** Ensure users receive verification emails upon signing up with email/password.
 
-Add Session Refresh Logic: In middleware.js, implement a retry mechanism for session refresh on 401 errors.
+*   **Verify Supabase Config:**
+    *   Check `supabase/config.toml` for email provider settings.
+    *   Confirm `auth.email.enable_confirmations = true` in the Supabase dashboard settings.
+    *   Verify SMTP credentials or Supabase's built-in email provider is correctly configured.
+*   **Check Email Templates:** Ensure default or custom email templates in Supabase are active and correctly formatted.
+*   **Test Signup Flow:** Perform test signups using email/password to confirm email delivery and verification link functionality.
+*   **Debug:** Investigate potential issues in Supabase logs, API routes (`/auth/callback`, signup actions), or email provider settings if emails fail.
 
-Test Session Stability: Simulate a logout after 24 hours and ensure users remain authenticated post-refresh.
+### 2. LinkedIn Outreach Logic Revamp
 
-Log Errors: Add error logging in utils/supabase/server.js to capture authentication failures.
+**Goal:** Implement robust and scalable LinkedIn connection request sending logic using Unipile, respecting user account status and aiming to work within LinkedIn's limits.
 
-2. Add Google Auth and Simple Sign-In
-Set Up Google OAuth: Register an app in Google Cloud Console and obtain client ID/secret.
+*   **Account Status-Based Limits (From Unipile Docs):**
+    *   **Free Account:** ~15 invitations per week (200 characters) or 150 without a note
+    *   **Paid/Active Account:** 80-100 invitations per day, ~200 per week (300 characters)
+    *   **New/Inactive Accounts:** Start with lower quantities and gradually increase
+    *   **Accounts with <150 connections:** Limited invitation capability, some may not be delivered
+    *   **Profile Visit Limits:**
+        *   Free/Premium: ~100 profiles per day
+        *   Sales Navigator: Higher limits available via Sales Navigator API parameter
 
-Configure Supabase: Add Google provider in Supabase dashboard with credentials from step 11.
+*   **Remove Hardcoded Limits:**
+    *   Locate and remove the current limit restricting sends to ~10 profiles at a time (check `lib/invitation-service.js` and `/api/linkedin/invitations/send/route.js`).
+    *   Replace with dynamic limits based on account status.
 
-Update .env.local: Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.
+*   **Implement Dynamic Sending Based on Account Status:**
+    *   Add account type detection to `lib/invitation-service.js`:
+        *   Check connection count
+        *   Verify account age/activity
+        *   Determine if Sales Navigator is available
+    *   Implement progressive limit increases:
+        *   Start conservatively for new accounts
+        *   Track successful sends and gradually increase limits
+        *   Store historical success rates in the database
+    *   Add error handling for HTTP 429 responses (LinkedIn's rate limit response)
 
-Modify Sign-In Page: Edit /app/signin/page.js to include a "Sign in with Google" button using signInWithGoogle from utils/action.js.
+*   **Develop Anti-Detection Strategy (Based on Unipile Guidelines):**
+    *   **Timing Algorithm:**
+        *   Implement random delays between requests (~1 minute intervals)
+        *   Distribute actions across working hours
+        *   Add randomization to avoid pattern detection
+    *   **Profile Interaction Strategy:**
+        *   Implement profile views before connection requests
+        *   Use Sales Navigator API parameter when available
+        *   Track and respect the 100 profiles/day visit limit
+    *   **Request Distribution:**
+        *   Implement daily and weekly quota tracking
+        *   Add cool-down periods between batches
+        *   Store timing data in `invitation_jobs` table
 
-Implement Callback: Ensure /app/auth/callback/route.js handles Google OAuth redirects and sets session cookies.
+*   **Database Updates:**
+    *   Add fields to `profiles` table:
+        *   `linkedin_account_type` (free, premium, sales_navigator)
+        *   `linkedin_connection_count`
+        *   `daily_invitation_count`
+        *   `weekly_invitation_count`
+        *   `last_invitation_time`
+    *   Add fields to `invitation_jobs`:
+        *   `distribution_strategy` (immediate, distributed, progressive)
+        *   `time_window_start`
+        *   `time_window_end`
+        *   `delay_range_min`
+        *   `delay_range_max`
 
-Test Google Auth: Sign in with a Google account and verify user creation in Supabase.
+*   **Refactor & Test:**
+    *   Update services and API routes:
+        *   Modify `lib/invitation-service.js` to implement new timing logic
+        *   Update `/api/linkedin/invitations/send/route.js` with quota checks
+        *   Add rate limit handling to all LinkedIn-related API calls
+    *   Implement monitoring and logging:
+        *   Track success/failure rates
+        *   Log rate limit encounters
+        *   Monitor account warnings
+    *   Test scenarios:
+        *   New account ramping
+        *   Different account types
+        *   Rate limit handling
+        *   Distribution strategies
+        *   Error recovery
 
-Add Simple Sign-In: Update /app/signin/page.js to support email/password login if not already present.
+### 3. Account Lifecycle Monitoring System
 
-Validate Simple Sign-In: Test email/password login with a test account and confirm session persistence.
+**Goal:** Implement a robust account lifecycle monitoring system using Unipile's Account Status Webhook to track LinkedIn account health and connection status in real-time.
 
-Style Auth Pages: Use Tailwind CSS in /app/signin/page.js and /app/signup/page.js for consistent UI.
+#### Webhook Implementation
+```typescript
+interface AccountStatusPayload {
+  AccountStatus: {
+    account_id: string;
+    account_type: 'LINKEDIN';
+    message: AccountStatusType;
+  }
+}
 
-Document Auth Flow: Update docs/ with a new auth-flow.md detailing both methods.
+type AccountStatusType = 
+  | 'OK'               // Account healthy and syncing
+  | 'ERROR'            // Unexpected error during data fetch
+  | 'STOPPED'          // Sync stopped due to error
+  | 'CREDENTIALS'      // Invalid/expired credentials
+  | 'CONNECTING'       // Initial connection attempt
+  | 'DELETED'          // Account deleted
+  | 'CREATION_SUCCESS' // Account added successfully
+  | 'RECONNECTED'      // Account reconnected
+  | 'SYNC_SUCCESS';    // LinkedIn sync complete
+```
 
-3. Fix LinkedIn Sign-In Edge Cases
-Review Unipile Config: Verify UNIPILE_API_TOKEN and UNIPILE_REDIRECT_URI in .env.local.
+#### Database Schema Updates
+- Add to `linkedin_accounts` table:
+  ```sql
+  ALTER TABLE linkedin_accounts
+  ADD COLUMN status AccountStatusType NOT NULL DEFAULT 'CONNECTING',
+  ADD COLUMN last_status_update TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  ADD COLUMN status_history JSONB DEFAULT '[]',
+  ADD COLUMN sync_failures INTEGER DEFAULT 0,
+  ADD COLUMN last_successful_sync TIMESTAMP WITH TIME ZONE;
+  ```
 
-Test Current Flow: Attempt LinkedIn sign-in via /api/auths/linkedin/connect/route.js and log failures.
+#### Status Management System
+- **Real-time Monitoring:**
+  - Implement webhook endpoint `/api/webhooks/unipile/account-status`
+  - Store status updates in database
+  - Trigger notifications for critical status changes
+  - Track sync history and failure patterns
 
-Handle Token Expiry: Add logic in utils/unipileClient.js to refresh Unipile tokens if expired.
+- **Auto-Recovery System:**
+  ```typescript
+  interface RecoveryAction {
+    status: AccountStatusType;
+    action: 'NOTIFY' | 'RETRY' | 'PAUSE' | 'RECONNECT';
+    maxAttempts: number;
+    cooldownPeriod: number; // minutes
+  }
+  ```
 
-Update Connect Route: Modify /api/auths/linkedin/connect/route.js to retry on 401 errors with a refreshed token.
+- **Status-Based Actions:**
+  1. **CREDENTIALS Issues:**
+     - Pause all outreach activities
+     - Notify user for re-authentication
+     - Track session duration for proactive renewal
+  
+  2. **ERROR/STOPPED:**
+     - Implement exponential backoff retry
+     - Log detailed error information
+     - Alert on repeated failures
+  
+  3. **Rate Limit Prevention:**
+     - Monitor sync failures for rate limit patterns
+     - Adjust request timing based on status history
+     - Implement progressive backoff strategy
 
-Add Reconnection Logic: Use utils/email/reconnectionEmail.js to send reconnect prompts on persistent failures.
+#### Integration with Existing Systems
+- **Outreach Logic:**
+  - Check account status before sending invitations
+  - Pause campaigns on non-OK status
+  - Resume with reduced rate after recovery
 
-Test Edge Cases: Simulate network interruptions and expired tokens, ensuring sign-in succeeds.
+- **User Dashboard:**
+  - Real-time account status display
+  - Historical status timeline
+  - Health metrics and recommendations
+  - Re-authentication workflow
 
-Log Unipile Errors: Add console logs in utils/unipileClient.js for debugging API responses.
+#### Monitoring & Alerts
+- **System Metrics:**
+  ```typescript
+  interface AccountHealthMetrics {
+    uptime_percentage: number;
+    sync_success_rate: number;
+    average_recovery_time: number;
+    status_change_frequency: number;
+  }
+  ```
 
-Improve Status Check: Enhance /api/auths/linkedin/status/route.js to return detailed error codes.
+- **Alert Conditions:**
+  - Multiple accounts failing simultaneously
+  - Extended periods in non-OK status
+  - Unusual status change patterns
+  - Critical status transitions
 
-Update Settings UI: Modify /app/dashboard/settings/page.js to display LinkedIn connection status clearly.
+#### Implementation Phases
+1. **Phase 1: Core Monitoring**
+   - Webhook endpoint setup
+   - Basic status tracking
+   - Database schema updates
+   - Simple notification system
 
-Test Reconnection: Disconnect and reconnect a LinkedIn account, verifying email and UI updates.
+2. **Phase 2: Advanced Features**
+   - Auto-recovery system
+   - Historical analysis
+   - Pattern detection
+   - User dashboard integration
 
-4. Handle LinkedIn URLs Better
-Analyze Current Handling: Review /utils/linkedin/searchParameters.js for URL parsing logic.
+3. **Phase 3: Optimization**
+   - Machine learning for pattern prediction
+   - Automated recovery optimization
+   - Advanced health scoring
+   - Predictive maintenance
 
-Define URL Patterns: Research LinkedIn URL structures (e.g., linkedin.com/in/username) and document in docs/linkedin-integration.md.
+### LinkedIn Search Integration
 
-Create Parser Function: Add a parseLinkedInUrl function in utils/linkedin/ to extract profile IDs.
+#### Search API Implementation Strategy
+- **Multi-API Support**:
+  - Classic LinkedIn API
+    - Best for: Basic profile searches, company research
+    - Features: Basic filters, high daily limits
+    - Use Case: Initial prospect discovery
+  - Sales Navigator API
+    - Best for: Advanced targeting, lead generation
+    - Features: Advanced filters, detailed company insights
+    - Use Case: Specific industry/role targeting
+  - Recruiter API
+    - Best for: Skill-based searches, detailed profile analysis
+    - Features: Comprehensive skill filtering, role matching
+    - Use Case: Technical role targeting
 
-Update Search Endpoint: Modify /api/linkedin/search/route.js to use parseLinkedInUrl for input validation.
+#### Search Parameters Configuration
+- **Core Search Parameters**:
+  ```typescript
+  interface SearchParams {
+    api: 'classic' | 'sales_navigator' | 'recruiter';
+    category: 'people' | 'companies' | 'posts';
+    keywords?: string;
+    network_distance?: [1, 2, 3];
+    profile_language?: string[];
+    tenure?: { min: number }[];
+  }
+  ```
 
-Test URL Parsing: Input various LinkedIn URLs (e.g., with/without trailing slashes) and verify profile extraction.
+- **Advanced Filtering**:
+  - Industry Targeting:
+    ```typescript
+    industry: {
+      include: string[];  // Industry IDs
+      exclude: string[];  // Industry IDs to exclude
+    }
+    ```
+  - Role Matching:
+    ```typescript
+    role: [{
+      keywords: string;  // e.g., "developer OR engineer"
+      priority: "MUST_HAVE" | "NICE_TO_HAVE" | "DOESNT_HAVE";
+      scope: "CURRENT" | "PAST" | "CURRENT_OR_PAST";
+    }]
+    ```
+  - Skills Assessment:
+    ```typescript
+    skills: [{
+      id: string;        // Skill ID
+      priority: "MUST_HAVE" | "NICE_TO_HAVE" | "DOESNT_HAVE";
+    }]
+    ```
 
-Enhance Invitation Sending: Update /api/linkedin/invitations/send/route.js to use parsed IDs for connections.
+#### Search Result Processing
+- **Pagination Handler**:
+  ```typescript
+  interface PaginationConfig {
+    cursor: string;      // Base64 encoded cursor
+    pageSize: number;    // Default: 10, Max: 100
+    totalCount: boolean; // Whether to fetch total results count
+  }
+  ```
 
-Add Fallback Logic: If URL parsing fails, fetch profile data via Unipile API as a backup.
+- **Profile Data Structure**:
+  ```typescript
+  interface ProfileData {
+    id: string;
+    type: 'PEOPLE' | 'COMPANY';
+    member_urn: string;
+    network_distance: string;
+    location: string;
+    current_positions: {
+      company: string;
+      role: string;
+      tenure_at_company: { years: number };
+    }[];
+    industry: string;
+    headline: string;
+  }
+  ```
 
-Rate Limit Requests: Implement a 1-minute delay between requests in /api/linkedin/invitations/send/route.js.
+#### Search Strategy Implementation
+- **Template System**:
+  ```typescript
+  interface SearchTemplate {
+    name: string;
+    description: string;
+    params: SearchParams;
+    targeting_score: number;
+    success_rate: number;
+    last_used: Date;
+  }
+  ```
 
-Store Parsed Data: Save extracted profile IDs in Supabase linkedin_connections table.
+- **Caching Strategy**:
+  - Cache Duration: 24 hours for search results
+  - Cache Keys: Hash of search parameters
+  - Invalidation: On template update or manual refresh
 
-Test Connection Flow: Send a connection request using a pasted URL and confirm success.
+### Enhanced Profile Targeting
 
-5. Implement Stripe for Two Plans
-Define Plans: Create "Basic" ($19.99/month, 100 connections) and "Premium" ($49.99/month, 500 connections) in Stripe dashboard.
+#### Target Profile Validation System
+- **Accessibility Check**:
+  ```typescript
+  interface ProfileAccessibility {
+    can_view_full_profile: boolean;
+    can_send_inmail: boolean;
+    can_send_invitation: boolean;
+    network_distance: number;
+    is_premium: boolean;
+  }
+  ```
 
-Update Config: Edit config.js to reflect new plans with priceId from Stripe.
+- **Connection Analysis**:
+  ```typescript
+  interface ConnectionMetrics {
+    mutual_connections: number;
+    mutual_companies: number;
+    mutual_schools: number;
+    shared_groups: number;
+  }
+  ```
 
-Modify Checkout Route: Update /api/stripe/create-checkout/route.js to accept a planType parameter and select the correct priceId.
+#### Profile Scoring Algorithm
+- **Base Score Components**:
+  ```typescript
+  interface ProfileScore {
+    relevance_score: number;    // 0-100
+    engagement_score: number;   // 0-100
+    response_score: number;     // 0-100
+    final_score: number;        // Weighted average
+  }
+  ```
 
-Create Pricing Page: Add /app/pricing/page.js with Tailwind-styled plan options and checkout buttons.
+- **Scoring Weights**:
+  ```typescript
+  const SCORE_WEIGHTS = {
+    profile_match: 0.4,
+    activity_level: 0.2,
+    mutual_connections: 0.2,
+    response_likelihood: 0.2
+  };
+  ```
 
-Handle Webhooks: Enhance /api/webhook/stripe/route.js to update profiles.subscription_tier on subscription events.
+- **Activity Scoring**:
+  ```typescript
+  interface ActivityMetrics {
+    post_frequency: number;     // Posts per month
+    comment_frequency: number;  // Comments per month
+    profile_updates: number;    // Updates in last 3 months
+    last_active: Date;
+  }
+  ```
 
-Restrict Features: Modify utils/check-subscription.js to limit connections based on subscription_tier.
+#### Implementation Phases
+1. **Phase 1: Basic Search & Validation**
+   - Implement core search APIs
+   - Basic profile validation
+   - Simple scoring system
 
-Test Checkout: Subscribe to each plan and verify redirection to /dashboard.
+2. **Phase 2: Advanced Targeting**
+   - Template system
+   - Caching layer
+   - Enhanced scoring algorithm
 
-Update Dashboard: Edit /app/dashboard/page.js to display current plan and connection limits.
+3. **Phase 3: Optimization**
+   - A/B testing different templates
+   - Success rate tracking
+   - Automated template optimization
 
-Test Access Control: Attempt to exceed connection limits on Basic plan and confirm restriction.
+---
 
-Document Plans: Add a stripe-plans.md in docs/ detailing plan features and integration steps.
+*(Previous implementation notes, if any, would follow here)*
 
-6. Additional Enhancements
-Add Campaign Analytics: Update /api/linkedin/analytics/route.js to track sent/accepted invitations.
-
-Test Campaign Flow: Create a campaign in /app/dashboard/campaigns/new/ and verify tracking.
-
-Optimize UI: Use DaisyUI components in /components/ui/ for consistent dashboard styling.
-
-Secure Routes: Ensure all /dashboard/* routes redirect unauthenticated users to /signin.
 
