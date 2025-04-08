@@ -50,8 +50,8 @@ export async function GET(request) {
       // Use current user's ID
       name: user.id,
       notify_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/unipile/webhooks`,
-      success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-      failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?linkedin_connected=true`, // Add query param
+      failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?linkedin_failed=true`, // Add query param for failure
     });
 
     return NextResponse.redirect(response.url);

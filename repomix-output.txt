@@ -50,6 +50,7 @@ Directory Structure
     APP-FLOW-doc.mdc
     BACKEND-STRUCTURES-doc.mdc
     code-format-sql.mdc
+    Coding_Guidelines.mdc
     database-create-migration.mdc
     database-functions.mdc
     database-rls-policies.mdc
@@ -144,6 +145,7 @@ app/
     page.js
   components/
     SectionBiography.tsx
+    UpdateFrequencyInfo.jsx
   dashboard/
     analytics/
       page.js
@@ -160,9 +162,6 @@ app/
         page.js
       page.js
     settings/
-      page.js
-    upgrade/
-      layout.js
       page.js
     layout.js
     page.js
@@ -310,59 +309,76 @@ File: .cursor/rules/APP-FLOW-doc.mdc
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
+**Update this rule if user requested changes to the project requirement, etc.**
+
 # Prospectr App Flow Document
 
-Update this rule if user requested changes to the project requirement, etc.
+**Last Updated:** 2025-04-04
+
+**Note**: This document should be updated whenever there are changes to the project's application flow or requirements to ensure it remains accurate and useful.
+
+This document outlines the primary user flows within the Prospectr application based on the current codebase.
 
 ## Onboarding and Sign-In/Sign-Up
 
-When users first visit the Prospectr web application, they land on the home page located at `app/page.js`. This page serves as the entry point with a clean, professional design featuring a hero section that explains Prospectr as an AI-powered LinkedIn prospecting tool for finding and connecting with leads. The color scheme uses the "black" DaisyUI theme defined in `config.js`, ensuring a sleek and modern look. The home page includes clear calls-to-action: a "Sign In" button directing users to `app/signin/page.js` and a "Sign Up" button leading to `app/signup/page.js`. Additional sections may highlight features, pricing (linking to `#pricing`), testimonials, or a demo video. Users can also navigate to informational pages via the footer: Blog at `app/blog/page.js`, Privacy Policy at `app/privacy-policy/page.js`, and Terms of Service at `app/tos/page.js`.
+When users first visit the Prospectr web application, they land on the home page located at `app/page.js`. This page serves as the entry point with a clean, professional design featuring a hero section (`components/Hero.js`) that explains Prospectr as an AI-powered LinkedIn prospecting tool for finding and connecting with leads. The color scheme uses the "black" DaisyUI theme defined in `config.js`, ensuring a sleek and modern look. The home page includes clear calls-to-action: a "Sign In" button (`components/ButtonSignin.js`) directing users to `app/signin/page.js` and a "Sign Up" button leading to `app/signup/page.js`. Additional sections highlight features (`components/FeaturesAccordion.js`), pricing (`components/Pricing.js` linking to `#pricing`), testimonials (`components/Testimonials3.js`, `components/Testimonials1.js`), FAQ (`components/FAQ.js`), and contact info (`components/ContactSection.js`). Users can also navigate to informational pages via the footer (`components/Footer.js`): Blog at `app/blog/page.js`, Privacy Policy at `app/privacy-policy/page.js`, and Terms of Service at `app/tos/page.js`.
 
-The sign-up page at `app/signup/page.js` offers a straightforward registration process using Supabase Auth. Users enter their email and password or sign up via Google OAuth, triggered by `utils/action.js` with `signInWithGoogle`. Upon successful registration, a confirmation email may be sent if required, and users are redirected to the sign-in page or directly to the dashboard at `app/dashboard/page.js` if auto-login is enabled. If registration fails due to an invalid email or password, an error message appears, keeping users on the sign-up page.
+The sign-up page at `app/signup/page.js` utilizes the `app/signup/SignupForm.js` component, offering a straightforward registration process using Supabase Auth. Users enter their email and password or sign up via Google OAuth, triggered by `utils/action.js` with `signInWithGoogle`. Upon successful registration, a confirmation email is sent (if `auth.email.enable_confirmations = true` in `supabase/config.toml`), and users are typically redirected to the dashboard at `app/dashboard/page.js` via the `/auth/callback` route (`app/auth/callback/route.js`). If registration fails due to an invalid email or password, an error message appears via `react-hot-toast`, keeping users on the sign-up page.
 
-The sign-in page at `app/signin/page.js` allows users to log in with their email and password or Google OAuth. After entering credentials, Supabase Auth verifies them, and upon success, users are redirected to the dashboard at `app/dashboard/page.js`. If authentication fails, an error message displays, and users remain on the sign-in page. The middleware at `middleware.js` ensures session persistence, refreshing tokens if expired, and redirects unauthenticated users from protected routes to `/signin`.
+The sign-in page at `app/signin/page.js` allows users to log in with their email and password or Google OAuth. After entering credentials, Supabase Auth verifies them, and upon success, users are redirected to the dashboard at `app/dashboard/page.js` via the `/auth/callback` route. If authentication fails, an error message displays via `react-hot-toast`, and users remain on the sign-in page. The middleware at `middleware.js` ensures session persistence using `@supabase/ssr`, refreshing tokens if expired, and redirects unauthenticated users from protected routes (like `/dashboard/*`) to `/signin`.
 
 ## Main Dashboard
 
-After signing in, users arrive at the dashboard at `app/dashboard/page.js`, the central hub for all activities. The dashboard features a modern, responsive layout using `components/dashboard/DashboardShell.js`, styled with Tailwind CSS and DaisyUI. A sidebar or top navigation menu provides access to key sections: Campaigns at `app/dashboard/campaigns/page.js`, Analytics at `app/dashboard/analytics/page.js`, Settings at `app/dashboard/settings/page.js`, and Upgrade at `app/dashboard/upgrade/page.js`. The main content area displays an overview, including recent campaigns, key metrics like connection requests sent, and notifications such as LinkedIn connection status or subscription reminders. Users can navigate to any section by clicking the respective menu item, instantly transitioning to the chosen page.
+After signing in, users arrive at the dashboard at `app/dashboard/page.js`, the central hub for all activities. The dashboard features a modern, responsive layout using `components/dashboard/DashboardShell.js`, styled with Tailwind CSS and DaisyUI. A sidebar or top navigation menu provides access to key sections: Campaigns at `app/dashboard/campaigns/page.js`, Analytics at `app/dashboard/analytics/page.js`, and Settings at `app/dashboard/settings/page.js`. The main content area displays an overview, including recent campaigns, key metrics like total connections and response rates (fetched via `useAnalytics` context), and notifications such as LinkedIn connection status or subscription reminders. Users can navigate to any section by clicking the respective menu item, instantly transitioning to the chosen page.
 
 ## Campaigns Section
 
-The campaigns page at `app/dashboard/campaigns/page.js` lists all user campaigns. Each campaign shows its name, status (active, paused, completed), and metrics like leads targeted and connection rate. A "Create New Campaign" button takes users to `app/dashboard/campaigns/new/page.js`. Clicking a campaign name directs users to its details page at `app/dashboard/campaigns/[id]/page.js`.
+The campaigns page at `app/dashboard/campaigns/page.js` lists all user campaigns fetched via the `useAnalytics` context. Each campaign shows its name (or Job ID), status (processing, completed, pending), and metrics like total invitations and accepted connections. A "New Campaign" button takes users to `app/dashboard/campaigns/new/leads/page.js` (via the redirect in `app/dashboard/campaigns/new/page.js`). Clicking a campaign row (or potentially a details button, though not explicitly shown) directs users to its details page at `app/dashboard/campaigns/[id]/page.js`.
 
-The new campaign page at `app/dashboard/campaigns/new/page.js` guides users through campaign creation. It includes a leads selection step at `app/dashboard/campaigns/new/leads/page.js`, where users search LinkedIn profiles using a search interface powered by `app/api/linkedin/search/route.js` and rendered via components like `LinkedInSearch.js`. Users select profiles by checking boxes next to search results, then proceed to the sequence setup at `app/dashboard/campaigns/new/sequence/page.js`. Here, they craft a connection message using a message editor component, possibly `CampaignEditor.js`, with a 300-character limit, template selection, and variable insertion (e.g., first name, company). A review step at `app/dashboard/campaigns/new/review/page.js` lets users confirm settings before launching. Upon submission, the campaign is created via `app/api/linkedin/invitations/send/route.js` using the Unipile API, and users are redirected to the campaigns list or the new campaign’s details page.
+The new campaign flow starts at `app/dashboard/campaigns/new/leads/page.js`. Users search LinkedIn profiles using a search interface powered by `app/api/linkedin/search/route.js`. The search utilizes `@tanstack/react-query` for data fetching and state management. Users select profiles by checking boxes next to search results, storing selections in the `useCampaignStore` (Zustand). They then proceed to the sequence setup at `app/dashboard/campaigns/new/sequence/page.js`. Here, they craft an optional connection message (max 300 chars) and an optional follow-up message (max 1000 chars) using textareas, with variable support (`{{name}}`, `{{company}}`, `{{position}}`). They also provide a template name for reference. A review step at `app/dashboard/campaigns/new/review/page.js` lets users confirm the number of leads, template name, and message content before launching. Upon submission, the campaign is created via `app/api/linkedin/invitations/send/route.js` using the Unipile API. This API queues the job and returns a `jobId`. The frontend (`review/page.js`) shows a success message and options to start a new campaign or go to the dashboard. Campaign progress can be monitored via `/api/linkedin/invitations/status/[jobId]/route.js`.
 
-The campaign details page at `app/dashboard/campaigns/[id]/page.js` displays comprehensive information about a campaign. It shows the campaign name, status, start date, a list of targeted leads with connection statuses (pending, accepted, ignored), and analytics like connection and response rates. Action buttons allow users to pause, resume, edit, or delete the campaign, with changes saved via API calls like `app/api/lead/route.js`. Users can return to the campaigns list by clicking a back button.
+The campaign details page at `app/dashboard/campaigns/[id]/page.js` displays information about a specific campaign (currently using mock data). It shows the campaign name, status, start date, prospect count, progress, replies, and reply rate. Action buttons allow users to pause, resume, or delete the campaign (Note: API endpoints for these actions are not explicitly defined in the provided code, but status tracking exists). Users can return to the campaigns list by clicking the "Back to Campaigns" button.
 
 ## Settings and Account Management
 
-The settings page at `app/dashboard/settings/page.js` lets users manage their account. It includes sections for updating profile information (name, email), connecting or reconnecting their LinkedIn account via Unipile with `app/api/auths/linkedin/connect/route.js` or `app/api/auths/linkedin/reconnect/route.js`, and managing subscriptions with Stripe integration at `app/api/stripe/create-portal/route.js`. Users can save changes and return to the dashboard by clicking a back button, maintaining their workflow.
+The settings page at `app/dashboard/settings/page.js` lets users manage their account. It includes:
+*   **Subscription Management:** Displays the current plan (fetched via `/api/users`), connection limits (from `config.js`), and provides a button (`components/ButtonCheckout.js`) to subscribe to the Pro plan or a "Manage Billing" button (using `/api/stripe/create-portal/route.js`) if already subscribed.
+*   **LinkedIn Integration:** Shows the connection status using the `useLinkedIn` context (`components/contexts/LinkedInContext.js`) and provides a button (`components/ButtonLinkedin.js`) to connect (`/api/auths/linkedin/connect/route.js`) or reconnect (`/api/auths/linkedin/reconnect/route.js`) their LinkedIn account via Unipile.
+*   **Account Settings:** Currently indicates that settings are managed via the authentication provider.
 
 ## Analytics
 
-The analytics page at `app/dashboard/analytics/page.js` provides detailed insights into prospecting activities. It displays overall performance metrics like total connections and response rates, campaign-specific data, and lead engagement details. Visualizations use charts or tables from `components/ui`, populated by `app/api/linkedin/analytics/route.js`. Users can return to the dashboard via the navigation menu.
+The analytics page at `app/dashboard/analytics/page.js` provides detailed insights into prospecting activities. It displays overall performance metrics (Connection Rate, Total Connections, Total Invitations, Active Campaigns) and campaign-specific data using the `useAnalytics` context (`components/contexts/AnalyticsContext.js`), which fetches data from `app/api/linkedin/analytics/route.js`. Visualizations include progress bars for campaigns and a table for campaign performance. Users can refresh data and filter by timeframe (though filtering logic isn't fully implemented in the provided code). Users can return to the dashboard via the navigation menu in `DashboardShell.js`.
 
-## Upgrade
+## Upgrade / Pricing
 
-The upgrade page at `app/dashboard/upgrade/page.js` allows users to view and select subscription plans defined in `config.js` (e.g., Pro at $19.99/month, Premium at $49.99/month). It shows plan features and pricing, with a button to initiate checkout via `app/api/stripe/create-checkout/route.js`. After successful payment through Stripe, users are redirected to the dashboard, and their subscription updates in Supabase.
+Users view subscription plans defined in `config.js` (currently one Pro plan at $15/month) on the main landing page (`app/page.js` using `components/Pricing.js`) and within the settings page (`app/dashboard/settings/page.js`). The `components/ButtonCheckout.js` component handles the checkout process:
+1.  If the user is not logged in, it redirects them to `/signup?checkout=pending`, storing the plan ID in localStorage.
+2.  If the user is logged in, it calls `/api/stripe/create-checkout/route.js` to get a Stripe session URL and redirects the user.
+After successful payment through Stripe, users are redirected to `/dashboard?checkout=success`. Subscription status (`has_access`, `subscription_tier`, etc.) is updated in the `profiles` table via webhooks handled by `/api/webhook/stripe/route.js`. Subscription management (canceling, updating payment methods) is handled via the Stripe Customer Portal accessed through `/api/stripe/create-portal/route.js` from the settings page.
 
 ## Blog and Informational Pages
 
-The blog page at `app/blog/page.js` lists articles on prospecting and LinkedIn tips. Each article links to its page at `app/blog/[articleId]/page.js`, displaying full content with navigation to related articles, author pages at `app/blog/author/[authorId]/page.js`, or category pages at `app/blog/category/[categoryId]/page.js`. The privacy policy at `app/privacy-policy/page.js` and terms of service at `app/tos/page.js` are static pages accessible from the footer, providing legal information.
+The blog page at `app/blog/page.js` lists articles defined in `app/blog/_assets/content.js`, rendered using components like `CardArticle.js`. Each article links to its page at `app/blog/[articleId]/page.js`, displaying full content with author info (`Avatar.js`) and category badges (`BadgeCategory.js`). Navigation includes links to author pages (`app/blog/author/[authorId]/page.js`) and category pages (`app/blog/category/[categoryId]/page.js`). The layout uses `app/blog/layout.js` with a dedicated header (`HeaderBlog.js`). The privacy policy at `app/privacy-policy/page.js` and terms of service at `app/tos/page.js` are static pages accessible from the footer, providing legal information.
 
 ## Survey and Thank You Pages
 
-The survey page at `app/survey/page.js` collects user feedback, rendered with components like `SurveyTable.js`. After submission, users are redirected to the thank you page at `app/thankyou/page.js`, acknowledging their input with a return link to the dashboard.
+The survey page at `app/survey/page.js` is currently a placeholder. If implemented, it would collect user feedback, potentially using components like `app/survey/_assets/components/SurveyTable.js`. After submission, users are redirected to the thank you page at `app/thankyou/page.js`, acknowledging their input with a return link to the dashboard.
 
 ## Error States and Alternate Paths
 
-The app handles errors with custom pages: `app/error.js` for general errors and `app/not-found.js` for 404s. If users access a protected route without authentication, middleware redirects them to `/signin`. Failed API calls (e.g., LinkedIn search errors) display messages on the current page, offering retry options. Subscription checks via `utils/check-subscription.js` redirect non-subscribers to `#pricing` or a checkout session, ensuring access control.
+The app handles errors with custom pages: `app/error.js` for general client-side errors and `app/not-found.js` for 404s. If users access a protected route (like `/dashboard/*`) without authentication, the middleware (`middleware.js`) redirects them to `/signin`. Failed API calls display error messages using `react-hot-toast`. Subscription checks via `utils/check-subscription.js` redirect non-subscribers to `#pricing` or initiate a checkout session via `/api/stripe/create-checkout`, ensuring access control based on the `profiles.has_access` field. LinkedIn connection errors are handled within components (e.g., disabling search if not connected).
 
 ## Conclusion and Overall App Journey
 
-The journey through Prospectr is intuitive and efficient. It starts with a professional home page guiding users to sign up or sign in. After authentication, the dashboard provides a central hub for campaigns, analytics, settings, and upgrades. The campaigns section enables users to create, manage, and monitor LinkedIn outreach with precise controls and analytics. Settings offer account personalization, while the upgrade page facilitates subscription changes. The blog provides resources, and survey/thank you pages enhance user engagement. Navigation is seamless with menu links and buttons, supported by robust error handling, ensuring users always have a clear path forward in their prospecting tasks.
+The journey through Prospectr starts with a professional home page guiding users to sign up or sign in. After authentication via Supabase (Email/Password or Google), the dashboard (`DashboardShell.js`) provides a central hub for managing campaigns, viewing analytics (powered by `AnalyticsContext`), and adjusting settings. The campaign creation flow guides users through lead selection (LinkedIn search via Unipile), message sequencing, and review before launching automated outreach jobs tracked via Supabase tables. Settings allow users to connect their LinkedIn account (via Unipile) and manage their Stripe subscription. The blog provides resources, while static pages cover legal information. Navigation is seamless, and error handling/access control ensures a smooth user experience.
 
 ================
 File: .cursor/rules/BACKEND-STRUCTURES-doc.mdc
@@ -370,160 +386,221 @@ File: .cursor/rules/BACKEND-STRUCTURES-doc.mdc
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
-BACKEND STRUCTURE DOCUMENT
-Overview
-Prospectr's backend is powered by Supabase, providing a PostgreSQL database, authentication, and storage services. The database is organized into multiple schemas, with the public schema containing application-specific tables that manage user profiles, LinkedIn connections, invitation jobs, and subscription details. The backend ensures secure authentication, data integrity, and access control through Row Level Security (RLS) policies, integrating seamlessly with the frontend to deliver a robust LinkedIn prospecting tool.
-Database Schema
-The database leverages Supabase's PostgreSQL instance, with the public schema hosting the core application tables. Below is a detailed breakdown of each table, their purposes, key columns, and relationships.
-Tables
-profiles
-Purpose: Stores user profile information, LinkedIn connection status, and subscription details.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the profile.
-user_id (uuid, Primary Key, Foreign Key): References auth.users.id from Supabase Auth.
-linkedin_token (text): Stores the LinkedIn authentication token.
-linkedin_status (boolean): Indicates whether LinkedIn is connected.
-message_quota (integer, default: 50): Daily message limit for the user.
-subscription_tier (enum: FREE, PRO, PREMUIM, EXPIRED, default: FREE): User's subscription level.
-Subscription-related fields: customer_id (text), price_id (text), subscription_id (text), subscription_status (text).
-Timestamp fields: trial_ends_at (timestamptz), canceled_at (timestamptz), etc.
-Notes: Links directly to Supabase Auth via user_id.
-invitation_jobs
-Purpose: Tracks bulk LinkedIn invitation-sending jobs.
-Key Columns:
-job_id (text, Primary Key): Unique identifier for the job.
-id (uuid, Primary Key): Secondary unique identifier.
-user_id (uuid, Foreign Key): References auth.users.id.
-status (text): Current status of the job (e.g., pending, in-progress, completed).
-total_invitations (integer): Total number of invitations to send.
-invitations_sent (integer): Number of successfully sent invitations.
-invitations_failed (integer): Number of failed invitations.
-template_id (uuid, Foreign Key): References invitation_templates.id.
-Timestamp fields: created_at (timestamptz), started_at (timestamptz), completed_at (timestamptz).
-Notes: Ties invitation campaigns to specific users and templates.
-invitation_templates
-Purpose: Stores reusable message templates for LinkedIn invitations.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the template.
-user_id (uuid, Foreign Key): References auth.users.id.
-name (text): Name of the template.
-follow_up_message (text): Content of the follow-up message.
-Notes: Allows users to customize and reuse invitation messages.
-invitation_users
-Purpose: Tracks individual LinkedIn users targeted in invitation jobs.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the invitation record.
-job_id (text, Foreign Key): References invitation_jobs.job_id.
-linkedin_user_id (text): LinkedIn identifier of the target user.
-linkedin_profile_url (text): URL of the target LinkedIn profile.
-invitation_status (text, default: 'pending'): Status of the invitation (e.g., pending, sent, accepted).
-Timestamp fields: invitation_sent_at (timestamptz), invitation_accepted_at (timestamptz), follow_up_sent_at (timestamptz).
-has_responded (boolean): Indicates if the target user has responded.
-Notes: Links individual invitations to their respective jobs.
-linkedin_status_updates
-Purpose: Records status updates related to LinkedIn activities.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the update.
-user_id (uuid, Foreign Key): References auth.users.id.
-connection_id (uuid): Reference to a specific connection (context-specific).
-status (text): Description of the status update.
-metadata (jsonb): Additional data in JSON format.
-Notes: Provides a log of LinkedIn-related events for each user.
-saved_profiles
-Purpose: Stores LinkedIn profiles saved by users for later use.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the saved profile.
-user_id (uuid, Foreign Key): References auth.users.id.
-profile_data (jsonb): JSON data of the LinkedIn profile.
-profile_id (text): LinkedIn profile identifier.
-tags (array): Tags assigned to the profile.
-notes (text): User-added notes about the profile.
-Notes: Facilitates profile management and organization.
-linkedin_connections
-Purpose: Manages LinkedIn connections for each user.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the connection.
-user_id (uuid, Foreign Key): References auth.users.id.
-profile_id (text): LinkedIn profile identifier.
-name (text): Name of the connected individual.
-headline (text): LinkedIn headline of the connection.
-status (enum: PENDING, ACCEPTED, IGNORED): Connection status.
-Notes: Tracks the lifecycle of LinkedIn connections.
-leads
-Purpose: Simple table for capturing lead information.
-Key Columns:
-id (uuid, Primary Key): Unique identifier for the lead.
-email (text): Email address of the lead.
-created_at (timestamp): Timestamp of lead creation.
-Notes: Minimalist design for basic lead collection.
-Custom Types
-subscription_tier: Enum with values FREE, PRO, PREMUIM, EXPIRED.
-Used in profiles to define subscription levels.
-linkeding_status: Enum with values PENDING, ACCEPTED, IGNORED.
-Used in linkedin_connections to track connection status.
-Note: Typo in enum name (linkeding_status instead of linkedin_status) exists in the schema.
-Database Functions
-Several PostgreSQL functions enhance database operations:
-create_user_profile(): Trigger function to automatically create a profile in profiles upon user signup.
-handle_new_user(): Trigger function handling new user creation, likely linked to authentication events.
-update_updated_at() and update_updated_at_column(): Functions to update timestamp columns on record modifications.
-Row Level Security (RLS)
-RLS is enabled on several tables to enforce data access control:
-leads: Allows public insertion (e.g., anyone can add a lead).
-linkedin_status_updates: Restricts access to the user’s own updates (user_id = auth.uid()).
-linkedin_connections: RLS enabled, likely limiting access to the user’s own connections.
-saved_profiles: RLS enabled, restricting access to the user’s saved profiles.
-profiles: RLS policies defined but disabled:
-Insert/delete allowed based on user_id.
-Select/update permitted for authenticated users.
-Data Relationships
-Key foreign key relationships ensure data integrity:
-profiles.user_id → auth.users.id
-invitation_jobs.user_id → auth.users.id
-invitation_jobs.template_id → invitation_templates.id
-invitation_templates.user_id → auth.users.id
-invitation_users.job_id → invitation_jobs.job_id
-linkedin_status_updates.user_id → auth.users.id
-saved_profiles.user_id → auth.users.id
-linkedin_connections.user_id → auth.users.id
-These relationships link user data across tables, supporting features like invitation campaigns and connection tracking.
-Authentication Logic
-Prospectr leverages Supabase Auth for user authentication, integrated with the auth schema and its 16 tables (e.g., auth.users).
-Mechanism: 
-Managed via Supabase Auth, supporting email/password and OAuth (e.g., Google, LinkedIn via auth.external.linkedin_oidc configuration in supabase/config.toml).
-Configured in utils/supabase/ files (client.js, server.js, middleware.js) using @supabase/ssr.
-Profile Creation: 
-Upon signup, triggers like handle_new_user() or create_user_profile() create a corresponding entry in the profiles table, linking via user_id.
-Access Control: 
-RLS policies restrict data access to authenticated users’ own records (e.g., user_id = auth.uid()).
-Middleware (middleware.js) refreshes sessions and redirects unauthenticated users to /signin.
-Subscription Integration: 
-The profiles table tracks subscription status (subscription_tier, subscription_status), influencing feature access (e.g., message quotas).
-Storage Rules
-Supabase Storage: 
-Likely used for file uploads (e.g., user avatars or profile-related media), configured via supabase/config.toml:
-file_size_limit = "50MiB"
-Buckets not explicitly defined in the provided config but can be set up in the Supabase dashboard.
-Access Control: 
-RLS policies would govern access, aligning with user authentication (e.g., only authenticated users can upload/view their files).
-Notes: 
-Specific bucket configurations are not detailed in the codebase, suggesting default or dashboard-managed settings.
-Edge Cases
-The backend design accounts for several edge cases:
-Subscription Expiry: 
-Users with subscription_tier = EXPIRED or past trial_ends_at may lose access to premium features, enforced via checkSubscription() in utils/check-subscription.js.
-LinkedIn Token Expiry: 
-Invalid or expired linkedin_token in profiles requires reconnection, handled via sendReconnectionEmail() in utils/email/reconnectionEmail.js.
-Invitation Job Failures: 
-Partial failures in invitation_jobs are tracked (invitations_failed), ensuring accurate status reporting.
-Rate Limiting: 
-Enforces message quotas (message_quota) and LinkedIn API limits, with cron jobs (check-invitations, check-responses) monitoring compliance.
-Data Consistency: 
-Ensures integrity between invitation_jobs and invitation_users via foreign keys and triggers.
-Conclusion
-This Backend Structure Document provides a comprehensive overview of Prospectr's backend, detailing the Supabase-powered database schema, authentication logic, storage considerations, and key edge cases. It serves as a foundation for developers to maintain, extend, and troubleshoot the application, ensuring a secure and efficient LinkedIn prospecting tool. For further iterations or specific enhancements, please refer to this document and update as needed based on project requirements.
+# Prospectr Backend Structure Document
+
+**Last Updated:** 2024-04-04
+
+**Note**: This document reflects the current implementation status based on the actual database schema and codebase structure. Update it whenever necessary
+
+## Database Overview
+
+The Prospectr database is implemented in Supabase with the following schemas:
+
+- **auth** (1624 kB): Contains 16 tables for Supabase authentication
+- **public** (296 kB): Contains 8 tables for application data
+- **realtime** (136 kB): Contains 8 tables for Supabase realtime features
+- **storage** (144 kB): Contains 5 tables for file storage
+- **supabase_functions** (64 kB): Contains 2 tables for edge functions
+- **net** (48 kB): Contains 2 tables for networking features
+- **vault** (24 kB): Contains 1 table for secure storage
+- **extensions**, **graphql**, **graphql_public**: Empty schemas (0 bytes)
+
+## Public Schema Tables
+
+### `profiles`
+Primary user profile table linking Supabase Auth with application data.
+
+**Columns:**
+- `id` uuid PRIMARY KEY (auto-generated)
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid NOT NULL PRIMARY KEY REFERENCES auth.users(id)
+- `linkedin_token` text
+- `linkedin_status` boolean DEFAULT false
+- `message_quota` integer DEFAULT 50 (Daily message limit)
+- `stripe_customer_id` text
+- `subscription_tier` enum DEFAULT 'FREE'
+- `oauth_state` text
+- `unipile_account_id` text
+- `reconnect_token` text
+- `reconnect_expires_at` date
+- `customer_id` text
+- `price_id` text
+- `has_access` boolean DEFAULT false
+- `subscription_id` text
+- `subscription_status` text
+- `trial_ends_at` timestamptz
+- `cancel_at_period_end` timestamptz
+- `subscription_created_at` timestamptz
+- `last_payment_at` timestamptz
+- `canceled_at` timestamptz
+- `payment_failed` boolean DEFAULT false
+
+### `invitation_jobs`
+Tracks bulk LinkedIn invitation campaigns.
+
+**Columns:**
+- `job_id` text PRIMARY KEY DEFAULT ''
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid REFERENCES auth.users(id)
+- `status` text NOT NULL
+- `total_invitations` integer
+- `invitations_sent` integer DEFAULT 0
+- `invitations_failed` integer DEFAULT 0
+- `started_at` timestamptz
+- `last_updated` timestamptz
+- `completed_at` timestamptz
+- `error_message` text
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `template_id` uuid REFERENCES invitation_templates(id)
+- `message` text
+- `name` text
+
+### `invitation_users`
+Tracks individual LinkedIn connection requests within campaigns.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `linkedin_user_id` text
+- `linkedin_profile_url` text
+- `invitation_status` text DEFAULT 'pending'
+- `invitation_sent_at` timestamptz DEFAULT now()
+- `invitation_accepted_at` timestamptz
+- `follow_up_sent_at` timestamptz
+- `updated_at` timestamptz DEFAULT now()
+- `job_id` text NOT NULL REFERENCES invitation_jobs(job_id)
+- `has_responded` boolean DEFAULT false
+- `first_response_at` timestamptz
+
+### `invitation_templates`
+Stores message templates for connection requests and follow-ups.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid REFERENCES auth.users(id)
+- `name` text NOT NULL
+- `follow_up_message` text NOT NULL
+- `updated_at` timestamptz DEFAULT now()
+
+### `linkedin_status_updates`
+Logs LinkedIn connection status changes.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `user_id` uuid NOT NULL REFERENCES auth.users(id)
+- `connection_id` uuid NOT NULL
+- `status` text NOT NULL
+- `account_id` text
+- `timestamp` timestamptz DEFAULT now()
+- `metadata` jsonb DEFAULT '{}'
+
+### `saved_profiles`
+Stores saved LinkedIn profiles for future reference.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `profile_data` jsonb NOT NULL
+- `tags` text[]
+- `notes` text
+- `profile_id` text NOT NULL
+- `user_id` uuid REFERENCES auth.users(id)
+
+### `linkedin_connections`
+Tracks LinkedIn connections (appears to be legacy/unused).
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `created_at` timestamptz NOT NULL DEFAULT now()
+- `user_id` uuid REFERENCES auth.users(id)
+- `profile_id` text
+- `name` text
+- `headline` text
+- `status` enum
+
+### `leads`
+Simple table for capturing lead information.
+
+**Columns:**
+- `id` uuid PRIMARY KEY DEFAULT gen_random_uuid()
+- `email` text
+- `created_at` timestamptz NOT NULL DEFAULT timezone('utc'::text, now())
+
+## Table Relationships
+
+### Foreign Key Relationships
+- `profiles.user_id` → `auth.users.id`
+- `invitation_jobs.user_id` → `auth.users.id`
+- `invitation_jobs.template_id` → `invitation_templates.id`
+- `invitation_templates.user_id` → `auth.users.id`
+- `invitation_users.job_id` → `invitation_jobs.job_id`
+- `linkedin_status_updates.user_id` → `auth.users.id`
+- `saved_profiles.user_id` → `auth.users.id`
+- `linkedin_connections.user_id` → `auth.users.id`
+
+### Custom Types
+- `subscription_tier`: Enum type (FREE, PRO, PREMIUM)
+- Status enum for linkedin_connections table
+
+## Table Usage Statistics
+
+Based on current data:
+- `invitation_jobs`: 4 rows, 81920 bytes
+- `profiles`: 8 rows, 65536 bytes
+- `invitation_templates`: 3 rows, 32768 bytes
+- `invitation_users`: 6 rows, 32768 bytes
+- Other tables: 0 rows currently
+
+## Security and Access Control
+
+### Row Level Security (RLS)
+RLS policies should be implemented for:
+- `profiles`: Restrict access to user's own profile
+- `invitation_jobs`: Restrict access to user's own jobs
+- `invitation_users`: Restrict access based on job ownership
+- `invitation_templates`: Restrict access to user's own templates
+- `linkedin_status_updates`: Restrict access to user's own updates
+- `saved_profiles`: Restrict access to user's own saved profiles
+- `linkedin_connections`: Restrict access to user's own connections
+- `leads`: Allow public insertion, restrict reading
+
+### Authentication Flow
+- Uses Supabase Auth with email/password and potentially OAuth providers
+- Session management via `@supabase/ssr`
+- Profile creation triggered on user signup
+- LinkedIn connection managed separately via Unipile
+
+## API Routes
+
+The following API routes interact with the database:
+
+### Authentication
+- `/api/auth/*`: Supabase authentication endpoints
+- `/api/auths/linkedin/connect`: LinkedIn connection via Unipile
+- `/api/auths/linkedin/status`: Check LinkedIn connection status
+- `/api/auths/linkedin/reconnect`: Initiate LinkedIn reconnection
+
+### Campaign Management
+- `/api/linkedin/invitations/send`: Create new invitation campaigns
+- `/api/linkedin/invitations/status/[jobId]`: Check campaign status
+- `/api/linkedin/search`: Search LinkedIn profiles
+- `/api/linkedin/saved_profile`: Save/manage LinkedIn profiles
+
+### Subscription Management
+- `/api/stripe/create-checkout`: Create Stripe checkout session
+- `/api/stripe/create-portal`: Access Stripe customer portal
+- `/api/webhook/stripe`: Handle Stripe webhook events
+
+### Background Jobs
+- `/api/cron/check-invitations`: Update invitation statuses
+- `/api/cron/check-responses`: Check for LinkedIn responses
+
+## Conclusion
+
+This document reflects the current state of the Prospectr backend based on the actual Supabase database schema. The structure supports the core features of LinkedIn prospecting, campaign management, and subscription handling, with appropriate security measures and monitoring capabilities.
 
 ================
 File: .cursor/rules/code-format-sql.mdc
@@ -531,7 +608,7 @@ File: .cursor/rules/code-format-sql.mdc
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Postgres SQL Style Guide
 
@@ -676,12 +753,140 @@ order by
 ```
 
 ================
-File: .cursor/rules/database-create-migration.mdc
+File: .cursor/rules/Coding_Guidelines.mdc
 ================
 ---
 description: 
 globs: 
 alwaysApply: true
+---
+# Cursor Development Rules & AI Collaboration Guide
+ 
+## 📜 Core Philosophy
+ 
+1.  **Simplicity:** Prioritize simple, clear, and maintainable solutions. Avoid unnecessary complexity or over-engineering.
+2.  **Iterate:** Prefer iterating on existing, working code rather than building entirely new solutions from scratch, unless fundamentally necessary or explicitly requested.
+3.  **Focus:** Concentrate efforts on the specific task assigned. Avoid unrelated changes or scope creep.
+4.  **Quality:** Strive for a clean, organized, well-tested, and secure codebase.
+5.  **Collaboration:** This document guides both human developers and the AI assistant for effective teamwork.
+ 
+## 📚 Project Context & Understanding
+ 
+1.  **Documentation First:**
+    *   **Always** check for and thoroughly review relevant project documentation *before* starting any task. This includes:
+        *   `.cursor/rules/APP-FLOW-doc.mdc` (Application flow and routing documentation)
+        *   `.cursor/rules/BACKEND-STRUCTURES-doc.mdc` (Backend architecture and database schema)
+        *   `.cursor/rules/PRD-doc.mdc` (Product Requirements Document)
+        *   `.cursor/rules/TECH-STACK-doc.mdc` (Technology stack and dependencies)
+        *   `.cursor/rules/IMPLEMENTATION-PLAN-doc.mdc` (Technical specifications and implementation steps)
+        *   `.cursor/rules/FRONTEND-GUIDELINES.mdc` (Frontend development standards)
+        *   `.cursor/rules/code-format-sql.mdc` (SQL coding standards)
+        *   `.cursor/rules/database-create-migration.mdc` (Database migration guidelines)
+        *   `.cursor/rules/database-functions.mdc` (Database functions documentation)
+        *   `.cursor/rules/database-rls-policies.mdc` (Row Level Security policies)
+        *   `.cursor/rules/edge-functions.mdc` (Edge functions implementation guide)
+        *   `.cursor/rules/nextjs-supabase-auth.mdc` (Authentication implementation guide)
+    *   If documentation is missing, unclear, or conflicts with the request, **ask for clarification**.
+2.  **Architecture Adherence:**
+    *   Understand and respect module boundaries, data flow, system interfaces, and component dependencies outlined in `.cursor/rules/APP-FLOW-doc.mdc`.
+    *   Validate that changes comply with the established architecture. Warn and propose compliant solutions if a violation is detected.
+3.  **Pattern & Tech Stack Awareness:**
+    *   Reference `.cursor/rules/TECH-STACK-doc.mdc` and `.cursor/rules/FRONTEND-GUIDELINES.mdc` to understand and utilize existing patterns and technologies.
+    *   Exhaust options using existing implementations before proposing new patterns or libraries.
+ 
+## ⚙️ Task Execution & Workflow
+ 
+1.  **Task Definition:**
+    *   Clearly understand the task requirements, acceptance criteria, and any dependencies from `.cursor/rules/PRD-doc.mdc` and `.cursor/rules/IMPLEMENTATION-PLAN-doc.mdc`.
+2.  **Systematic Change Protocol:** Before making significant changes:
+    *   **Identify Impact:** Determine affected components, dependencies, and potential side effects.
+    *   **Plan:** Outline the steps. Tackle one logical change or file at a time.
+    *   **Verify Testing:** Confirm how the change will be tested. Add tests if necessary *before* implementing (see TDD).
+3.  **Progress Tracking:**
+    *   Keep track of changes and their impact on the system architecture and implementation plan.
+    *   Update relevant documentation in `.cursor/rules/IMPLEMENTATION-PLAN.mdc` upon task completion or if requirements change during implementation.
+ 
+## 🤖 AI Collaboration & Prompting
+ 
+1.  **Clarity is Key:** Provide clear, specific, and unambiguous instructions to the AI. Define the desired outcome, constraints, and context.
+2.  **Context Referencing:** If a task spans multiple interactions, explicitly remind the AI of relevant previous context, decisions, or code snippets.
+3.  **Suggest vs. Apply:** Clearly state whether the AI should *suggest* a change for human review or *apply* a change directly (use only when high confidence and task is well-defined). Use prefixes like "Suggestion:" or "Applying fix:".
+4.  **Question AI Output:** Human developers should critically review AI-generated code. Question assumptions, verify logic, and don't blindly trust confident-sounding but potentially incorrect suggestions (hallucinations).
+5.  **Focus the AI:** Guide the AI to work on specific, focused parts of the task. Avoid overly broad requests that might lead to architectural or logical errors.
+6.  **Leverage Strengths:** Use the AI for tasks it excels at (boilerplate generation, refactoring specific patterns, finding syntax errors, generating test cases) but maintain human oversight for complex logic, architecture, and security.
+7.  **Incremental Interaction:** Break down complex tasks into smaller steps for the AI. Review and confirm each step before proceeding.
+8.  **Standard Check-in (for AI on large tasks):** Before providing significant code suggestions:
+    *   "Confirming understanding: I've reviewed [specific document/previous context]. The goal is [task goal], adhering to [key pattern/constraint]. Proceeding with [planned step]." (This replaces the more robotic "STOP AND VERIFY").
+ 
+## ✨ Code Quality & Style
+ 
+1.  **TypeScript Guidelines:** Use strict typing (avoid `any`). Document complex logic or public APIs with JSDoc.
+2.  **Readability & Maintainability:** Write clean, well-organized code.
+3.  **Small Files & Components:**
+    *   Keep files under **300 lines**. Refactor proactively.
+    *   Break down large React components into smaller, single-responsibility components.
+4.  **Avoid Duplication (DRY):** Actively look for and reuse existing functionality. Refactor to eliminate duplication.
+5.  **No Bazel:** Bazel is not permitted. Use project-specified build tools.
+6.  **Linting/Formatting:** Ensure all code conforms to project's ESLint/Prettier rules.
+7.  **Pattern Consistency:** Adhere to established project patterns. Don't introduce new ones without discussion/explicit instruction. If replacing an old pattern, ensure the old implementation is fully removed.
+8.  **File Naming:** Use clear, descriptive names. Avoid "temp", "refactored", "improved", etc., in permanent file names.
+9.  **No One-Time Scripts:** Do not commit one-time utility scripts into the main codebase.
+ 
+## ♻️ Refactoring
+ 
+1.  **Purposeful Refactoring:** Refactor to improve clarity, reduce duplication, simplify complexity, or adhere to architectural goals.
+2.  **Holistic Check:** When refactoring, look for duplicate code, similar components/files, and opportunities for consolidation across the affected area.
+3.  **Edit, Don't Copy:** Modify existing files directly. Do not duplicate files and rename them (e.g., `component-v2.tsx`).
+4.  **Verify Integrations:** After refactoring, ensure all callers, dependencies, and integration points function correctly. Run relevant tests.
+ 
+## ✅ Testing & Validation
+ 
+1.  **Test-Driven Development (TDD):**
+    *   **New Features:** Outline tests, write failing tests, implement code, refactor.
+    *   **Bug Fixes:** Write a test reproducing the bug *before* fixing it.
+2.  **Comprehensive Tests:** Write thorough unit, integration, and/or end-to-end tests covering critical paths, edge cases, and major functionality.
+3.  **Tests Must Pass:** All tests **must** pass before committing or considering a task complete. Notify the human developer immediately if tests fail and cannot be easily fixed.
+4.  **No Mock Data (Except Tests):** Use mock data *only* within test environments. Development and production should use real or realistic data sources.
+5.  **Manual Verification:** Supplement automated tests with manual checks where appropriate, especially for UI changes.
+ 
+## 🐛 Debugging & Troubleshooting
+ 
+1.  **Fix the Root Cause:** Prioritize fixing the underlying issue causing an error, rather than just masking or handling it, unless a temporary workaround is explicitly agreed upon.
+2.  **Console/Log Analysis:** Always check browser and server console output for errors, warnings, or relevant logs after making changes or when debugging. Report findings.
+3.  **Targeted Logging:** For persistent or complex issues, add specific `console.log` statements (or use a project logger) to trace execution and variable states. *Remember to check the output.*
+4.  **Document Complex Issues:** If a bug requires significant effort (multiple iterations, complex logic) to fix, document the problem, investigation steps, and the solution in the relevant `.cursor/rules` documentation.
+5.  **Research:** Use available tools (documentation search, etc.) to research solutions or best practices when stuck or unsure.
+ 
+## 🔒 Security
+ 
+1.  **Server-Side Authority:** Keep sensitive logic, validation, and data manipulation strictly on the server-side. Use secure API endpoints.
+2.  **Input Sanitization/Validation:** Always sanitize and validate user input on the server-side.
+3.  **Dependency Awareness:** Be mindful of the security implications of adding or updating dependencies.
+4.  **Credentials:** Never hardcode secrets or credentials in the codebase. Use environment variables or a secure secrets management solution.
+ 
+## 🌳 Version Control & Environment
+ 
+1.  **Git Hygiene:**
+    *   Commit frequently with clear, atomic messages.
+    *   Keep the working directory clean; ensure no unrelated or temporary files are staged or committed.
+    *   Use `.gitignore` effectively.
+2.  **Branching Strategy:** Follow the project's established branching strategy. Do not create new branches unless requested or necessary for the workflow (e.g., feature branches).
+3.  **.env Files:** **Never** commit `.env` files. Use `.env.example` for templates. Do not overwrite local `.env` files without confirmation.
+4.  **Environment Awareness:** Code should function correctly across different environments (dev, test, prod). Use environment variables for configuration.
+5.  **Server Management:** Kill related running servers before starting new ones. Restart servers after relevant configuration or backend changes.
+ 
+## 📄 Documentation Maintenance
+ 
+1.  **Update Docs:** If code changes impact architecture, technical decisions, established patterns, or task status, update the relevant documentation in `.cursor/rules/`.
+2.  **Keep Rules Updated:** The files in `.cursor/rules/` should be reviewed and updated periodically to reflect learned best practices and project evolution.
+
+================
+File: .cursor/rules/database-create-migration.mdc
+================
+---
+description: how to be a Postgres Expert who loves creating secure database schemas.
+globs: 
+alwaysApply: false
 ---
 
 # Database: Create migration
@@ -736,7 +941,7 @@ File: .cursor/rules/database-functions.mdc
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Database: Create functions
@@ -874,9 +1079,9 @@ $$;
 File: .cursor/rules/database-rls-policies.mdc
 ================
 ---
-description: 
+description: how to generate a policy with the constraints given by the user.
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Database: Create RLS policies
@@ -1127,9 +1332,9 @@ This prevents the policy `( (select auth.uid()) = user_id )` from running for an
 File: .cursor/rules/edge-functions.mdc
 ================
 ---
-description: 
+description: how to Generate **high-quality Supabase Edge Functions** that adhere to the following best practices:
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 # Writing Supabase Edge Functions
 
@@ -1247,142 +1452,8 @@ File: .cursor/rules/FRONTEND-GUIDELINES.mdc
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
-FRONTEND GUIDELINES
-Update this rule if user requested changes to the project requirement, etc.
-Introduction
-These frontend guidelines ensure consistency, maintainability, and a high-quality user experience across the Prospectr application. They provide detailed rules and best practices for developers working on the frontend, aligning with the project’s technical stack and design philosophy.
-Purpose:
-Maintain a cohesive design language throughout the application.
-Ensure accessibility, performance, and scalability standards are met.
-Provide a precise reference for developers to implement consistent UI elements and layouts.
-How to Use:
-Consult these guidelines when developing new features or updating existing ones.
-Adhere to the specified design system for fonts, colors, spacing, components, and icons.
-Follow the best practices to ensure a seamless and efficient user experience.
-Design System
-a. Fonts
-Primary Font Family: Prospectr uses the default sans-serif font stack provided by Tailwind CSS (sans), which typically resolves to system fonts like -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif. This ensures cross-browser consistency and optimal performance. No custom font imports are defined in app/globals.css or tailwind.config.js.
-Note: If a custom font is introduced (e.g., for branding), import it in app/globals.css using @import or @font-face and update this section accordingly.
-Font Sizes and Weights:
-Headings:
-h1: text-4xl (2.25rem / 36px), font-bold (700).
-h2: text-3xl (1.875rem / 30px), font-bold (700).
-h3: text-2xl (1.5rem / 24px), font-semibold (600).
-h4: text-xl (1.25rem / 20px), font-semibold (600).
-h5: text-lg (1.125rem / 18px), font-medium (500).
-h6: text-base (1rem / 16px), font-medium (500).
-Body Text: text-base (1rem / 16px) with font-normal (400) for paragraphs and primary content.
-Secondary Text: text-sm (0.875rem / 14px) with font-normal (400) for captions, labels, or footnotes.
-Small Text: text-xs (0.75rem / 12px) with font-normal (400) for minor details or fine print.
-Line Heights: Use Tailwind’s default line heights (e.g., leading-normal for body text, leading-tight for headings) unless overridden for specific components.
-b. Color Palette
-The color palette is driven by the DaisyUI theme "black" (configured in tailwind.config.js) with custom CSS variables defined in app/globals.css. These variables allow for theming flexibility and consistency across the application.
-Key Colors (from tailwind.config.js and DaisyUI "black" theme):
-background: hsl(var(--background)) - Main application background (default: dark gray, e.g., #1a1a1a).
-foreground: hsl(var(--foreground)) - Primary text and foreground elements (default: light gray, e.g., #e0e0e0).
-primary: hsl(var(--primary)) - Primary actions (e.g., buttons, links; default: #0ea5e9 - a vibrant blue).
-primary-foreground: hsl(var(--primary-foreground)) - Text/icons on primary backgrounds (default: #ffffff).
-secondary: hsl(var(--secondary)) - Secondary actions or backgrounds (default: #4b5563 - muted gray).
-secondary-foreground: hsl(var(--secondary-foreground)) - Text/icons on secondary backgrounds (default: #ffffff).
-muted: hsl(var(--muted)) - Subtle text or backgrounds (default: #6b7280 - soft gray).
-muted-foreground: hsl(var(--muted-foreground)) - Text on muted backgrounds (default: #d1d5db).
-accent: hsl(var(--accent)) - Highlights or interactive states (default: #f59e0b - warm yellow).
-accent-foreground: hsl(var(--accent-foreground)) - Text/icons on accent backgrounds (default: #ffffff).
-destructive: hsl(var(--destructive)) - Error states or destructive actions (default: #ef4444 - red).
-destructive-foreground: hsl(var(--destructive-foreground)) - Text/icons on destructive backgrounds (default: #ffffff).
-border: hsl(var(--border)) - Borders and dividers (default: #374151 - dark gray).
-input: hsl(var(--input)) - Input fields (default: #374151 - matches border for consistency).
-ring: hsl(var(--ring)) - Focus rings (default: #0ea5e9 - matches primary).
-Usage Guidelines:
-Primary: Apply to main call-to-action buttons (e.g., <button class="btn btn-primary">).
-Secondary: Use for less prominent actions or subtle backgrounds (e.g., <button class="btn btn-secondary">).
-Muted: Use for placeholder text, disabled states, or low-emphasis elements.
-Accent: Highlight interactive elements like hover states or selected items.
-Destructive: Reserve for error messages, delete buttons, or warnings.
-Ensure sufficient contrast (WCAG AA compliant) between foreground and background (e.g., ratio ≥ 4.5:1).
-Customization: Adjust colors by modifying CSS variables in app/globals.css under the :root selector or updating the DaisyUI theme in tailwind.config.js.
-c. Spacing and Layout
-Spacing Scale: Leverage Tailwind’s default spacing scale (multiples of 4px up to 96px, then larger increments), accessible via utility classes:
-p-4 (16px padding), m-2 (8px margin), gap-6 (24px gap).
-Full scale: 0, px (1px), 0.5 (2px), 1 (4px), 1.5 (6px), 2 (8px), ..., 24 (96px), 28 (112px), etc.
-Layout Conventions:
-Containers: Use container class for centered content with responsive max-widths (e.g., max-w-7xl at 1280px).
-Example: <div class="container mx-auto px-4">.
-Flexbox: Use flex, flex-row (horizontal), or flex-col (vertical) for flexible layouts.
-Example: <div class="flex flex-col gap-4"> for stacked items with 16px spacing.
-Grid: Use grid with grid-cols-{n} for column-based layouts (e.g., grid grid-cols-1 md:grid-cols-2 gap-6).
-Padding and Margins:
-Cards: p-4 (16px) for internal padding.
-Sections: py-8 (32px vertical) or py-12 (48px vertical) for vertical spacing.
-Elements: my-2 (8px vertical margin) for consistent spacing between items.
-Breakpoints: Use Tailwind’s responsive prefixes (sm:, md:, lg:, xl:) for mobile-first design:
-sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px.
-d. UI Components
-Preferred Component Library:
-DaisyUI: Use DaisyUI components (e.g., btn, card, input, modal) for pre-styled, themeable UI elements integrated with Tailwind CSS.
-Configured in tailwind.config.js with the "black" theme.
-Example: <button class="btn btn-primary">Click Me</button>.
-Custom Components: Build custom components with Tailwind CSS utility classes when DaisyUI components don’t suffice.
-Store in components/ui/ or components/ with PascalCase naming (e.g., ButtonLead.js).
-Guidelines for New Components:
-Structure: Follow existing patterns in components/ (e.g., exported main component, subcomponents, helpers).
-Example:
-jsx
-export function ButtonLead({ children, ...props }) {
-  return <button className="btn btn-primary" {...props}>{children}</button>;
-}
-Styling: Use Tailwind utility classes exclusively (e.g., flex items-center gap-2 text-sm font-medium).
-Accessibility: Include ARIA attributes (e.g., aria-label), ensure focus states (e.g., focus:ring-2 focus:ring-offset-2 focus:ring-primary), and use semantic HTML.
-Props: Support standard HTML attributes and custom props for flexibility.
-e. Icons
-Icon Library: Lucide (lucide-react), specified in components.json as "iconLibrary": "lucide".
-Installed via package.json dependency: "lucide-react": "^0.473.0".
-Usage Guidelines:
-Import: Import icons individually from lucide-react:
-jsx
-import { User, ChevronDown } from "lucide-react";
-Rendering: Use with Tailwind classes for sizing and color:
-jsx
-<User className="h-5 w-5 text-muted-foreground" />
-Sizes: Standard sizes: h-4 w-4 (16px), h-5 w-5 (20px), h-6 w-6 (24px).
-Accessibility: Add aria-hidden="true" for decorative icons or aria-label for interactive ones.
-Consistency: Match icon color to surrounding text (e.g., text-primary for primary buttons).
-Best Practices
-Accessibility:
-Use semantic HTML (e.g., <nav>, <main>, <button>).
-Ensure keyboard navigation with visible focus states (e.g., focus:ring).
-Provide alt text for images via next/image (e.g., <Image alt="Description" src={...} />).
-Validate contrast ratios using tools like WebAIM Contrast Checker.
-Performance:
-Use next/image for optimized images with sizes, loading="lazy", and WebP format where possible.
-Minimize 'use client' directives; prefer server components (React Server Components) for data fetching.
-Example: Fetch data in app/dashboard/page.js server-side with Supabase instead of client-side.
-Dynamically import non-critical components:
-jsx
-import dynamic from "next/dynamic";
-const HeavyComponent = dynamic(() => import("./HeavyComponent"), { ssr: false });
-Wrap client-side hooks (e.g., useSearchParams) in <Suspense>:
-jsx
-import { Suspense } from "react";
-<Suspense fallback={<div>Loading...</div>}>
-  <ComponentWithHooks />
-</Suspense>
-Responsive Design:
-Use Tailwind’s mobile-first approach with responsive utilities (e.g., md:flex, lg:text-lg).
-Test across breakpoints: 640px (sm), 768px (md), 1024px (lg), 1280px (xl).
-Example: <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">.
-Updating the Guidelines
-Process for Changes:
-Propose updates via pull requests to this document in the repository.
-Discuss significant changes (e.g., new font families, theme switches) in team design reviews.
-Document all updates with a changelog and notify the team via agreed communication channels (e.g., Slack).
-This document provides a detailed, specific framework for building and maintaining the Prospectr frontend, ensuring alignment with its Next.js, Tailwind CSS, DaisyUI, and Lucide-based architecture. Adhering to these guidelines will result in a consistent, performant, and accessible user interface tailored to Prospectr’s LinkedIn integration and campaign management features.
-
-================
-File: .cursor/rules/IMPLEMENTATION-PLAN-doc.mdc
-================
 ---
 description: 
 globs: 
@@ -1390,129 +1461,502 @@ alwaysApply: true
 ---
 **Update this rule if user requested changes to the project requirement, etc.**
 
-Implementation Plan
-Below is a detailed, actionable plan with 50+ specific steps to address the requested enhancements: fixing authentication, adding Google Auth and simple sign-in, improving LinkedIn sign-in and URL handling, and implementing two Stripe plans. These steps are designed for manual execution or AI-assisted development with tools like Cursor or Windsurf.
-1. Fix Authentication Flow
-Audit Supabase Config: Review NEXT_PUBLIC_SUPABASE_URL and SUPABASE_ANON_KEY in .env.local for correctness.
+# Prospectr Frontend Guidelines
 
-Enable Email Confirmations: Update Supabase Auth settings to require email verification (auth.email.enable_confirmations = true in supabase/config.toml).
+**Last Updated:** 2024-04-04
 
-Set Up Resend: Verify RESEND_API_KEY in .env.local and test email sending with a dummy message.
+**Note**: This document should be updated whenever there are changes to the project's frontend guidelines or requirements to ensure it remains accurate and useful.
 
-Create Email Templates: Add HTML templates in supabase/templates/ for sign-up, password reset, and confirmation emails.
+## Introduction
+These frontend guidelines ensure consistency, maintainability, and a high-quality user experience across the Prospectr application. They provide detailed rules and best practices for developers working on the frontend, aligning with the project’s technical stack and design philosophy.
+*   **Purpose:** Maintain a cohesive design language, ensure accessibility/performance/scalability, and provide a clear reference for developers.
+*   **How to Use:** Consult when developing or updating features. Adhere to the design system and best practices.
 
-Update Sign-Up Route: Modify /app/signup/page.js to trigger email confirmation post-registration.
+## Design System
 
-Test Sign-Up Flow: Register a test user and verify email receipt and confirmation link functionality.
+### a. Fonts
+*   **Primary Font Family:** Default sans-serif stack via Tailwind CSS (`sans` in `tailwind.config.js`). Currently uses `Inter` via `app/layout.js`.
+*   **Font Sizes and Weights:** Standard Tailwind utility classes are used (e.g., `text-4xl`, `font-bold`). Refer to `app/globals.css` and component implementations for specific usage (e.g., `h1` often uses `text-4xl font-bold`).
+*   **Line Heights:** Default Tailwind line heights (e.g., `leading-normal`, `leading-tight`).
 
-Fix Session Persistence: Adjust utils/supabase/middleware.js to extend maxAge to 30 days and handle expired sessions gracefully.
+### b. Color Palette
+*   **Theme:** DaisyUI "black" theme configured in `tailwind.config.js`.
+*   **CSS Variables:** Custom variables defined in `app/globals.css` under `:root` provide core colors (e.g., `--background`, `--foreground`, `--primary`, `--destructive`, `--border`, `--input`, `--ring`). These map to HSL values.
+*   **Usage:**
+    *   Use DaisyUI component classes (`btn-primary`, `alert-error`) or Tailwind utility classes (`bg-primary`, `text-destructive-foreground`).
+    *   Utilize the CSS variables for consistency (e.g., `bg-background`, `text-foreground`).
+    *   Ensure WCAG AA contrast ratios.
+*   **Customization:** Modify CSS variables in `app/globals.css` or update the DaisyUI theme in `tailwind.config.js`. The primary color seems to be a red/purple gradient in many places (`components/Hero.js`, `components/Problem.js`, `components/CTA.js`).
 
-Add Session Refresh Logic: In middleware.js, implement a retry mechanism for session refresh on 401 errors.
+### c. Spacing and Layout
+*   **Spacing Scale:** Standard Tailwind spacing scale (multiples of 4px). Use utility classes like `p-4`, `m-2`, `gap-6`.
+*   **Layout Conventions:**
+    *   **Containers:** Use `container mx-auto px-4` (or similar padding) for centered, max-width content (e.g., `max-w-7xl`).
+    *   **Flexbox & Grid:** Use `flex`, `grid`, and related utilities (`gap-x`, `items-center`, `grid-cols-x`) for layout.
+*   **Padding/Margins:** Apply consistent spacing using Tailwind utilities (e.g., `py-12` for section vertical padding, `p-6` for card padding).
+*   **Breakpoints:** Mobile-first approach using Tailwind prefixes (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`).
 
-Test Session Stability: Simulate a logout after 24 hours and ensure users remain authenticated post-refresh.
+### d. UI Components
+*   **Primary Libraries:**
+    *   **DaisyUI:** Configured in `tailwind.config.js`. Used for base components like `btn`, `card`, `input`, `modal`, `alert`.
+    *   **shadcn/ui:** Components like `Button`, `Input`, `Select`, `Tabs`, `Table` are present in `components/ui/` and configured via `components.json`. These are built on Radix UI primitives.
+*   **Custom Components:** Located in `components/`. Follow PascalCase naming (e.g., `ButtonLead.js`, `FeaturesAccordion.js`).
+*   **Guidelines for New Components:**
+    *   **Structure:** Follow existing patterns. Export the main component.
+    *   **Styling:** Use Tailwind CSS utility classes. Leverage `clsx` and `tailwind-merge` (via `lib/utils.js`) for conditional/merged classes, especially in shadcn/ui components.
+    *   **Accessibility:** Use semantic HTML, ARIA attributes, and ensure focus states (often handled by shadcn/ui components).
+    *   **Props:** Accept standard HTML attributes and necessary custom props.
 
-Log Errors: Add error logging in utils/supabase/server.js to capture authentication failures.
+### e. Icons
+*   **Icon Library:** Lucide React (`lucide-react`), specified in `components.json` and `package.json`.
+*   **Usage:**
+    *   Import specific icons: `import { User, Search } from "lucide-react";`
+    *   Render with Tailwind classes for size/color: `<Search className="h-5 w-5 text-muted-foreground" />`
+    *   Standard sizes: `h-4 w-4` (16px), `h-5 w-5` (20px), `h-6 w-6` (24px).
+    *   Add `aria-hidden="true"` for decorative icons.
 
-2. Add Google Auth and Simple Sign-In
-Set Up Google OAuth: Register an app in Google Cloud Console and obtain client ID/secret.
+## Best Practices
 
-Configure Supabase: Add Google provider in Supabase dashboard with credentials from step 11.
+*   **Accessibility (A11y):**
+    *   Use semantic HTML (`<nav>`, `<main>`, `<button>`).
+    *   Ensure keyboard navigation and visible focus states (Tailwind `focus:ring`, shadcn/ui defaults).
+    *   Provide `alt` text for images (`next/image`).
+    *   Use ARIA attributes where necessary.
+    *   Check color contrast.
+*   **Performance:**
+    *   **Images:** Use `next/image` for optimization (automatic format, sizes, lazy loading).
+    *   **Components:** Minimize `'use client'` directive. Prefer Server Components where possible. Fetch data server-side when feasible (e.g., in page components).
+    *   **Client Hooks:** Wrap components using client hooks (`useSearchParams`, `usePathname`, `useState`, `useEffect`) in `<Suspense>` with a fallback (as seen in `app/layout.js`, `app/dashboard/page.js`, etc.).
+    *   **Dynamic Imports:** Use `next/dynamic` for large/non-critical components: `const HeavyComponent = dynamic(() => import('./HeavyComponent'), { ssr: false });` (Example: `Spline` component in `components/ui/splite.jsx`).
+    *   **Loading States:** Provide visual feedback during data fetching (e.g., spinners in `app/dashboard/analytics/page.js`).
+*   **State Management:**
+    *   Use `useState` and `useEffect` for local component state.
+    *   Use React Context API (`components/contexts/`) for global state like LinkedIn status (`LinkedInContext`) and analytics data (`AnalyticsContext`).
+    *   Use Zustand (`app/store/campaignStore.js`) for managing complex state across the campaign creation flow, with persistence.
+    *   Use `@tanstack/react-query` for server state management, caching, and background updates (as seen in `app/dashboard/campaigns/new/leads/page.js`). Wrap the app in `QueryClientProvider` (`components/LayoutClient.js`).
+*   **Responsive Design:**
+    *   Employ Tailwind's mobile-first approach (`md:`, `lg:` prefixes).
+    *   Test layouts across standard breakpoints.
+*   **Error Handling:**
+    *   Use `try...catch` blocks for API calls.
+    *   Display user-friendly error messages using `react-hot-toast` (configured in `LayoutClient.js`).
+    *   Utilize `app/error.js` for catching rendering errors.
 
-Update .env.local: Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.
+## Updating the Guidelines
+*   **Process:** Propose changes via PRs. Discuss significant changes in team reviews.
+*   **Documentation:** Keep this document updated with any new patterns, libraries, or decisions.
 
-Modify Sign-In Page: Edit /app/signin/page.js to include a "Sign in with Google" button using signInWithGoogle from utils/action.js.
+This document provides a framework for building the Prospectr frontend, ensuring consistency and quality using Next.js, React, Tailwind CSS, DaisyUI, shadcn/ui, Lucide Icons, Zustand, and React Query.
 
-Implement Callback: Ensure /app/auth/callback/route.js handles Google OAuth redirects and sets session cookies.
+================
+File: .cursor/rules/IMPLEMENTATION-PLAN-doc.mdc
+================
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+**Update this rule if user requested changes to the project requirement, etc.**
 
-Test Google Auth: Sign in with a Google account and verify user creation in Supabase.
+# Prospectr Implementation Status & Plan
 
-Add Simple Sign-In: Update /app/signin/page.js to support email/password login if not already present.
+**Last Updated:** 2024-04-05 (Launch Plan Update)
 
-Validate Simple Sign-In: Test email/password login with a test account and confirm session persistence.
+**Note**: This document reflects the current implementation status based on the codebase and outlines potential next steps or areas matching the original plan.
 
-Style Auth Pages: Use Tailwind CSS in /app/signin/page.js and /app/signup/page.js for consistent UI.
+## Launch Plan (Target: Tomorrow)
 
-Document Auth Flow: Update docs/ with a new auth-flow.md detailing both methods.
+This section outlines the critical tasks to prepare Prospectr for launch.
 
-3. Fix LinkedIn Sign-In Edge Cases
-Review Unipile Config: Verify UNIPILE_API_TOKEN and UNIPILE_REDIRECT_URI in .env.local.
+### 1. Authentication Email Verification
 
-Test Current Flow: Attempt LinkedIn sign-in via /api/auths/linkedin/connect/route.js and log failures.
+**Goal:** Ensure users receive verification emails upon signing up with email/password.
 
-Handle Token Expiry: Add logic in utils/unipileClient.js to refresh Unipile tokens if expired.
+*   **Verify Supabase Config:**
+    *   Check `supabase/config.toml` for email provider settings.
+    *   Confirm `auth.email.enable_confirmations = true` in the Supabase dashboard settings.
+    *   Verify SMTP credentials or Supabase's built-in email provider is correctly configured.
+*   **Check Email Templates:** Ensure default or custom email templates in Supabase are active and correctly formatted.
+*   **Test Signup Flow:** Perform test signups using email/password to confirm email delivery and verification link functionality.
+*   **Debug:** Investigate potential issues in Supabase logs, API routes (`/auth/callback`, signup actions), or email provider settings if emails fail.
 
-Update Connect Route: Modify /api/auths/linkedin/connect/route.js to retry on 401 errors with a refreshed token.
+### 2. LinkedIn Outreach Logic Revamp
 
-Add Reconnection Logic: Use utils/email/reconnectionEmail.js to send reconnect prompts on persistent failures.
+**Goal:** Implement robust and scalable LinkedIn connection request sending logic using Unipile, respecting user account status and aiming to work within LinkedIn's limits.
 
-Test Edge Cases: Simulate network interruptions and expired tokens, ensuring sign-in succeeds.
+*   **Account Status-Based Limits (From Unipile Docs):**
+    *   **Free Account:** ~15 invitations per week (200 characters) or 150 without a note
+    *   **Paid/Active Account:** 80-100 invitations per day, ~200 per week (300 characters)
+    *   **New/Inactive Accounts:** Start with lower quantities and gradually increase
+    *   **Accounts with <150 connections:** Limited invitation capability, some may not be delivered
+    *   **Profile Visit Limits:**
+        *   Free/Premium: ~100 profiles per day
+        *   Sales Navigator: Higher limits available via Sales Navigator API parameter
 
-Log Unipile Errors: Add console logs in utils/unipileClient.js for debugging API responses.
+*   **Remove Hardcoded Limits:**
+    *   Locate and remove the current limit restricting sends to ~10 profiles at a time (check `lib/invitation-service.js` and `/api/linkedin/invitations/send/route.js`).
+    *   Replace with dynamic limits based on account status.
 
-Improve Status Check: Enhance /api/auths/linkedin/status/route.js to return detailed error codes.
+*   **Implement Dynamic Sending Based on Account Status:**
+    *   Add account type detection to `lib/invitation-service.js`:
+        *   Check connection count
+        *   Verify account age/activity
+        *   Determine if Sales Navigator is available
+    *   Implement progressive limit increases:
+        *   Start conservatively for new accounts
+        *   Track successful sends and gradually increase limits
+        *   Store historical success rates in the database
+    *   Add error handling for HTTP 429 responses (LinkedIn's rate limit response)
 
-Update Settings UI: Modify /app/dashboard/settings/page.js to display LinkedIn connection status clearly.
+*   **Develop Anti-Detection Strategy (Based on Unipile Guidelines):**
+    *   **Timing Algorithm:**
+        *   Implement random delays between requests (~1 minute intervals)
+        *   Distribute actions across working hours
+        *   Add randomization to avoid pattern detection
+    *   **Profile Interaction Strategy:**
+        *   Implement profile views before connection requests
+        *   Use Sales Navigator API parameter when available
+        *   Track and respect the 100 profiles/day visit limit
+    *   **Request Distribution:**
+        *   Implement daily and weekly quota tracking
+        *   Add cool-down periods between batches
+        *   Store timing data in `invitation_jobs` table
 
-Test Reconnection: Disconnect and reconnect a LinkedIn account, verifying email and UI updates.
+*   **Database Updates:**
+    *   Add fields to `profiles` table:
+        *   `linkedin_account_type` (free, premium, sales_navigator)
+        *   `linkedin_connection_count`
+        *   `daily_invitation_count`
+        *   `weekly_invitation_count`
+        *   `last_invitation_time`
+    *   Add fields to `invitation_jobs`:
+        *   `distribution_strategy` (immediate, distributed, progressive)
+        *   `time_window_start`
+        *   `time_window_end`
+        *   `delay_range_min`
+        *   `delay_range_max`
 
-4. Handle LinkedIn URLs Better
-Analyze Current Handling: Review /utils/linkedin/searchParameters.js for URL parsing logic.
+*   **Refactor & Test:**
+    *   Update services and API routes:
+        *   Modify `lib/invitation-service.js` to implement new timing logic
+        *   Update `/api/linkedin/invitations/send/route.js` with quota checks
+        *   Add rate limit handling to all LinkedIn-related API calls
+    *   Implement monitoring and logging:
+        *   Track success/failure rates
+        *   Log rate limit encounters
+        *   Monitor account warnings
+    *   Test scenarios:
+        *   New account ramping
+        *   Different account types
+        *   Rate limit handling
+        *   Distribution strategies
+        *   Error recovery
 
-Define URL Patterns: Research LinkedIn URL structures (e.g., linkedin.com/in/username) and document in docs/linkedin-integration.md.
+### 3. Account Lifecycle Monitoring System
 
-Create Parser Function: Add a parseLinkedInUrl function in utils/linkedin/ to extract profile IDs.
+**Goal:** Implement a robust account lifecycle monitoring system using Unipile's Account Status Webhook to track LinkedIn account health and connection status in real-time.
 
-Update Search Endpoint: Modify /api/linkedin/search/route.js to use parseLinkedInUrl for input validation.
+#### Webhook Implementation
+```typescript
+interface AccountStatusPayload {
+  AccountStatus: {
+    account_id: string;
+    account_type: 'LINKEDIN';
+    message: AccountStatusType;
+  }
+}
 
-Test URL Parsing: Input various LinkedIn URLs (e.g., with/without trailing slashes) and verify profile extraction.
+type AccountStatusType = 
+  | 'OK'               // Account healthy and syncing
+  | 'ERROR'            // Unexpected error during data fetch
+  | 'STOPPED'          // Sync stopped due to error
+  | 'CREDENTIALS'      // Invalid/expired credentials
+  | 'CONNECTING'       // Initial connection attempt
+  | 'DELETED'          // Account deleted
+  | 'CREATION_SUCCESS' // Account added successfully
+  | 'RECONNECTED'      // Account reconnected
+  | 'SYNC_SUCCESS';    // LinkedIn sync complete
+```
 
-Enhance Invitation Sending: Update /api/linkedin/invitations/send/route.js to use parsed IDs for connections.
+#### Database Schema Updates
+- Add to `linkedin_accounts` table:
+  ```sql
+  ALTER TABLE linkedin_accounts
+  ADD COLUMN status AccountStatusType NOT NULL DEFAULT 'CONNECTING',
+  ADD COLUMN last_status_update TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  ADD COLUMN status_history JSONB DEFAULT '[]',
+  ADD COLUMN sync_failures INTEGER DEFAULT 0,
+  ADD COLUMN last_successful_sync TIMESTAMP WITH TIME ZONE;
+  ```
 
-Add Fallback Logic: If URL parsing fails, fetch profile data via Unipile API as a backup.
+#### Status Management System
+- **Real-time Monitoring:**
+  - Implement webhook endpoint `/api/webhooks/unipile/account-status`
+  - Store status updates in database
+  - Trigger notifications for critical status changes
+  - Track sync history and failure patterns
 
-Rate Limit Requests: Implement a 1-minute delay between requests in /api/linkedin/invitations/send/route.js.
+- **Auto-Recovery System:**
+  ```typescript
+  interface RecoveryAction {
+    status: AccountStatusType;
+    action: 'NOTIFY' | 'RETRY' | 'PAUSE' | 'RECONNECT';
+    maxAttempts: number;
+    cooldownPeriod: number; // minutes
+  }
+  ```
 
-Store Parsed Data: Save extracted profile IDs in Supabase linkedin_connections table.
+- **Status-Based Actions:**
+  1. **CREDENTIALS Issues:**
+     - Pause all outreach activities
+     - Notify user for re-authentication
+     - Track session duration for proactive renewal
+  
+  2. **ERROR/STOPPED:**
+     - Implement exponential backoff retry
+     - Log detailed error information
+     - Alert on repeated failures
+  
+  3. **Rate Limit Prevention:**
+     - Monitor sync failures for rate limit patterns
+     - Adjust request timing based on status history
+     - Implement progressive backoff strategy
 
-Test Connection Flow: Send a connection request using a pasted URL and confirm success.
+#### Integration with Existing Systems
+- **Outreach Logic:**
+  - Check account status before sending invitations
+  - Pause campaigns on non-OK status
+  - Resume with reduced rate after recovery
 
-5. Implement Stripe for Two Plans
-Define Plans: Create "Basic" ($19.99/month, 100 connections) and "Premium" ($49.99/month, 500 connections) in Stripe dashboard.
+- **User Dashboard:**
+  - Real-time account status display
+  - Historical status timeline
+  - Health metrics and recommendations
+  - Re-authentication workflow
 
-Update Config: Edit config.js to reflect new plans with priceId from Stripe.
+#### Monitoring & Alerts
+- **System Metrics:**
+  ```typescript
+  interface AccountHealthMetrics {
+    uptime_percentage: number;
+    sync_success_rate: number;
+    average_recovery_time: number;
+    status_change_frequency: number;
+  }
+  ```
 
-Modify Checkout Route: Update /api/stripe/create-checkout/route.js to accept a planType parameter and select the correct priceId.
+- **Alert Conditions:**
+  - Multiple accounts failing simultaneously
+  - Extended periods in non-OK status
+  - Unusual status change patterns
+  - Critical status transitions
 
-Create Pricing Page: Add /app/pricing/page.js with Tailwind-styled plan options and checkout buttons.
+#### Implementation Phases
+1. **Phase 1: Core Monitoring**
+   - Webhook endpoint setup
+   - Basic status tracking
+   - Database schema updates
+   - Simple notification system
 
-Handle Webhooks: Enhance /api/webhook/stripe/route.js to update profiles.subscription_tier on subscription events.
+2. **Phase 2: Advanced Features**
+   - Auto-recovery system
+   - Historical analysis
+   - Pattern detection
+   - User dashboard integration
 
-Restrict Features: Modify utils/check-subscription.js to limit connections based on subscription_tier.
+3. **Phase 3: Optimization**
+   - Machine learning for pattern prediction
+   - Automated recovery optimization
+   - Advanced health scoring
+   - Predictive maintenance
 
-Test Checkout: Subscribe to each plan and verify redirection to /dashboard.
+### LinkedIn Search Integration
 
-Update Dashboard: Edit /app/dashboard/page.js to display current plan and connection limits.
+#### Search API Implementation Strategy
+- **Multi-API Support**:
+  - Classic LinkedIn API
+    - Best for: Basic profile searches, company research
+    - Features: Basic filters, high daily limits
+    - Use Case: Initial prospect discovery
+  - Sales Navigator API
+    - Best for: Advanced targeting, lead generation
+    - Features: Advanced filters, detailed company insights
+    - Use Case: Specific industry/role targeting
+  - Recruiter API
+    - Best for: Skill-based searches, detailed profile analysis
+    - Features: Comprehensive skill filtering, role matching
+    - Use Case: Technical role targeting
 
-Test Access Control: Attempt to exceed connection limits on Basic plan and confirm restriction.
+#### Search Parameters Configuration
+- **Core Search Parameters**:
+  ```typescript
+  interface SearchParams {
+    api: 'classic' | 'sales_navigator' | 'recruiter';
+    category: 'people' | 'companies' | 'posts';
+    keywords?: string;
+    network_distance?: [1, 2, 3];
+    profile_language?: string[];
+    tenure?: { min: number }[];
+  }
+  ```
 
-Document Plans: Add a stripe-plans.md in docs/ detailing plan features and integration steps.
+- **Advanced Filtering**:
+  - Industry Targeting:
+    ```typescript
+    industry: {
+      include: string[];  // Industry IDs
+      exclude: string[];  // Industry IDs to exclude
+    }
+    ```
+  - Role Matching:
+    ```typescript
+    role: [{
+      keywords: string;  // e.g., "developer OR engineer"
+      priority: "MUST_HAVE" | "NICE_TO_HAVE" | "DOESNT_HAVE";
+      scope: "CURRENT" | "PAST" | "CURRENT_OR_PAST";
+    }]
+    ```
+  - Skills Assessment:
+    ```typescript
+    skills: [{
+      id: string;        // Skill ID
+      priority: "MUST_HAVE" | "NICE_TO_HAVE" | "DOESNT_HAVE";
+    }]
+    ```
 
-6. Additional Enhancements
-Add Campaign Analytics: Update /api/linkedin/analytics/route.js to track sent/accepted invitations.
+#### Search Result Processing
+- **Pagination Handler**:
+  ```typescript
+  interface PaginationConfig {
+    cursor: string;      // Base64 encoded cursor
+    pageSize: number;    // Default: 10, Max: 100
+    totalCount: boolean; // Whether to fetch total results count
+  }
+  ```
 
-Test Campaign Flow: Create a campaign in /app/dashboard/campaigns/new/ and verify tracking.
+- **Profile Data Structure**:
+  ```typescript
+  interface ProfileData {
+    id: string;
+    type: 'PEOPLE' | 'COMPANY';
+    member_urn: string;
+    network_distance: string;
+    location: string;
+    current_positions: {
+      company: string;
+      role: string;
+      tenure_at_company: { years: number };
+    }[];
+    industry: string;
+    headline: string;
+  }
+  ```
 
-Optimize UI: Use DaisyUI components in /components/ui/ for consistent dashboard styling.
+#### Search Strategy Implementation
+- **Template System**:
+  ```typescript
+  interface SearchTemplate {
+    name: string;
+    description: string;
+    params: SearchParams;
+    targeting_score: number;
+    success_rate: number;
+    last_used: Date;
+  }
+  ```
 
-Secure Routes: Ensure all /dashboard/* routes redirect unauthenticated users to /signin.
+- **Caching Strategy**:
+  - Cache Duration: 24 hours for search results
+  - Cache Keys: Hash of search parameters
+  - Invalidation: On template update or manual refresh
+
+### Enhanced Profile Targeting
+
+#### Target Profile Validation System
+- **Accessibility Check**:
+  ```typescript
+  interface ProfileAccessibility {
+    can_view_full_profile: boolean;
+    can_send_inmail: boolean;
+    can_send_invitation: boolean;
+    network_distance: number;
+    is_premium: boolean;
+  }
+  ```
+
+- **Connection Analysis**:
+  ```typescript
+  interface ConnectionMetrics {
+    mutual_connections: number;
+    mutual_companies: number;
+    mutual_schools: number;
+    shared_groups: number;
+  }
+  ```
+
+#### Profile Scoring Algorithm
+- **Base Score Components**:
+  ```typescript
+  interface ProfileScore {
+    relevance_score: number;    // 0-100
+    engagement_score: number;   // 0-100
+    response_score: number;     // 0-100
+    final_score: number;        // Weighted average
+  }
+  ```
+
+- **Scoring Weights**:
+  ```typescript
+  const SCORE_WEIGHTS = {
+    profile_match: 0.4,
+    activity_level: 0.2,
+    mutual_connections: 0.2,
+    response_likelihood: 0.2
+  };
+  ```
+
+- **Activity Scoring**:
+  ```typescript
+  interface ActivityMetrics {
+    post_frequency: number;     // Posts per month
+    comment_frequency: number;  // Comments per month
+    profile_updates: number;    // Updates in last 3 months
+    last_active: Date;
+  }
+  ```
+
+#### Implementation Phases
+1. **Phase 1: Basic Search & Validation**
+   - Implement core search APIs
+   - Basic profile validation
+   - Simple scoring system
+
+2. **Phase 2: Advanced Targeting**
+   - Template system
+   - Caching layer
+   - Enhanced scoring algorithm
+
+3. **Phase 3: Optimization**
+   - A/B testing different templates
+   - Success rate tracking
+   - Automated template optimization
+
+---
+
+*(Previous implementation notes, if any, would follow here)*
 
 ================
 File: .cursor/rules/nextjs-supabase-auth.mdc
 ================
 ---
-description: 
+description: how to implement supabase auth
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Bootstrap Next.js app with Supabase Auth
@@ -1747,9 +2191,15 @@ File: .cursor/rules/PRD-doc.mdc
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
-Update this rule if user requested changes to the project requirement, etc.
+**Update this rule if user requested changes to the project requirement, etc.**
+
+# Prospectr Product Requirements Document
+
+**Last Updated:** 3/24/25
+
+**Note**: This document should be updated whenever there are changes to the project's tech stack or requirements to ensure it remains accurate and useful.
 
 Below is a comprehensive Product Requirements Document (PRD) for the **Prospectr** project, tailored to the provided codebase and project requirements. This PRD is designed to be clean, concise, and easy to iterate with, while being painfully specific to ensure clarity for development teams and AI-assisted workflows.
 
@@ -1906,11 +2356,18 @@ File: .cursor/rules/TECH-STACK-doc.mdc
 ---
 description: 
 globs: 
+alwaysApply: false
+---
+---
+description: 
+globs: 
 alwaysApply: true
 ---
 **Update this rule if user requested changes to the project requirement, etc.**
 
 # Prospectr Tech Stack Document
+
+**Last Updated:** 2025-04-04
 
 **Note**: This document should be updated whenever there are changes to the project's tech stack or requirements to ensure it remains accurate and useful.
 
@@ -1923,198 +2380,152 @@ This document outlines the technology choices behind Prospectr, a lead finder we
 The frontend of Prospectr is designed to deliver a responsive, intuitive, and visually appealing user interface using modern web technologies.
 
 - **Next.js (v15.2.2)**  
-  A React framework enabling server-side rendering (SSR), static site generation (SSG), and API routes for optimal performance and SEO. Prospectr uses Next.js for routing, rendering, and server-side logic.  
-  - **Configuration**: Uses App Router, Turbopack for development (via `next dev --turbopack`), and custom headers for Open Graph images (see `next.config.js`).  
+  A React framework enabling server-side rendering (SSR), static site generation (SSG), and API routes for optimal performance and SEO. Prospectr uses Next.js with the App Router (`app/` directory).
+  - **Configuration**: Uses App Router, Turbopack for development (`next dev --turbopack`), custom headers for Open Graph images, and excludes Supabase functions from webpack compilation (see `next.config.js`).
   - [Next.js Documentation](mdc:https:/nextjs.org/docs)
 
 - **React (v18.2.0)**  
-  A JavaScript library for building user interfaces with a component-based architecture. Manages the component lifecycle and state in Prospectr.  
+  A JavaScript library for building user interfaces with a component-based architecture. Manages the component lifecycle and state in Prospectr.
   - [React Documentation](mdc:https:/react.dev)
 
 - **Tailwind CSS (v3.4.3)**  
-  A utility-first CSS framework for rapid UI development, focusing on customization and responsiveness. Provides Prospectr’s styling foundation.  
-  - **Configuration**: Extended with custom animations, gradients, and DaisyUI integration (see `tailwind.config.js`).  
+  A utility-first CSS framework for rapid UI development, focusing on customization and responsiveness. Provides Prospectr’s styling foundation.
+  - **Configuration**: Extended with custom animations (shimmer, rainbow, gradient), gradients, and DaisyUI integration (see `tailwind.config.js`). Defines custom CSS variables for colors in `app/globals.css`.
   - [Tailwind CSS Documentation](mdc:https:/tailwindcss.com/docs)
 
 - **DaisyUI (v4.12.23)**  
-  A component library built on Tailwind CSS, offering pre-designed UI components for consistency and ease of development. Used for buttons, modals, and other UI elements.  
-  - **Configuration**: Theme set to "black" (see `config.js`).  
+  A component library built on Tailwind CSS, offering pre-designed UI components for consistency and ease of development. Used for base styling and components.
+  - **Configuration**: Theme set to "black" (see `config.js` and `tailwind.config.js`).
   - [DaisyUI Documentation](mdc:https:/daisyui.com/docs)
 
-- **Radix UI (Multiple Packages)**  
-  Provides accessible, customizable UI primitives for complex interfaces. Includes `@radix-ui/react-select` (v2.1.5), `@radix-ui/react-slot` (v1.1.1), and `@radix-ui/react-tabs` (v1.1.3).  
+- **shadcn/ui & Radix UI**  
+  Provides accessible, customizable UI primitives and styled components (`components/ui/`). Includes:
+    - `Button`, `Input`, `Select`, `Tabs`, `Table` (built on Radix UI primitives like `@radix-ui/react-select` v2.1.5, `@radix-ui/react-slot` v1.1.1, `@radix-ui/react-tabs` v1.1.3).
+    - Configured via `components.json`.
+  - [shadcn/ui Documentation](mdc:https:/ui.shadcn.com)
   - [Radix UI Documentation](mdc:https:/www.radix-ui.com/docs)
 
 - **Lucide React (v0.473.0)**  
-  An icon library for React offering customizable icons. Used throughout Prospectr for visual elements.  
+  An icon library for React offering customizable icons. Used throughout Prospectr for visual elements. Configured via `components.json`.
   - [Lucide Documentation](mdc:https:/lucide.dev/docs)
 
-These technologies ensure a seamless user experience, with Next.js and React handling rendering and state, while Tailwind CSS and DaisyUI provide consistent, responsive styling.
+- **State Management**
+    - **React Context API:** Used for global state like LinkedIn connection status (`components/contexts/LinkedInContext.js`) and analytics data (`components/contexts/AnalyticsContext.js`).
+    - **Zustand (v5.0.3):** Used for managing complex state across the multi-step campaign creation flow (`app/store/campaignStore.js`), including persistence.
+    - **@tanstack/react-query (v5.68.0):** Used for server state management, caching, and background updates, particularly for LinkedIn search (`app/dashboard/campaigns/new/leads/page.js`). Requires `QueryClientProvider` setup (`components/LayoutClient.js`).
+
+- **Other Frontend Libraries:**
+    - `framer-motion` (v12.5.0): For animations.
+    - `react-hot-toast` (v2.4.1): For displaying notifications.
+    - `react-tooltip` (v5.26.3): For tooltips.
+    - `react-type-animation` (v3.2.0): For typing animations (e.g., in Hero).
+    - `nextjs-toploader` (v1.6.11): Displays a loading bar during navigation.
+    - `@splinetool/react-spline` (v4.0.0): For embedding Spline 3D scenes.
+
+These technologies ensure a seamless user experience, with Next.js handling routing/rendering, React for UI logic, Tailwind/DaisyUI/shadcn for styling, and various libraries for state management and specific UI features.
 
 ---
 
 ## Backend Technologies
 
-Prospectr’s backend leverages serverless functions and third-party services for data storage, authentication, payments, and LinkedIn integrations.
+Prospectr’s backend leverages serverless functions (Next.js API Routes) and third-party services for data storage, authentication, payments, and LinkedIn integrations.
 
-- **Supabase (v2.49.1 via `@supabase/supabase-js`, v0.5.2 via `@supabase/ssr`)**  
-  An open-source Firebase alternative providing a Postgres database, authentication, and real-time subscriptions. Prospectr uses Supabase for user authentication, data persistence, and profile management.  
-  - **Configuration Example**:  
-    ```javascript
-    import { createClient } from '@supabase/ssr';
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      { cookies: { getAll: () => cookieStore.getAll(), setAll: (cookies) => cookies.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } }
-    );
-    ```  
+- **Supabase (JS v2.49.1, SSR v0.5.2)**  
+  An open-source Firebase alternative providing a Postgres database, authentication, and real-time subscriptions. Prospectr uses Supabase for user authentication (Email/Password, Google via server actions), data persistence (`profiles`, `invitation_jobs`, etc.), and RLS (partially configured).
+  - **Configuration**: Uses `@supabase/ssr` for server-side auth handling (`utils/supabase/client.js`, `server.js`, `middleware.js`). Connection details in `.env.local`. Schema defined partly in `schema.txt` and migrations (though migrations folder is gitignored). `supabase/config.toml` defines project settings.
   - [Supabase Documentation](mdc:https:/supabase.com/docs)
 
 - **Stripe (v13.11.0)**  
-  A payment processing platform for handling subscriptions and payments. Integrated for Prospectr’s monetization.  
-  - **Configuration**: Uses `NEXT_PUBLIC_STRIPE_PRICE_ID` for subscription plans (see `.env.local`).  
+  A payment processing platform for handling subscriptions. Integrated for Prospectr’s Pro plan monetization.
+  - **Configuration**: Uses `STRIPE_SECRET_KEY` and `NEXT_PUBLIC_STRIPE_PRICE_ID` from `.env.local`. Plan details in `config.js`. API interactions via `libs/stripe.js` and API routes (`/api/stripe/*`, `/api/webhook/stripe`).
   - [Stripe Documentation](mdc:https:/stripe.com/docs)
 
 - **Unipile (v1.9.2 via `unipile-node-sdk`)**  
-  An API for LinkedIn integrations, enabling profile search and connection requests.  
-  - **Configuration Example**:  
-    ```javascript
-    import { UnipileClient } from 'unipile-node-sdk';
-    const client = new UnipileClient(process.env.UNIPILE_API_URL, process.env.UNIPILE_API_TOKEN);
-    ```  
+  An API for LinkedIn integrations, enabling profile search, connection requests, and status checks.
+  - **Configuration**: Uses `UNIPILE_API_URL` and `UNIPILE_API_TOKEN` from `.env.local`. Client initialized in `utils/unipileClient.js`. Used in `/api/auths/linkedin/*`, `/api/linkedin/*`, and `lib/invitation-service.js`.
   - [Unipile Documentation](mdc:https:/docs.unipile.com)
 
 - **Node.js (v20.x implied via Next.js)**  
-  The runtime environment for executing JavaScript on the server, used with Next.js API routes for server-side logic.  
+  The runtime environment for executing JavaScript in Next.js API routes for server-side logic.
   - [Node.js Documentation](mdc:https:/nodejs.org/en/docs)
 
-These backend technologies ensure secure data management, payment processing, and efficient LinkedIn API interactions.
+These backend technologies ensure secure data management, authentication, payment processing, and efficient LinkedIn API interactions via serverless functions.
 
 ---
 
 ## Infrastructure and Deployment
 
-Prospectr is designed for scalability and ease of deployment.
+Prospectr is designed for scalability and ease of deployment using modern cloud platforms.
 
 - **Vercel**  
-  A platform optimized for Next.js applications, providing hosting, domain management, and automatic deployments. Prospectr is deployed on Vercel.  
-  - **Configuration**: Defined in `vercel.json` with cron jobs and function settings.  
+  A platform optimized for Next.js applications, providing hosting, domain management, automatic deployments, and serverless functions (including Cron Jobs). Prospectr is deployed on Vercel.
+  - **Configuration**: Defined in `vercel.json` with cron job schedules (`/api/cron/*`) and function settings (memory/duration for Stripe webhook). Uses Vercel Analytics (`@vercel/analytics`) and Speed Insights (`@vercel/speed-insights`).
   - [Vercel Documentation](mdc:https:/vercel.com/docs)
 
 - **GitHub**  
-  Used for version control and collaboration, with CI/CD pipelines automating testing and deployment.  
+  Used for version control and potentially CI/CD pipelines integrated with Vercel.
   - [GitHub Documentation](mdc:https:/docs.github.com)
 
-This setup supports rapid development cycles and reliable updates.
+This setup supports rapid development cycles and reliable, scalable hosting.
 
 ---
 
 ## Third-Party Integrations
 
-Prospectr integrates external services to enhance functionality.
+Prospectr integrates external services to enhance functionality beyond core features.
 
 - **Resend (v4.1.2)**  
-  An email API for sending transactional emails, such as reconnection emails.  
-  - **Configuration Example**:  
-    ```javascript
-    import { Resend } from 'resend';
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({ from: 'prospectr@customerservice.peakvaluebusiness.com', to: email, subject: 'Reconnect LinkedIn Account', html: `<a href="${reconnectionUrl}">Reconnect Now</a>` });
-    ```  
+  An email API for sending transactional emails, specifically used for LinkedIn reconnection prompts.
+  - **Configuration**: Uses `RESEND_API_KEY` from `.env.local`. Implemented in `utils/email/reconnectionEmail.js`.
   - [Resend Documentation](mdc:https:/resend.com/docs)
 
 - **Crisp (v1.0.25 via `crisp-sdk-web`)**  
-  A customer support platform integrated for user assistance.  
-  - **Configuration**: ID set in `config.js` as `4001a365-4a61-4b7e-a71e-01af4dc2ce52`.  
+  A customer support chat platform integrated for user assistance.
+  - **Configuration**: Crisp ID set in `config.js`. Initialized in `components/LayoutClient.js` via the `CrispChat` component. Visibility controlled based on routes defined in `config.js`.
   - [Crisp Documentation](mdc:https:/docs.crisp.chat)
 
-These integrations improve user communication and support.
+- **Trackdesk**
+    - An affiliate tracking and partner management platform.
+    - **Configuration**: Scripts included directly in `app/layout.js` and managed via `components/TrackdeskScriptWrapper.js` to handle click tracking and potentially client reference IDs for Stripe.
+    - [Trackdesk Documentation](mdc:https:/trackdesk.com/docs) (Assumed URL)
+
+These integrations improve user communication, support, and potentially affiliate tracking.
 
 ---
 
 ## Security and Performance Considerations
 
-Security and performance are critical to Prospectr’s design.
-
-- **Authentication**  
-  Handled by Supabase Auth with secure session management and token refreshing (see `utils/supabase/middleware.js`).  
-
-- **Data Encryption**  
-  Sensitive data (e.g., LinkedIn tokens) is encrypted using Supabase’s built-in features.  
-
-- **Rate Limiting**  
-  Implemented for API requests to prevent abuse, with tier-based limits (e.g., 20 connects/day for free users).  
-
-- **Performance Optimizations**  
-  Leverages Next.js features like SSG, ISR, and Turbopack for fast page loads. Image optimization is configured in `next.config.js`.  
-
-These measures ensure data security and efficient performance.
+- **Authentication:** Handled by Supabase Auth using `@supabase/ssr` for secure server-side session management and token refreshing (`utils/supabase/middleware.js`).
+- **Authorization:** RLS policies in Supabase (partially implemented/enabled) and application-level checks (`utils/check-subscription.js`) control access to data and features.
+- **API Security:** Sensitive keys stored in `.env.local`. Stripe webhook signature verification implemented in `/api/webhook/stripe`.
+- **Performance Optimizations:**
+    - Next.js features: App Router, Server Components, Route Handlers, Turbopack (dev).
+    - Image optimization via `next/image`.
+    - Client component optimization: Minimal `use client`, Suspense boundaries for components with client hooks.
+    - Loading states implemented for data fetching.
+    - Caching via React Query.
 
 ---
 
 ## Dependencies
 
-Below is a complete list of packages from `package.json`:
+(List derived from `package.json` - See `package.json` file for exact versions)
 
-### Production Dependencies
-- `@headlessui/react` (v1.7.18)  
-- `@radix-ui/react-select` (v2.1.5)  
-- `@radix-ui/react-slot` (v1.1.1)  
-- `@radix-ui/react-tabs` (v1.1.3)  
-- `@splinetool/react-spline` (v4.0.0)  
-- `@splinetool/runtime` (v1.9.59)  
-- `@supabase/auth-helpers-nextjs` (v0.10.0) - Legacy, not used in favor of `@supabase/ssr`  
-- `@supabase/ssr` (v0.5.2)  
-- `@supabase/supabase-js` (v2.49.1)  
-- `@tanstack/react-query` (v5.68.0)  
-- `@vercel/analytics` (v1.5.0)  
-- `@vercel/speed-insights` (v1.2.0)  
-- `axios` (v1.6.8)  
-- `class-variance-authority` (v0.7.1)  
-- `clsx` (v2.1.1)  
-- `crisp-sdk-web` (v1.0.25)  
-- `eslint` (v8.47.0)  
-- `eslint-config-next` (v13.4.19)  
-- `form-data` (v4.0.0)  
-- `framer-motion` (v12.5.0)  
-- `jsonwebtoken` (v9.0.2)  
-- `lucide-react` (v0.473.0)  
-- `mailgun.js` (v9.4.1)  
-- `next` (v15.2.2)  
-- `next-plausible` (v3.12.0)  
-- `next-sitemap` (v4.2.3)  
-- `nextjs-toploader` (v1.6.11)  
-- `nodemailer` (v6.9.13)  
-- `react` (v18.2.0)  
-- `react-dom` (v18.2.0)  
-- `react-hot-toast` (v2.4.1)  
-- `react-syntax-highlighter` (v15.6.1)  
-- `react-tooltip` (v5.26.3)  
-- `react-type-animation` (v3.2.0)  
-- `resend` (v4.1.2)  
-- `stripe` (v13.11.0)  
-- `tailwind-merge` (v2.6.0)  
-- `tailwindcss-animate` (v1.0.7)  
-- `unipile-node-sdk` (v1.9.2)  
-- `zustand` (v5.0.3)  
-
-### Development Dependencies
-- `@types/react` (v19.0.8)  
-- `autoprefixer` (v10.4.19)  
-- `daisyui` (v4.12.23)  
-- `postcss` (v8.4.38)  
-- `tailwindcss` (v3.4.3)  
+- **Core Framework:** `next`, `react`, `react-dom`
+- **Styling:** `tailwindcss`, `daisyui`, `autoprefixer`, `postcss`, `clsx`, `tailwind-merge`, `tailwindcss-animate`
+- **UI Components/Primitives:** `@headlessui/react`, `@radix-ui/*`, `class-variance-authority`, `lucide-react` (Icons)
+- **State Management:** `zustand`, `@tanstack/react-query`
+- **Backend/DB:** `@supabase/ssr`, `@supabase/supabase-js`
+- **APIs/Integrations:** `axios`, `stripe`, `unipile-node-sdk`, `resend`, `crisp-sdk-web`, `mailgun.js` (present but usage unclear), `nodemailer` (present but usage unclear)
+- **Utilities:** `nextjs-toploader`, `react-hot-toast`, `react-tooltip`, `react-type-animation`, `@splinetool/react-spline`
+- **Dev/Build:** `eslint`, `eslint-config-next`, `next-sitemap`
+- **Analytics/Monitoring:** `@vercel/analytics`, `@vercel/speed-insights`, `next-plausible`
 
 ---
 
 ## Conclusion
 
-Prospectr’s tech stack is meticulously selected to automate LinkedIn outreach while delivering a user-friendly experience. By integrating modern frontend frameworks (Next.js, React, Tailwind CSS, DaisyUI), robust backend services (Supabase, Stripe, Unipile), and strategic third-party integrations (Resend, Crisp), Prospectr provides a powerful lead generation tool. This document, with its specific version numbers, configurations, and code snippets, serves as a comprehensive guide for maintaining and iterating on the application.
-
-**Additional Notes**  
-- All dependencies and versions are sourced from `package.json`.  
-- Environment variables are managed via `.env.local` (e.g., `NEXT_PUBLIC_SUPABASE_URL`, `STRIPE_SECRET_KEY`).  
-- Next.js API routes provide a full-stack JavaScript solution.
+Prospectr’s tech stack leverages modern JavaScript technologies, focusing on Next.js for the full-stack framework, Supabase for backend services, and Unipile/Stripe for key integrations. The frontend utilizes Tailwind CSS with DaisyUI and shadcn/ui for a consistent and responsive UI, while state management is handled contextually with React Context, Zustand, and React Query. Deployment is streamlined via Vercel.
 
 ================
 File: .million/store.json
@@ -2817,7 +3228,7 @@ export async function POST(req) {
   }
 
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -3233,7 +3644,8 @@ import { NextResponse } from "next/server";
 //   method: 'DELETE'
 // });
 
-export async function DELETE(request, { params }) {
+export async function DELETE(request, props) {
+  const params = await props.params;
   const supabase = await createClient();
   const profileId = params.id;
 
@@ -3665,6 +4077,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getUser } from "@/utils/supabase/getUser";
 import config from "@/config";
+import { createClient } from "@/utils/supabase/server";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -3676,17 +4089,40 @@ export async function POST(req) {
     const { priceId, successUrl, cancelUrl } = await req.json();
 
     // Get authenticated user
-    const user = await getUser();
+    let user = await getUser();
+
+    // If no user, try to refresh the session
     if (!user) {
-      // Return a response indicating the user needs to sign up
-      return NextResponse.json(
-        {
-          error: "Authentication required",
-          redirectToSignup: true,
-          status: 401,
-        },
-        { status: 401 }
-      );
+      const supabase = await createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session) {
+        // Try to refresh the session
+        const { error: refreshError } = await supabase.auth.refreshSession();
+        if (!refreshError) {
+          // Get the user again after refresh
+          const {
+            data: { user: refreshedUser },
+          } = await supabase.auth.getUser();
+          if (refreshedUser) {
+            user = refreshedUser;
+          }
+        }
+      }
+
+      // If still no user after refresh, return signup redirect
+      if (!user) {
+        return NextResponse.json(
+          {
+            error: "Authentication required",
+            redirectToSignup: true,
+            status: 401,
+          },
+          { status: 401 }
+        );
+      }
     }
 
     // Determine if this is the Premium plan (to add trial period)
@@ -3697,6 +4133,7 @@ export async function POST(req) {
     const sessionOptions = {
       mode: "subscription",
       payment_method_types: ["card"],
+      allow_promotion_codes: true,
       line_items: [
         {
           price: priceId,
@@ -3738,7 +4175,7 @@ import { createCustomerPortal } from "@/libs/stripe";
 
 export async function POST(req) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -3863,7 +4300,6 @@ export async function POST(req) {
 ================
 File: app/api/unipile/webhooks/route.js
 ================
-import { getUser } from "@/utils/supabase/getUser";
 import { createClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
@@ -3983,7 +4419,7 @@ export async function POST(req) {
   const body = await req.text();
 
   // Get the signature from headers
-  const signature = headers().get("stripe-signature");
+  const signature = (await headers()).get("stripe-signature");
 
   let data;
   let eventType;
@@ -4336,7 +4772,7 @@ export async function GET(request) {
         const baseUrl = `${protocol}://${host}`;
 
         // Check for checkout redirection cookie
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
 
         // If this was a sign-in from the checkout process, get the selected plan ID
         // and create a checkout session
@@ -4363,6 +4799,7 @@ export async function GET(request) {
               const session = await stripe.checkout.sessions.create({
                 mode: "subscription",
                 payment_method_types: ["card"],
+                allow_promotion_codes: true,
                 line_items: [
                   {
                     price: selectedPlanId,
@@ -5231,7 +5668,8 @@ import Avatar from "../_assets/components/Avatar";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params;
   const article = articles.find((article) => article.slug === params.articleId);
 
   return getSEOTags({
@@ -5257,7 +5695,8 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Article({ params }) {
+export default async function Article(props) {
+  const params = await props.params;
   const article = articles.find((article) => article.slug === params.articleId);
   const articlesRelated = articles
     .filter(
@@ -5405,7 +5844,8 @@ import CardArticle from "../../_assets/components/CardArticle";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params;
   const author = authors.find((author) => author.slug === params.authorId);
 
   return getSEOTags({
@@ -5415,7 +5855,8 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Author({ params }) {
+export default async function Author(props) {
+  const params = await props.params;
   const author = authors.find((author) => author.slug === params.authorId);
   const articlesByAuthor = articles
     .filter((article) => article.author.slug === author.slug)
@@ -5490,7 +5931,8 @@ import CardCategory from "../../_assets/components/CardCategory";
 import { getSEOTags } from "@/libs/seo";
 import config from "@/config";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata(props) {
+  const params = await props.params;
   const category = categories.find(
     (category) => category.slug === params.categoryId
   );
@@ -5502,7 +5944,8 @@ export async function generateMetadata({ params }) {
   });
 }
 
-export default async function Category({ params }) {
+export default async function Category(props) {
+  const params = await props.params;
   const category = categories.find(
     (category) => category.slug === params.categoryId
   );
@@ -5773,6 +6216,28 @@ function SectionBiography() {
 export default SectionBiography
 
 ================
+File: app/components/UpdateFrequencyInfo.jsx
+================
+import { Info } from "lucide-react";
+
+export default function UpdateFrequencyInfo() {
+  return (
+    <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-4">
+      <div className="flex items-start gap-3">
+        <Info className="w-5 h-5 text-blue-400 mt-0.5" />
+        <div>
+          <h4 className="text-sm font-medium text-white mb-1">Campaign Update Frequencies</h4>
+          <div className="space-y-2 text-sm text-[#A1A1AA]">
+            <p>• Connection requests are checked every 2 hours</p>
+            <p>• Response tracking updates every 4 hours</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+================
 File: app/dashboard/analytics/page.js
 ================
 "use client";
@@ -6038,14 +6503,16 @@ export default function AnalyticsPage() {
 File: app/dashboard/campaigns/[id]/page.js
 ================
 "use client";
+import { use } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Users, BarChart2, Calendar, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import UpdateFrequencyInfo from "../../../components/UpdateFrequencyInfo";
 
 // Mock data - replace with real data later
 const mockCampaigns = {
-  "1": {
+  1: {
     id: "1",
     name: "Q1 Outreach",
     status: "active",
@@ -6057,14 +6524,14 @@ const mockCampaigns = {
     lastActive: "2025-01-23",
     description: "Q1 outreach campaign targeting tech decision makers",
   },
-  "2": {
+  2: {
     id: "2",
     name: "Tech Founders",
     status: "draft",
     lastEdited: "2 days ago",
     description: "Campaign targeting startup founders in the tech industry",
   },
-  "3": {
+  3: {
     id: "3",
     name: "December Outreach",
     status: "completed",
@@ -6074,17 +6541,22 @@ const mockCampaigns = {
     startDate: "2024-12-01",
     completedDate: "2024-12-31",
     description: "End of year outreach campaign",
-  }
+  },
 };
 
-export default function CampaignDetailsPage({ params }) {
+export default function CampaignDetailsPage(props) {
+  const params = use(props.params);
   const router = useRouter();
   const campaign = mockCampaigns[params.id];
 
   if (!campaign) {
     return (
       <div className="space-y-4">
-        <Button variant="ghost" onClick={() => router.back()} className="text-[#C9E5FF]">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="text-[#C9E5FF]"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Campaigns
         </Button>
@@ -6097,13 +6569,19 @@ export default function CampaignDetailsPage({ params }) {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-4">
-        <Button variant="ghost" onClick={() => router.back()} className="text-[#C9E5FF]">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="text-[#C9E5FF]"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Campaigns
         </Button>
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-[#C9E5FF]">{campaign.name}</h1>
+            <h1 className="text-2xl font-bold text-[#C9E5FF]">
+              {campaign.name}
+            </h1>
             <p className="text-sm text-[#A3A3A3]">{campaign.description}</p>
           </div>
           <div className="flex gap-2">
@@ -6123,14 +6601,18 @@ export default function CampaignDetailsPage({ params }) {
       {/* Campaign Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A] p-6">
-          <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">Campaign Overview</h3>
+          <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">
+            Campaign Overview
+          </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-[#A3A3A3]" />
                 <span className="text-[#A3A3A3]">Total Prospects</span>
               </div>
-              <span className="text-[#C9E5FF] font-medium">{campaign.prospects || "N/A"}</span>
+              <span className="text-[#C9E5FF] font-medium">
+                {campaign.prospects || "N/A"}
+              </span>
             </div>
             {campaign.status === "active" && (
               <div className="flex items-center justify-between">
@@ -6138,27 +6620,36 @@ export default function CampaignDetailsPage({ params }) {
                   <BarChart2 className="w-4 h-4 text-[#A3A3A3]" />
                   <span className="text-[#A3A3A3]">Progress</span>
                 </div>
-                <span className="text-[#C9E5FF] font-medium">{campaign.progress}%</span>
+                <span className="text-[#C9E5FF] font-medium">
+                  {campaign.progress}%
+                </span>
               </div>
             )}
-            {(campaign.status === "active" || campaign.status === "completed") && (
+            {(campaign.status === "active" ||
+              campaign.status === "completed") && (
               <>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#A3A3A3]" />
                     <span className="text-[#A3A3A3]">Start Date</span>
                   </div>
-                  <span className="text-[#C9E5FF] font-medium">{campaign.startDate}</span>
+                  <span className="text-[#C9E5FF] font-medium">
+                    {campaign.startDate}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#A3A3A3]" />
                     <span className="text-[#A3A3A3]">
-                      {campaign.status === "active" ? "Last Active" : "Completed Date"}
+                      {campaign.status === "active"
+                        ? "Last Active"
+                        : "Completed Date"}
                     </span>
                   </div>
                   <span className="text-[#C9E5FF] font-medium">
-                    {campaign.status === "active" ? campaign.lastActive : campaign.completedDate}
+                    {campaign.status === "active"
+                      ? campaign.lastActive
+                      : campaign.completedDate}
                   </span>
                 </div>
               </>
@@ -6168,20 +6659,29 @@ export default function CampaignDetailsPage({ params }) {
 
         {(campaign.status === "active" || campaign.status === "completed") && (
           <div className="bg-[#0C0C0C] rounded-lg border border-[#2A2A2A] p-6">
-            <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">Performance</h3>
+            <h3 className="text-lg font-medium text-[#C9E5FF] mb-4">
+              Performance
+            </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[#A3A3A3]">Total Replies</span>
-                <span className="text-[#C9E5FF] font-medium">{campaign.replies}</span>
+                <span className="text-[#C9E5FF] font-medium">
+                  {campaign.replies}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#A3A3A3]">Reply Rate</span>
-                <span className="text-[#C9E5FF] font-medium">{campaign.replyRate}%</span>
+                <span className="text-[#C9E5FF] font-medium">
+                  {campaign.replyRate}%
+                </span>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Update Frequency Info */}
+      <UpdateFrequencyInfo />
     </div>
   );
 }
@@ -7229,6 +7729,7 @@ import {
 } from "lucide-react";
 import { useCampaignStore } from "@/app/store/campaignStore";
 import { useMutation } from "@tanstack/react-query";
+import UpdateFrequencyInfo from "../../../../components/UpdateFrequencyInfo";
 
 export default function ReviewPage() {
   const router = useRouter();
@@ -7503,10 +8004,13 @@ export default function ReviewPage() {
             <h2 className="text-2xl font-bold text-white mb-2">
               Campaign Published!
             </h2>
-            <p className="text-[#A3A3A3] max-w-md mx-auto">
+            <p className="text-[#A3A3A3] max-w-md mx-auto mb-6">
               Your connection requests will be sent to {selectedLeads.length}{" "}
               leads. You can track the progress in your campaigns dashboard.
             </p>
+            <div className="max-w-md mx-auto">
+              <UpdateFrequencyInfo />
+            </div>
           </div>
 
           <div className="flex justify-center space-x-4">
@@ -7775,6 +8279,7 @@ import { Users, BarChart2 } from "lucide-react";
 import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAnalytics } from "@/components/contexts/AnalyticsContext";
+import UpdateFrequencyInfo from "../../components/UpdateFrequencyInfo";
 
 function CampaignsContent() {
   const [activeTab, setActiveTab] = useState("all");
@@ -7788,11 +8293,11 @@ function CampaignsContent() {
     }
 
     const campaigns = analyticsData.data.campaigns || [];
-    
+
     return {
-      active: campaigns.filter(camp => camp.status === 'processing'),
-      drafts: campaigns.filter(camp => camp.status === 'pending'),
-      completed: campaigns.filter(camp => camp.status === 'completed')
+      active: campaigns.filter((camp) => camp.status === "processing"),
+      drafts: campaigns.filter((camp) => camp.status === "pending"),
+      completed: campaigns.filter((camp) => camp.status === "completed"),
     };
   };
 
@@ -7808,56 +8313,61 @@ function CampaignsContent() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-white">Campaigns</h1>
-          <p className="text-sm text-[#A1A1AA]">Manage your LinkedIn outreach campaigns</p>
+          <p className="text-sm text-[#A1A1AA]">
+            Manage your LinkedIn outreach campaigns
+          </p>
         </div>
-        <Button 
+        <Button
           variant="outline"
-          onClick={() => router.push('/dashboard/campaigns/new/leads')}
+          onClick={() => router.push("/dashboard/campaigns/new/leads")}
         >
           New Campaign
         </Button>
       </div>
 
+      {/* Update Frequency Info */}
+      <UpdateFrequencyInfo />
+
       {/* Campaign Filters */}
       <div className="flex gap-4 pb-4 border-b border-[#1A1A1A]">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "all" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "all"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("all")}
         >
           All Campaigns
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "active" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "active"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("active")}
         >
           Active
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "drafts" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "drafts"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("drafts")}
         >
           Drafts
         </Button>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={`pb-4 px-2 rounded-none ${
-            activeTab === "completed" 
-              ? "text-white border-b-2 border-white" 
+            activeTab === "completed"
+              ? "text-white border-b-2 border-white"
               : "text-[#A1A1AA] hover:text-white"
           }`}
           onClick={() => setActiveTab("completed")}
@@ -7877,143 +8387,200 @@ function CampaignsContent() {
       {!analyticsData.isLoading && (
         <div className="space-y-4">
           {/* Active Campaigns */}
-          {(activeTab === "all" || activeTab === "active") && campaigns.active.length > 0 && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-white">Active Campaigns</h3>
-                    <p className="text-sm text-[#A1A1AA]">Currently running campaigns</p>
+          {(activeTab === "all" || activeTab === "active") &&
+            campaigns.active.length > 0 && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-white">
+                        Active Campaigns
+                      </h3>
+                      <p className="text-sm text-[#A1A1AA]">
+                        Currently running campaigns
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {campaigns.active.map((campaign) => (
+                      <div
+                        key={campaign.job_id}
+                        className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {campaign.name}
+                            </h4>
+                            <p className="text-sm text-[#A1A1AA]">
+                              {campaign.total_invitations} prospects •{" "}
+                              {Math.min(
+                                100,
+                                (campaign.accepted_connections /
+                                  campaign.total_invitations) *
+                                  100
+                              ).toFixed(0)}
+                              % complete
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-sm text-white">
+                              {campaign.accepted_connections} connections
+                            </p>
+                            <p className="text-xs text-[#A1A1AA]">
+                              {campaign.response_rate}% rate
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewDetails(campaign.job_id)}
+                          >
+                            <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {campaigns.active.map(campaign => (
-                    <div key={campaign.job_id} className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-white font-medium">{campaign.name}</h4>
-                          <p className="text-sm text-[#A1A1AA]">{campaign.total_invitations} prospects • {Math.min(100, campaign.accepted_connections / campaign.total_invitations * 100).toFixed(0)}% complete</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm text-white">{campaign.accepted_connections} connections</p>
-                          <p className="text-xs text-[#A1A1AA]">{campaign.response_rate}% rate</p>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleViewDetails(campaign.job_id)}
-                        >
-                          <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Draft Campaigns */}
-          {(activeTab === "all" || activeTab === "drafts") && campaigns.drafts.length > 0 && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-white">Draft Campaigns</h3>
-                    <p className="text-sm text-[#A1A1AA]">Campaigns in preparation</p>
+          {(activeTab === "all" || activeTab === "drafts") &&
+            campaigns.drafts.length > 0 && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-white">
+                        Draft Campaigns
+                      </h3>
+                      <p className="text-sm text-[#A1A1AA]">
+                        Campaigns in preparation
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {campaigns.drafts.map((campaign) => (
+                      <div
+                        key={campaign.job_id}
+                        className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {campaign.name}
+                            </h4>
+                            <p className="text-sm text-[#A1A1AA]">
+                              Draft • Last edited{" "}
+                              {campaign.created_at
+                                ? new Date(
+                                    campaign.created_at
+                                  ).toLocaleDateString()
+                                : "recently"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewDetails(campaign.job_id)}
+                          >
+                            Edit
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {campaigns.drafts.map(campaign => (
-                    <div key={campaign.job_id} className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-white font-medium">{campaign.name}</h4>
-                          <p className="text-sm text-[#A1A1AA]">
-                            Draft • Last edited {campaign.created_at ? new Date(campaign.created_at).toLocaleDateString() : "recently"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleViewDetails(campaign.job_id)}
-                        >
-                          Edit
-                        </Button>
-                        <Button variant="ghost" size="sm">Delete</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* Completed Campaigns */}
-          {(activeTab === "all" || activeTab === "completed") && campaigns.completed.length > 0 && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-lg font-medium text-white">Completed</h3>
-                    <p className="text-sm text-[#A1A1AA]">Past campaigns</p>
+          {(activeTab === "all" || activeTab === "completed") &&
+            campaigns.completed.length > 0 && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A]">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-medium text-white">
+                        Completed
+                      </h3>
+                      <p className="text-sm text-[#A1A1AA]">Past campaigns</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {campaigns.completed.map((campaign) => (
+                      <div
+                        key={campaign.job_id}
+                        className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="text-white font-medium">
+                              {campaign.name}
+                            </h4>
+                            <p className="text-sm text-[#A1A1AA]">
+                              {campaign.total_invitations} prospects • Completed
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-sm text-white">
+                              {campaign.accepted_connections} connections
+                            </p>
+                            <p className="text-xs text-[#A1A1AA]">
+                              {campaign.response_rate}% rate
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleViewDetails(campaign.job_id)}
+                          >
+                            <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {campaigns.completed.map(campaign => (
-                    <div key={campaign.job_id} className="flex items-center justify-between p-4 bg-black rounded-lg border border-[#1A1A1A]">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#1A1A1A] rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="text-white font-medium">{campaign.name}</h4>
-                          <p className="text-sm text-[#A1A1AA]">{campaign.total_invitations} prospects • Completed</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm text-white">{campaign.accepted_connections} connections</p>
-                          <p className="text-xs text-[#A1A1AA]">{campaign.response_rate}% rate</p>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleViewDetails(campaign.job_id)}
-                        >
-                          <BarChart2 className="w-4 h-4 text-[#A1A1AA]" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* No Campaigns State */}
-          {!analyticsData.isLoading && 
-            analyticsData.data && 
-            (!analyticsData.data.campaigns || analyticsData.data.campaigns.length === 0) && (
-            <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-12 text-center">
-              <p className="text-[#A1A1AA] mb-4">You don&apos;t have any campaigns yet</p>
-              <Button
-                onClick={() => router.push('/dashboard/campaigns/new/leads')}
-              >
-                Create your first campaign
-              </Button>
-            </div>
-          )}
+          {!analyticsData.isLoading &&
+            analyticsData.data &&
+            (!analyticsData.data.campaigns ||
+              analyticsData.data.campaigns.length === 0) && (
+              <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-12 text-center">
+                <p className="text-[#A1A1AA] mb-4">
+                  You don&apos;t have any campaigns yet
+                </p>
+                <Button
+                  onClick={() => router.push("/dashboard/campaigns/new/leads")}
+                >
+                  Create your first campaign
+                </Button>
+              </div>
+            )}
         </div>
       )}
     </div>
@@ -8022,11 +8589,13 @@ function CampaignsContent() {
 
 export default function CampaignsPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-screen">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      }
+    >
       <CampaignsContent />
     </Suspense>
   );
@@ -8298,191 +8867,6 @@ export default function SettingsPage() {
 }
 
 ================
-File: app/dashboard/upgrade/layout.js
-================
-import DashboardShell from "@/components/dashboard/DashboardShell";
-
-export default function UpgradeLayout({ children }) {
-  return <DashboardShell>{children}</DashboardShell>;
-}
-
-================
-File: app/dashboard/upgrade/page.js
-================
-"use client";
-
-import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
-import ButtonCheckout from "@/components/ButtonCheckout";
-import config from "@/config";
-import TrackdeskScriptWrapper from "@/components/TrackdeskScriptWrapper";
-
-export default function UpgradePage() {
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscriptionTier, setSubscriptionTier] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Get the pro plan
-  const proPlan = config.stripe.plans[0];
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch("/api/users");
-        if (!res.ok) throw new Error("Failed to fetch user data");
-        const data = await res.json();
-
-        setIsSubscribed(data.user?.isSubscribed || false);
-        setSubscriptionTier(data.user?.subscriptionTier || null);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
-
-  return (
-    <>
-      <TrackdeskScriptWrapper />
-      <div className="container px-4 sm:px-6 max-w-6xl mx-auto">
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold text-white mb-2">
-              Prospectr Pro Plan
-            </h1>
-            <p className="text-[#A1A1AA]">
-              Get access to all Prospectr features and take your LinkedIn
-              outreach to the next level
-            </p>
-          </div>
-
-          <div className="max-w-xl mx-auto">
-            {/* Pro Plan */}
-            <div
-              className={`bg-[#0F0F0F] rounded-lg border ${
-                isSubscribed ? "border-red-500" : "border-[#1A1A1A]"
-              } overflow-hidden`}
-            >
-              <div className="bg-gradient-to-r from-red-500 to-red-700 text-white text-xs font-medium text-center py-1">
-                PROFESSIONAL PLAN
-              </div>
-
-              <div className="p-8">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-2xl font-bold text-white">
-                      {proPlan.name}
-                    </h2>
-                    <p className="text-[#A1A1AA] mt-2">{proPlan.description}</p>
-                  </div>
-                  {isSubscribed && (
-                    <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded-full">
-                      Current Plan
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-6">
-                  <span className="text-4xl font-bold text-white">
-                    ${proPlan.price}
-                  </span>
-                  <span className="text-[#A1A1AA] ml-1">
-                    {proPlan.priceDetails}
-                  </span>
-                </div>
-
-                <div className="mt-8">
-                  <ButtonCheckout
-                    priceId={proPlan.priceId}
-                    productLink={proPlan.link}
-                    className={`w-full btn ${
-                      isSubscribed
-                        ? "btn-disabled bg-[#2A2A2A] text-[#A1A1AA]"
-                        : "bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
-                    }`}
-                    disabled={isSubscribed}
-                    theme="red"
-                  >
-                    {isSubscribed ? "Current Plan" : "Get Pro Plan"}
-                  </ButtonCheckout>
-
-                  {!isSubscribed && (
-                    <p className="text-center text-sm text-[#A1A1AA] mt-2">
-                      $0.00 due today, cancel anytime
-                    </p>
-                  )}
-                </div>
-
-                <div className="mt-8 space-y-3">
-                  <h3 className="text-sm font-medium text-white">
-                    Everything included:
-                  </h3>
-                  <ul className="space-y-3">
-                    {proPlan.features.map((feature, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-3 text-sm"
-                      >
-                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center mt-0.5">
-                          <Check className="w-3 h-3 text-red-500" />
-                        </div>
-                        <span className="text-[#A1A1AA]">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#0F0F0F] rounded-lg border border-[#1A1A1A] p-6 mt-6 max-w-3xl mx-auto">
-            <h3 className="text-lg font-medium text-white mb-4">
-              Frequently Asked Questions
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-white font-medium mb-1">
-                  Can I cancel at any time?
-                </h4>
-                <p className="text-[#A1A1AA] text-sm">
-                  Yes, you can cancel your subscription at any time from your
-                  dashboard. Your access will remain until the end of your
-                  current billing period.
-                </p>
-              </div>
-              <div>
-                <h4 className="text-white font-medium mb-1">
-                  How do connection requests work?
-                </h4>
-                <p className="text-[#A1A1AA] text-sm">
-                  Connection requests are sent through your LinkedIn account.
-                  Your plan includes 500 connection requests per month that
-                  reset at the beginning of your billing cycle.
-                </p>
-              </div>
-              <div>
-                <h4 className="text-white font-medium mb-1">
-                  What happens if I need more connections?
-                </h4>
-                <p className="text-[#A1A1AA] text-sm">
-                  If you need additional connections beyond your monthly limit,
-                  please contact our support team to discuss options for your
-                  specific needs.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-================
 File: app/dashboard/layout.js
 ================
 import { redirect } from "next/navigation";
@@ -8497,7 +8881,7 @@ import DashboardShell from "@/components/dashboard/DashboardShell";
 // You can also add custom static UI elements like a Navbar, Sidebar, Footer, etc..
 // See https://shipfa.st/docs/tutorials/private-page
 export default async function LayoutPrivate({ children }) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -8695,17 +9079,6 @@ function DashboardContent() {
         >
           New Campaign
         </Button>
-        {!isSubscribed && (
-          <Button
-            onClick={() => router.push("/dashboard/settings")}
-            className="text-sm sm:text-base py-2 px-3 sm:px-4 bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800"
-          >
-            <span className="flex items-center justify-center gap-1">
-              <Zap className="w-3 h-3" />
-              Upgrade
-            </span>
-          </Button>
-        )}
       </div>
 
       {/* Recent Activity */}
@@ -11116,8 +11489,18 @@ export default function DashboardShell({ children }) {
     checkSubscription();
   }, []);
 
-  // Determine if user needs to upgrade (not subscribed)
-  const needsUpgrade = !isSubscribed;
+  // Get navigation links based on subscription status
+  const getNavigationLinks = () => {
+    return navigationLinks;
+  };
+
+  const getPageTitle = () => {
+    if (pathname === "/dashboard") return "Dashboard";
+    if (pathname === "/dashboard/campaigns") return "Campaigns";
+    if (pathname === "/dashboard/analytics") return "Analytics";
+    if (pathname === "/dashboard/settings") return "Settings";
+    return "";
+  };
 
   return (
     <div
@@ -11179,7 +11562,7 @@ export default function DashboardShell({ children }) {
           )}
 
           <nav className="flex-1 px-4 py-2 space-y-1">
-            {navigationLinks.map((item) => {
+            {getNavigationLinks().map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -11205,7 +11588,7 @@ export default function DashboardShell({ children }) {
         <header className="hidden md:flex items-center justify-between h-16 px-6 border-b border-[#1A1A1A] sticky top-0 bg-black z-10">
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-medium tracking-tight">
-              {getPageTitle(pathname)}
+              {getPageTitle()}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -11233,7 +11616,7 @@ export default function DashboardShell({ children }) {
         {/* Mobile header title and actions */}
         <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A] mt-16">
           <h1 className="text-lg font-medium tracking-tight">
-            {getPageTitle(pathname)}
+            {getPageTitle()}
           </h1>
           <div className="flex items-center gap-2">
             {!linkedInStatus.connected &&
@@ -11256,22 +11639,6 @@ export default function DashboardShell({ children }) {
         </div>
       </main>
     </div>
-  );
-}
-
-// Helper function to get page title based on pathname
-function getPageTitle(pathname) {
-  if (pathname === "/dashboard") return "Dashboard";
-  if (pathname === "/dashboard/campaigns") return "Campaigns";
-  if (pathname === "/dashboard/analytics") return "Analytics";
-  if (pathname === "/dashboard/settings") return "Settings";
-  if (pathname === "/dashboard/upgrade") return "Upgrade";
-
-  // Extract the last part of the pathname as a fallback
-  const segments = pathname.split("/");
-  return (
-    segments[segments.length - 1].charAt(0).toUpperCase() +
-    segments[segments.length - 1].slice(1)
   );
 }
 
@@ -17773,7 +18140,7 @@ enable_signup = true
 # addresses. If disabled, only the new email is required to confirm.
 double_confirm_changes = true
 # If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
+enable_confirmations = true
 # If enabled, users will need to reauthenticate or have logged in recently to change their password.
 secure_password_change = false
 # Controls the minimum amount of time that must pass before sending another signup confirmation or password reset email.
@@ -17784,14 +18151,14 @@ otp_length = 6
 otp_expiry = 3600
 
 # Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "re_jWRcjJEc_4BDNXvrXzGj1b2YykPTELZFC"
+admin_email = "test@customersupport.leadsprospectr.com"
+sender_name = "test @ prospectr"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -18171,7 +18538,7 @@ import { cookies } from "next/headers";
 const signInWith = (provider) => async (formData) => {
   const supabase = await createClient();
   const headersList = await headers();
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   // Get the host, with fallbacks for Vercel and local development
   const host =
@@ -18291,6 +18658,7 @@ export async function checkSubscription(
     const sessionOptions = {
       mode: "subscription",
       payment_method_types: ["card"],
+      allow_promotion_codes: true,
       line_items: [
         {
           price: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
@@ -18514,7 +18882,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 
 RESEND_API_KEY=re_Rwx3FLrx_JL7DQANtMj695fcyAQjaRv2j
 STRIPE_PUBLISHABLE_KEY=pk_live_51R4Z2RE37HnR1sjlZaLbYMYdbS2m9Yh672vWkwQ8aTog16oTvZrdbpx9j0eiE7QxDdDEZGsPvEmCoLcJCYi8Fe4g00GdrJjtXo
-NEXT_PUBLIC_STRIPE_PRICE_ID=prod_S0PrWEtJP90ffJ
+NEXT_PUBLIC_STRIPE_PRICE_ID=price_1R6P1qE37HnR1sjlvkSplq8X
 STRIPE_SECRET_KEY=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
 
 UNIPILE_BASE_URL=https://api12.unipile.com:14231/api/v1/hosted/accounts/link
@@ -18645,8 +19013,7 @@ const config = {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the priceId
     plans: [
       {
-        priceId:
-          process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || "prod_S0PrWEtJP90ffJ",
+        priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
         price: 15,
         name: "Pro",
         description: "Everything you need for LinkedIn automation",
@@ -18786,6 +19153,7 @@ export async function middleware(request) {
       !request.nextUrl.pathname.startsWith("/signin") &&
       !request.nextUrl.pathname.startsWith("/signup") &&
       !request.nextUrl.pathname.startsWith("/reset-password") &&
+      !request.nextUrl.pathname.startsWith("/api/stripe") && // Exclude Stripe API routes
       request.nextUrl.pathname !== "/"
     ) {
       const url = request.nextUrl.clone();
@@ -18822,7 +19190,6 @@ export const config = {
      */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
-  runtime: "edge",
 };
 
 ================
@@ -19245,11 +19612,11 @@ File: vercel.json
   "crons": [
     {
       "path": "/api/cron/check-invitations",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/cron/check-responses",
-      "schedule": "0 */12 * * *"
+      "schedule": "0 */4 * * *"
     }
   ]
 }
