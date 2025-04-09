@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
@@ -139,7 +139,7 @@ const ButtonAccordionCategories = () => {
 // This is the header that appears on all pages in the /blog folder.
 // By default it shows the logo, the links, and the CTA.
 // In the links, there's a popover with the categories.
-const HeaderBlog = () => {
+const HeaderBlogContent = () => {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -284,6 +284,15 @@ const HeaderBlog = () => {
         </div>
       </div>
     </header>
+  );
+};
+
+// Wrap the header in a Suspense boundary
+const HeaderBlog = () => {
+  return (
+    <Suspense fallback={<div className="h-[72px] bg-base-200" />}>
+      <HeaderBlogContent />
+    </Suspense>
   );
 };
 

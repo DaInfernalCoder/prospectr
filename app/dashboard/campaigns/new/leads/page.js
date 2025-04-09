@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,8 +20,10 @@ import {
   PARAMETER_TYPES,
   fetchLinkedInParameterIds,
 } from "@/app/utils/linkedin/searchParameters";
-export default function AddLeadsPage() {
+
+const AddLeadsPageContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { linkedInStatus } = useLinkedIn();
   const {
     selectedLeads,
@@ -1018,5 +1020,14 @@ export default function AddLeadsPage() {
         </div>
       </div>
     </div>
+  );
+};
+
+// Wrap the page in a Suspense boundary
+export default function AddLeadsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddLeadsPageContent />
+    </Suspense>
   );
 }

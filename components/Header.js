@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -27,7 +27,7 @@ const cta = <ButtonSignin extraStyle="btn-primary" />;
 
 // A header with a logo on the left, links in the center (like Pricing, etc...), and a CTA (like Get Started or Login) on the right.
 // The header is responsive, and on mobile, the links are hidden behind a burger button.
-const Header = () => {
+const HeaderContent = () => {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,27 +45,43 @@ const Header = () => {
         {/* Your logo/name on large screens */}
         <div className="flex lg:flex-1">
           <Link
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center gap-2 shrink-0 "
             href="/"
             title={`${config.appName} hompage`}
           >
             <Image
               src={logo}
               alt={`${config.appName} logo`}
-              className="w-7 sm:w-8"
-              placeholder="blur"
+              className="w-8"
               priority={true}
               width={32}
               height={32}
             />
-            <span className="font-extrabold text-base sm:text-lg">{config.appName}</span>
+            <span className="font-extrabold text-lg">{config.appName}</span>
           </Link>
         </div>
+
+        {/* Links on large screens */}
+        <div className="hidden lg:flex lg:gap-x-12">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-base-content/80 hover:text-base-content transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* CTA on large screens */}
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end">{cta}</div>
+
         {/* Burger button to open menu on mobile */}
         <div className="flex lg:hidden">
           <button
             type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
+            className="-m-2.5 inline-flex items-center justify-center rounded-box p-2.5"
             onClick={() => setIsOpen(true)}
           >
             <span className="sr-only">Open main menu</span>
@@ -75,7 +91,7 @@ const Header = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6 text-white"
+              className="w-6 h-6 text-base-content"
             >
               <path
                 strokeLinecap="round"
@@ -86,100 +102,81 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Your links on large screens */}
-        <div className="hidden lg:flex lg:justify-center lg:gap-12 lg:items-center">
-          {links.map((link) => (
-            <Link
-              href={link.href}
-              key={link.href}
-              className="text-white hover text-base font-medium:text-white/80 transition-colors font-medium"
-              title={link.label}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* CTA on large screens */}
-        <div className="hidden lg:flex lg:justify-end lg:flex-1">{cta}</div>
-      </nav>
-
-      {/* Mobile menu, show/hide based on menu state. */}
-      <div className={`relative z-50 ${isOpen ? "" : "hidden"}`}>
-        <div
-          className="fixed inset-0 bg-black/50 transition-opacity"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        ></div>
-        <div
-          className={`fixed inset-y-0 right-0 z-10 w-full px-6 py-4 overflow-y-auto bg-black sm:max-w-sm transform transition-transform duration-300 ease-in-out ${
-            isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          {/* Your logo/name on small screens */}
-          <div className="flex items-center justify-between">
-            <Link
-              className="flex items-center gap-2 shrink-0"
-              title={`${config.appName} hompage`}
-              href="/"
-            >
-              <Image
-                src={logo}
-                alt={`${config.appName} logo`}
-                className="w-7 sm:w-8"
-                placeholder="blur"
-                priority={true}
-                width={32}
-                height={32}
-              />
-              <span className="font-extrabold text-base sm:text-lg text-white">{config.appName}</span>
-            </Link>
-            <button
-              type="button"
-              className="-m-2.5 rounded-md p-2.5 inline-flex items-center justify-center"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="sr-only">Close menu</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6 text-white"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          {/* Your links on small screens */}
-          <div className="flow-root mt-6">
-            <div className="py-4">
-              <div className="flex flex-col gap-y-6 items-start">
-                {links.map((link) => (
-                  <Link
-                    href={link.href}
-                    key={link.href}
-                    className="text-white text-lg hover:text-white/80 transition-colors"
-                    title={link.label}
+        {/* Mobile menu, show/hide based on menu state. */}
+        {isOpen && (
+          <div className="lg:hidden">
+            <div className="fixed inset-0 z-50" />
+            <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-base-100 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-base-content/10">
+              <div className="flex items-center justify-between">
+                <Link
+                  className="flex items-center gap-2 shrink-0"
+                  href="/"
+                  title={`${config.appName} hompage`}
+                >
+                  <Image
+                    src={logo}
+                    alt={`${config.appName} logo`}
+                    className="w-8"
+                    priority={true}
+                    width={32}
+                    height={32}
+                  />
+                  <span className="font-extrabold text-lg">
+                    {config.appName}
+                  </span>
+                </Link>
+                <button
+                  type="button"
+                  className="-m-2.5 rounded-box p-2.5"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="sr-only">Close menu</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6"
                   >
-                    {link.label}
-                  </Link>
-                ))}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="mt-6 flow-root">
+                <div className="-my-6 divide-y divide-base-content/10">
+                  <div className="space-y-2 py-6">
+                    {links.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="-mx-3 block rounded-box px-3 py-2 text-base font-semibold leading-7 text-base-content hover:bg-base-200"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="py-6">{cta}</div>
+                </div>
               </div>
             </div>
-            <div className="border-t border-zinc-800 my-6"></div>
-            {/* Your CTA on small screens */}
-            <div className="flex flex-col">{cta}</div>
           </div>
-        </div>
-      </div>
+        )}
+      </nav>
     </header>
+  );
+};
+
+// Wrap the header in a Suspense boundary
+const Header = () => {
+  return (
+    <Suspense fallback={<div className="h-[72px]" />}>
+      <HeaderContent />
+    </Suspense>
   );
 };
 

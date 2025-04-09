@@ -286,6 +286,7 @@ utils/
 .gitignore
 components.json
 config.js
+DATABASE.md
 jsconfig.json
 middleware.js
 next-sitemap.config.js
@@ -2670,8 +2671,8 @@ export async function GET(request) {
       // Use current user's ID
       name: user.id,
       notify_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/unipile/webhooks`,
-      success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-      failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+      success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?linkedin_connected=true`, // Add query param
+      failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?linkedin_failed=true`, // Add query param for failure
     });
 
     return NextResponse.redirect(response.url);
@@ -4300,54 +4301,101 @@ export async function POST(req) {
 ================
 File: app/api/unipile/webhooks/route.js
 ================
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@supabase/supabase-js"; // Import the standard JS client
 import { NextResponse } from "next/server";
 
+// IMPORTANT: Use the standard Supabase client here, initialized with the Service Role Key
+// DO NOT use the server client from utils/supabase/server which relies on cookies/user context
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY, // Use the Service Role Key
+  {
+    auth: {
+      // Important: disable auto-refreshing tokens for service roles
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+);
+
 export async function POST(request) {
-  console.log("=== WEBHOOK STARTED ===");
+  console.log("=== WEBHOOK RECEIVED ==="); // Changed log message slightly
 
   try {
     const payload = await request.json();
-    console.log({ payload });
+    console.log("Webhook Payload:", JSON.stringify(payload, null, 2)); // Log the full payload
 
+    // Validate essential payload fields
     if (!payload.account_id || !payload.name) {
-      return NextResponse.json({ error: "Bad request" }, { status: 400 });
+      console.error(
+        "Webhook Error: Missing account_id or name (user_id) in payload"
+      );
+      return NextResponse.json(
+        { error: "Bad request: Missing required fields" },
+        { status: 400 }
+      );
     }
 
-    const supabase = await createClient();
+    const userId = payload.name; // Assuming payload.name contains the Supabase user_id
+    const unipileAccountId = payload.account_id;
 
-    const { data: user, error: fetchError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("user_id", payload.name)
-      .single();
+    console.log(
+      `Attempting to update profile for user_id: ${userId} with unipile_account_id: ${unipileAccountId}`
+    );
 
-    if (fetchError) {
-      console.error("User lookup failed:", fetchError);
-      throw fetchError;
-    }
-    console.log("Found user:", user);
-
-    const { data, error } = await supabase
+    // Use the supabaseAdmin client (with Service Role Key) to bypass RLS
+    const { data, error } = await supabaseAdmin
       .from("profiles")
       .update({
-        unipile_account_id: payload.account_id,
-        linkedin_status: true,
+        unipile_account_id: unipileAccountId,
+        linkedin_status: true, // Set status to true upon successful connection
+        // Optionally update a timestamp:
+        // linkedin_connected_at: new Date().toISOString(),
       })
-      .eq("user_id", payload.name)
-      .select();
+      .eq("user_id", userId) // Match the user based on the ID from the webhook payload
+      .select(); // Select the updated row to confirm the update
 
     if (error) {
-      console.error("Update error:", error);
+      console.error(`Supabase Update Error for user ${userId}:`, error);
+      // Consider specific error handling, e.g., if user_id doesn't exist
+      if (error.code === "PGRST116") {
+        // Error code for no rows found matching the filter
+        console.warn(
+          `Webhook Warning: No profile found for user_id ${userId}. Cannot update.`
+        );
+        // Return success to Unipile anyway, as the connection happened, just couldn't update profile.
+        return NextResponse.json({
+          success: true,
+          message: "Profile not found for user, but webhook acknowledged.",
+        });
+      }
+      // Throw other errors to be caught below
       throw error;
     }
-    console.log("Update successful:", data);
 
+    if (!data || data.length === 0) {
+      console.warn(
+        `Webhook Warning: Profile update for user_id ${userId} returned no data. Check if user exists.`
+      );
+      // Return success to Unipile, but log the issue.
+      return NextResponse.json({
+        success: true,
+        message: "Profile update succeeded but returned no data.",
+      });
+    }
+
+    console.log(
+      `Update successful for user ${userId}:`,
+      JSON.stringify(data, null, 2)
+    );
+
+    // Acknowledge receipt to Unipile
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Fatal error:", error);
+    console.error("Fatal Webhook Processing Error:", error);
+    // Return a generic server error response
     return NextResponse.json(
-      { error: "Webhook processing failed" },
+      { error: "Webhook processing failed internally" },
       { status: 500 }
     );
   }
@@ -5017,7 +5065,7 @@ File: app/blog/_assets/components/HeaderBlog.js
 ================
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
@@ -5156,7 +5204,7 @@ const ButtonAccordionCategories = () => {
 // This is the header that appears on all pages in the /blog folder.
 // By default it shows the logo, the links, and the CTA.
 // In the links, there's a popover with the categories.
-const HeaderBlog = () => {
+const HeaderBlogContent = () => {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -5301,6 +5349,15 @@ const HeaderBlog = () => {
         </div>
       </div>
     </header>
+  );
+};
+
+// Wrap the header in a Suspense boundary
+const HeaderBlog = () => {
+  return (
+    <Suspense fallback={<div className="h-[72px] bg-base-200" />}>
+      <HeaderBlogContent />
+    </Suspense>
   );
 };
 
@@ -6691,8 +6748,8 @@ File: app/dashboard/campaigns/new/leads/page.js
 ================
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -6711,8 +6768,10 @@ import {
   PARAMETER_TYPES,
   fetchLinkedInParameterIds,
 } from "@/app/utils/linkedin/searchParameters";
-export default function AddLeadsPage() {
+
+const AddLeadsPageContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { linkedInStatus } = useLinkedIn();
   const {
     selectedLeads,
@@ -7709,6 +7768,15 @@ export default function AddLeadsPage() {
         </div>
       </div>
     </div>
+  );
+};
+
+// Wrap the page in a Suspense boundary
+export default function AddLeadsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddLeadsPageContent />
+    </Suspense>
   );
 }
 
@@ -11290,116 +11358,117 @@ File: components/contexts/LinkedInContext.js
 ================
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  Suspense,
+} from "react";
 import { createClient } from "@/utils/supabase/client";
+import { useSearchParams, useRouter } from "next/navigation"; // Import hooks
 
 // Create the LinkedIn context
-const LinkedInContext = createContext();
+const LinkedInContext = createContext({});
 
-export function LinkedInProvider({ children }) {
+const LinkedInProviderContent = ({ children }) => {
   const [linkedInStatus, setLinkedInStatus] = useState({
-    checked: false,
     connected: false,
-    lastConnected: null,
-    lastChecked: null,
+    loading: true,
+    error: null,
   });
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Function to refresh LinkedIn status and clear cache
+  const refreshAndClearCache = async () => {
+    try {
+      setLinkedInStatus((prev) => ({ ...prev, loading: true, error: null }));
+      const response = await fetch("/api/linkedin/status");
+      if (!response.ok) {
+        throw new Error("Failed to refresh LinkedIn status");
+      }
+      const data = await response.json();
+      setLinkedInStatus({
+        connected: data.connected,
+        loading: false,
+        error: null,
+      });
+    } catch (error) {
+      setLinkedInStatus((prev) => ({
+        ...prev,
+        loading: false,
+        error: error.message,
+      }));
+    }
+  };
 
   // Check LinkedIn status when user is authenticated
   useEffect(() => {
     const checkInitialStatus = async () => {
+      // --- NEW: Check for redirect parameter ---
+      const linkedInConnected = searchParams.get("linkedin_connected");
+      const linkedInFailed = searchParams.get("linkedin_failed");
+
+      if (linkedInConnected === "true") {
+        console.log("Detected linkedin_connected=true, forcing refresh...");
+        await refreshAndClearCache();
+        // Clean the URL parameter
+        const newPath = window.location.pathname; // Keep current path
+        router.replace(newPath, { scroll: false }); // Use replace to avoid back button issues
+        return; // Don't proceed with cached check if we just refreshed
+      }
+
+      if (linkedInFailed === "true") {
+        console.log("Detected linkedin_failed=true");
+        // Optionally show an error message to the user here
+        const newPath = window.location.pathname;
+        router.replace(newPath, { scroll: false });
+        // Fall through to check status normally
+      }
+
+      // Normal status check
       try {
-        // Get current user to ensure we're authenticated
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          // Only make the initial API call once per session
-          const cachedStatus = sessionStorage.getItem('linkedInStatus');
-          
-          if (cachedStatus) {
-            // Use cached data if available
-            setLinkedInStatus(JSON.parse(cachedStatus));
-          } else {
-            // Make API call if no cached data
-            const response = await fetch('/api/auths/linkedin/status');
-            if (response.ok) {
-              const data = await response.json();
-              const newStatus = {
-                checked: true,
-                connected: data.connected,
-                lastConnected: data.last_connected,
-                lastChecked: new Date().toISOString(),
-              };
-              
-              // Update state and cache
-              setLinkedInStatus(newStatus);
-              sessionStorage.setItem('linkedInStatus', JSON.stringify(newStatus));
-            }
-          }
+        const response = await fetch("/api/linkedin/status");
+        if (!response.ok) {
+          throw new Error("Failed to check LinkedIn status");
         }
-      } catch (error) {
-        console.error("Failed to check LinkedIn status:", error);
-      }
-    };
-
-    // Check status on auth state change
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
-        checkInitialStatus();
-      } else if (event === 'SIGNED_OUT') {
-        // Clear status on sign out
-        setLinkedInStatus({
-          checked: false,
-          connected: false,
-          lastConnected: null,
-          lastChecked: null,
-        });
-        sessionStorage.removeItem('linkedInStatus');
-      }
-    });
-
-    // Initial check
-    checkInitialStatus();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Function to refresh LinkedIn status on demand
-  const refreshLinkedInStatus = async () => {
-    try {
-      setLinkedInStatus(prevState => ({ ...prevState, checked: false }));
-      
-      const response = await fetch('/api/auths/linkedin/status');
-      if (response.ok) {
         const data = await response.json();
-        const newStatus = {
-          checked: true,
+        setLinkedInStatus({
           connected: data.connected,
-          lastConnected: data.last_connected,
-          lastChecked: new Date().toISOString(),
-        };
-        
-        // Update state and cache
-        setLinkedInStatus(newStatus);
-        sessionStorage.setItem('linkedInStatus', JSON.stringify(newStatus));
-        return newStatus;
+          loading: false,
+          error: null,
+        });
+      } catch (error) {
+        setLinkedInStatus((prev) => ({
+          ...prev,
+          loading: false,
+          error: error.message,
+        }));
       }
-    } catch (error) {
-      console.error("Failed to refresh LinkedIn status:", error);
-      setLinkedInStatus(prevState => ({ ...prevState, checked: true }));
-      throw error;
-    }
-  };
+    };
+
+    checkInitialStatus();
+  }, [searchParams, router]);
 
   return (
-    <LinkedInContext.Provider value={{ 
-      linkedInStatus, 
-      refreshLinkedInStatus 
-    }}>
+    <LinkedInContext.Provider
+      value={{
+        ...linkedInStatus,
+        refreshStatus: refreshAndClearCache,
+      }}
+    >
       {children}
     </LinkedInContext.Provider>
+  );
+};
+
+export function LinkedInProvider({ children }) {
+  return (
+    <Suspense fallback={null}>
+      <LinkedInProviderContent>{children}</LinkedInProviderContent>
+    </Suspense>
   );
 }
 
@@ -14926,7 +14995,7 @@ File: components/Header.js
 ================
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -14953,7 +15022,7 @@ const cta = <ButtonSignin extraStyle="btn-primary" />;
 
 // A header with a logo on the left, links in the center (like Pricing, etc...), and a CTA (like Get Started or Login) on the right.
 // The header is responsive, and on mobile, the links are hidden behind a burger button.
-const Header = () => {
+const HeaderContent = () => {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -14971,27 +15040,43 @@ const Header = () => {
         {/* Your logo/name on large screens */}
         <div className="flex lg:flex-1">
           <Link
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center gap-2 shrink-0 "
             href="/"
             title={`${config.appName} hompage`}
           >
             <Image
               src={logo}
               alt={`${config.appName} logo`}
-              className="w-7 sm:w-8"
-              placeholder="blur"
+              className="w-8"
               priority={true}
               width={32}
               height={32}
             />
-            <span className="font-extrabold text-base sm:text-lg">{config.appName}</span>
+            <span className="font-extrabold text-lg">{config.appName}</span>
           </Link>
         </div>
+
+        {/* Links on large screens */}
+        <div className="hidden lg:flex lg:gap-x-12">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-base-content/80 hover:text-base-content transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* CTA on large screens */}
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end">{cta}</div>
+
         {/* Burger button to open menu on mobile */}
         <div className="flex lg:hidden">
           <button
             type="button"
-            className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5"
+            className="-m-2.5 inline-flex items-center justify-center rounded-box p-2.5"
             onClick={() => setIsOpen(true)}
           >
             <span className="sr-only">Open main menu</span>
@@ -15001,7 +15086,7 @@ const Header = () => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="w-6 h-6 text-white"
+              className="w-6 h-6 text-base-content"
             >
               <path
                 strokeLinecap="round"
@@ -15012,100 +15097,81 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Your links on large screens */}
-        <div className="hidden lg:flex lg:justify-center lg:gap-12 lg:items-center">
-          {links.map((link) => (
-            <Link
-              href={link.href}
-              key={link.href}
-              className="text-white hover text-base font-medium:text-white/80 transition-colors font-medium"
-              title={link.label}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* CTA on large screens */}
-        <div className="hidden lg:flex lg:justify-end lg:flex-1">{cta}</div>
-      </nav>
-
-      {/* Mobile menu, show/hide based on menu state. */}
-      <div className={`relative z-50 ${isOpen ? "" : "hidden"}`}>
-        <div
-          className="fixed inset-0 bg-black/50 transition-opacity"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        ></div>
-        <div
-          className={`fixed inset-y-0 right-0 z-10 w-full px-6 py-4 overflow-y-auto bg-black sm:max-w-sm transform transition-transform duration-300 ease-in-out ${
-            isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          {/* Your logo/name on small screens */}
-          <div className="flex items-center justify-between">
-            <Link
-              className="flex items-center gap-2 shrink-0"
-              title={`${config.appName} hompage`}
-              href="/"
-            >
-              <Image
-                src={logo}
-                alt={`${config.appName} logo`}
-                className="w-7 sm:w-8"
-                placeholder="blur"
-                priority={true}
-                width={32}
-                height={32}
-              />
-              <span className="font-extrabold text-base sm:text-lg text-white">{config.appName}</span>
-            </Link>
-            <button
-              type="button"
-              className="-m-2.5 rounded-md p-2.5 inline-flex items-center justify-center"
-              onClick={() => setIsOpen(false)}
-            >
-              <span className="sr-only">Close menu</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-6 h-6 text-white"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          {/* Your links on small screens */}
-          <div className="flow-root mt-6">
-            <div className="py-4">
-              <div className="flex flex-col gap-y-6 items-start">
-                {links.map((link) => (
-                  <Link
-                    href={link.href}
-                    key={link.href}
-                    className="text-white text-lg hover:text-white/80 transition-colors"
-                    title={link.label}
+        {/* Mobile menu, show/hide based on menu state. */}
+        {isOpen && (
+          <div className="lg:hidden">
+            <div className="fixed inset-0 z-50" />
+            <div className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-base-100 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-base-content/10">
+              <div className="flex items-center justify-between">
+                <Link
+                  className="flex items-center gap-2 shrink-0"
+                  href="/"
+                  title={`${config.appName} hompage`}
+                >
+                  <Image
+                    src={logo}
+                    alt={`${config.appName} logo`}
+                    className="w-8"
+                    priority={true}
+                    width={32}
+                    height={32}
+                  />
+                  <span className="font-extrabold text-lg">
+                    {config.appName}
+                  </span>
+                </Link>
+                <button
+                  type="button"
+                  className="-m-2.5 rounded-box p-2.5"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <span className="sr-only">Close menu</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6"
                   >
-                    {link.label}
-                  </Link>
-                ))}
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <div className="mt-6 flow-root">
+                <div className="-my-6 divide-y divide-base-content/10">
+                  <div className="space-y-2 py-6">
+                    {links.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="-mx-3 block rounded-box px-3 py-2 text-base font-semibold leading-7 text-base-content hover:bg-base-200"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="py-6">{cta}</div>
+                </div>
               </div>
             </div>
-            <div className="border-t border-zinc-800 my-6"></div>
-            {/* Your CTA on small screens */}
-            <div className="flex flex-col">{cta}</div>
           </div>
-        </div>
-      </div>
+        )}
+      </nav>
     </header>
+  );
+};
+
+// Wrap the header in a Suspense boundary
+const Header = () => {
+  return (
+    <Suspense fallback={<div className="h-[72px]" />}>
+      <HeaderContent />
+    </Suspense>
   );
 };
 
@@ -19063,6 +19129,254 @@ const config = {
 };
 
 export default config;
+
+================
+File: DATABASE.md
+================
+# Prospectr Database Documentation
+
+This document provides a comprehensive overview of the Prospectr database structure, including schemas, tables, relationships, and security policies.
+
+## Table of Contents
+1. [Schema Overview](#schema-overview)
+2. [Public Schema](#public-schema)
+3. [Auth Schema](#auth-schema)
+4. [Storage Schema](#storage-schema)
+5. [Row Level Security (RLS) Policies](#row-level-security-rls-policies)
+
+## Schema Overview
+
+The database consists of the following schemas:
+
+| Schema Name | Size | Table Count | Description |
+|------------|------|-------------|-------------|
+| auth | 1656 kB | 16 | Authentication and user management |
+| public | 312 kB | 9 | Main application data |
+| realtime | 272 kB | 9 | Real-time functionality |
+| storage | 144 kB | 5 | File storage system |
+| supabase_functions | 64 kB | 2 | Edge functions |
+| net | 48 kB | 2 | Network-related functionality |
+| cron | 152 kB | 2 | Scheduled tasks |
+| vault | 24 kB | 1 | Secure data storage |
+
+## Public Schema
+
+### Tables Overview
+
+1. **profiles** (65536 bytes, 9 rows)
+   - Primary user profile information
+   - Links to auth.users
+   - Stores LinkedIn integration and subscription data
+
+2. **invitation_jobs** (81920 bytes, 4 rows)
+   - Manages invitation campaigns
+   - Tracks job status and metrics
+
+3. **invitation_users** (32768 bytes, 6 rows)
+   - Stores invitation recipients
+   - Links to invitation_jobs
+
+4. **invitation_templates** (32768 bytes, 3 rows)
+   - Stores message templates
+   - Used for invitation campaigns
+
+5. **linkedin_status_updates** (32768 bytes, 0 rows)
+   - Tracks LinkedIn status changes
+   - Monitors integration health
+
+6. **saved_profiles** (24576 bytes, 0 rows)
+   - Stores saved LinkedIn profiles
+   - User bookmarking system
+
+7. **leads** (16384 bytes, 0 rows)
+   - Stores potential customer information
+   - Lead management system
+
+8. **linkedin_connections** (16384 bytes, 0 rows)
+   - Tracks LinkedIn connection data
+   - Network growth monitoring
+
+9. **linkedin_connection_events** (16384 bytes, 0 rows)
+   - Logs connection-related events
+   - Activity tracking
+
+### Detailed Table Structure: profiles
+
+| Column Name | Data Type | Nullable | Default | Description |
+|------------|-----------|-----------|---------|-------------|
+| id | uuid | NO | gen_random_uuid() | Primary key |
+| created_at | timestamp with time zone | NO | now() | Record creation timestamp |
+| user_id | uuid | NO | - | Foreign key to auth.users |
+| linkedin_token | text | YES | - | LinkedIn OAuth token |
+| linkedin_status | boolean | YES | false | LinkedIn connection status |
+| message_quota | integer | YES | 50 | Daily message limit |
+| stripe_customer_id | text | YES | - | Stripe customer identifier |
+| subscription_tier | enum | YES | 'FREE' | User's subscription level |
+| oauth_state | text | YES | - | OAuth state token |
+| unipile_account_id | text | YES | - | Unipile integration ID |
+| reconnect_token | text | YES | - | Token for reconnection |
+| reconnect_expires_at | date | YES | - | Token expiration date |
+| customer_id | text | YES | - | Customer identifier |
+| price_id | text | YES | - | Subscription price ID |
+| has_access | boolean | YES | false | Access control flag |
+| subscription_id | text | YES | - | Subscription identifier |
+| subscription_status | text | YES | - | Current subscription status |
+| trial_ends_at | timestamp with time zone | YES | - | Trial period end date |
+| cancel_at_period_end | timestamp with time zone | YES | - | Subscription end date |
+| subscription_created_at | timestamp with time zone | YES | - | Subscription start date |
+| last_payment_at | timestamp with time zone | YES | - | Last payment timestamp |
+| canceled_at | timestamp with time zone | YES | - | Cancellation timestamp |
+| payment_failed | boolean | YES | false | Payment status flag |
+| linkedin_connection_status | enum | YES | 'disconnected' | LinkedIn connection state |
+
+## Auth Schema
+
+The auth schema contains 16 tables managing user authentication and authorization:
+
+1. **users** (204800 bytes, 9 rows)
+   - Core user accounts
+   - Authentication data
+   - User metadata
+
+2. **audit_log_entries** (450560 bytes, 1157 rows)
+   - Security audit trail
+   - User action logging
+
+3. **refresh_tokens** (212992 bytes, 66 rows)
+   - JWT token management
+   - Session refresh handling
+
+4. **sessions** (122880 bytes, 27 rows)
+   - Active user sessions
+   - Session metadata
+
+5. **identities** (81920 bytes, 9 rows)
+   - OAuth identities
+   - External provider links
+
+Plus additional tables for MFA, SSO, and SAML functionality.
+
+## Storage Schema
+
+The storage schema manages file storage with 5 tables:
+
+1. **objects** (40960 bytes)
+   - File metadata
+   - Access controls
+
+2. **buckets** (24576 bytes)
+   - Storage containers
+   - Bucket configuration
+
+3. **migrations** (40960 bytes)
+   - Schema version control
+   - Migration history
+
+4. **s3_multipart_uploads** (24576 bytes)
+   - Large file upload management
+
+5. **s3_multipart_uploads_parts** (16384 bytes)
+   - Multipart upload chunks
+
+## Row Level Security (RLS) Policies
+
+### profiles Table Policies
+
+1. **View Own Profile**
+   ```sql
+   POLICY "Users can view their own profile."
+   ON public.profiles
+   FOR SELECT
+   TO authenticated
+   USING (auth.uid() = user_id)
+   ```
+
+2. **Update Own Profile**
+   ```sql
+   POLICY "Users can update their own profile."
+   ON public.profiles
+   FOR UPDATE
+   TO authenticated
+   USING (auth.uid() = user_id)
+   WITH CHECK (auth.uid() = user_id)
+   ```
+
+3. **Insert Profile**
+   ```sql
+   POLICY "Enable insert for users based on user_id"
+   ON public.profiles
+   FOR INSERT
+   TO public
+   WITH CHECK (auth.uid() = user_id)
+   ```
+
+### invitation_jobs Table Policies
+
+1. **View Own Jobs**
+   ```sql
+   POLICY "Users can view their own invitation jobs."
+   ON public.invitation_jobs
+   FOR SELECT
+   TO authenticated
+   USING (auth.uid() = user_id)
+   ```
+
+2. **Create Own Jobs**
+   ```sql
+   POLICY "Users can create their own invitation jobs."
+   ON public.invitation_jobs
+   FOR INSERT
+   TO authenticated
+   WITH CHECK (auth.uid() = user_id)
+   ```
+
+### saved_profiles Table Policies
+
+1. **View Own Saved Profiles**
+   ```sql
+   POLICY "Users can view their own saved profiles."
+   ON public.saved_profiles
+   FOR SELECT
+   TO authenticated
+   USING (auth.uid() = user_id)
+   ```
+
+2. **Create Saved Profiles**
+   ```sql
+   POLICY "Users can create their own saved profiles."
+   ON public.saved_profiles
+   FOR INSERT
+   TO authenticated
+   WITH CHECK (auth.uid() = user_id)
+   ```
+
+### linkedin_connections Table Policies
+
+1. **View Own Connections**
+   ```sql
+   POLICY "Users can view their own LinkedIn connections."
+   ON public.linkedin_connections
+   FOR SELECT
+   TO authenticated
+   USING (auth.uid() = user_id)
+   ```
+
+2. **Create Connections**
+   ```sql
+   POLICY "Users can create their own LinkedIn connections."
+   ON public.linkedin_connections
+   FOR INSERT
+   TO authenticated
+   WITH CHECK (auth.uid() = user_id)
+   ```
+
+## Security Notes
+
+1. All tables in the public schema implement RLS policies
+2. Authentication is required for most operations
+3. Users can only access their own data
+4. Public access is limited to specific operations (e.g., profile creation)
+5. Stripe and LinkedIn integration data is protected by user-specific policies
 
 ================
 File: jsconfig.json

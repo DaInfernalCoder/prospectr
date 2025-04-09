@@ -1,56 +1,50 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  Suspense,
+} from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useSearchParams, useRouter } from "next/navigation"; // Import hooks
 
 // Create the LinkedIn context
-const LinkedInContext = createContext();
+const LinkedInContext = createContext({});
 
-export function LinkedInProvider({ children }) {
+const LinkedInProviderContent = ({ children }) => {
   const [linkedInStatus, setLinkedInStatus] = useState({
-    checked: false,
     connected: false,
-    lastConnected: null,
-    lastChecked: null,
+    loading: true,
+    error: null,
   });
   const supabase = createClient();
-  const searchParams = useSearchParams(); // Get search params
-  const router = useRouter(); // Get router
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  // --- NEW: Function to refresh status and clear cache ---
+  // Function to refresh LinkedIn status and clear cache
   const refreshAndClearCache = async () => {
     try {
-      setLinkedInStatus((prevState) => ({ ...prevState, checked: false }));
-      sessionStorage.removeItem("linkedInStatus"); // Clear cache first
-
-      const response = await fetch("/api/auths/linkedin/status");
-      if (response.ok) {
-        const data = await response.json();
-        const newStatus = {
-          checked: true,
-          connected: data.connected,
-          lastConnected: data.last_connected,
-          lastChecked: new Date().toISOString(),
-        };
-
-        setLinkedInStatus(newStatus);
-        sessionStorage.setItem("linkedInStatus", JSON.stringify(newStatus));
-        return newStatus;
-      } else {
-        throw new Error("Failed to fetch status");
+      setLinkedInStatus((prev) => ({ ...prev, loading: true, error: null }));
+      const response = await fetch("/api/linkedin/status");
+      if (!response.ok) {
+        throw new Error("Failed to refresh LinkedIn status");
       }
+      const data = await response.json();
+      setLinkedInStatus({
+        connected: data.connected,
+        loading: false,
+        error: null,
+      });
     } catch (error) {
-      console.error("Failed to refresh LinkedIn status:", error);
-      setLinkedInStatus((prevState) => ({
-        ...prevState,
-        checked: true,
+      setLinkedInStatus((prev) => ({
+        ...prev,
+        loading: false,
         error: error.message,
-      })); // Add error state if needed
-      throw error;
+      }));
     }
   };
-  // --- END NEW FUNCTION ---
 
   // Check LinkedIn status when user is authenticated
   useEffect(() => {
@@ -75,81 +69,48 @@ export function LinkedInProvider({ children }) {
         router.replace(newPath, { scroll: false });
         // Fall through to check status normally
       }
-      // --- END NEW CHECK ---
 
+      // Normal status check
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session?.user) {
-          const cachedStatus = sessionStorage.getItem("linkedInStatus");
-
-          if (cachedStatus) {
-            setLinkedInStatus(JSON.parse(cachedStatus));
-          } else {
-            // Initial fetch if no cache
-            await refreshAndClearCache(); // Use the new function
-          }
-        } else {
-          // Clear status if no session
-          setLinkedInStatus({
-            checked: true,
-            connected: false,
-            lastConnected: null,
-            lastChecked: null,
-          });
-          sessionStorage.removeItem("linkedInStatus");
+        const response = await fetch("/api/linkedin/status");
+        if (!response.ok) {
+          throw new Error("Failed to check LinkedIn status");
         }
-      } catch (error) {
-        console.error("Failed to check initial LinkedIn status:", error);
+        const data = await response.json();
         setLinkedInStatus({
-          checked: true,
-          connected: false,
-          lastConnected: null,
-          lastChecked: null,
-          error: error.message,
+          connected: data.connected,
+          loading: false,
+          error: null,
         });
+      } catch (error) {
+        setLinkedInStatus((prev) => ({
+          ...prev,
+          loading: false,
+          error: error.message,
+        }));
       }
     };
-
-    // Check status on auth state change
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
-        checkInitialStatus();
-      } else if (event === "SIGNED_OUT") {
-        setLinkedInStatus({
-          checked: true,
-          connected: false,
-          lastConnected: null,
-          lastChecked: null,
-        });
-        sessionStorage.removeItem("linkedInStatus");
-      }
-    });
 
     checkInitialStatus();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]); // Add searchParams dependency
-
-  // Expose the refresh function
-  const refreshLinkedInStatus = refreshAndClearCache;
+  }, [searchParams, router]);
 
   return (
     <LinkedInContext.Provider
       value={{
-        linkedInStatus,
-        refreshLinkedInStatus,
+        ...linkedInStatus,
+        refreshStatus: refreshAndClearCache,
       }}
     >
       {children}
     </LinkedInContext.Provider>
+  );
+};
+
+export function LinkedInProvider({ children }) {
+  return (
+    <Suspense fallback={null}>
+      <LinkedInProviderContent>{children}</LinkedInProviderContent>
+    </Suspense>
   );
 }
 
