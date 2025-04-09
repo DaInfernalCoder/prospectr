@@ -43,7 +43,7 @@ const navigationLinks = [
 
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
-  const { linkedInStatus } = useLinkedIn();
+  const { connected = false, loading = true } = useLinkedIn() || {};
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState(null);
@@ -175,19 +175,18 @@ export default function DashboardShell({ children }) {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            {!linkedInStatus.connected &&
-              pathname !== "/dashboard/settings" && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-amber-400">
-                    LinkedIn not connected
-                  </span>
-                  <ButtonLinkedin
-                    variant="outline"
-                    text="Connect"
-                    className="btn-sm rounded-md"
-                  />
-                </div>
-              )}
+            {!loading && !connected && pathname !== "/dashboard/settings" && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-amber-400">
+                  LinkedIn not connected
+                </span>
+                <ButtonLinkedin
+                  variant="outline"
+                  text="Connect"
+                  className="btn-sm rounded-md"
+                />
+              </div>
+            )}
             {isSubscribed && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-white/70">Pro Plan</span>
@@ -202,23 +201,20 @@ export default function DashboardShell({ children }) {
             {getPageTitle()}
           </h1>
           <div className="flex items-center gap-2">
-            {!linkedInStatus.connected &&
-              pathname !== "/dashboard/settings" && (
-                <ButtonLinkedin
-                  variant="outline"
-                  text="Connect"
-                  className="btn-xs rounded-md"
-                />
-              )}
+            {!loading && !connected && pathname !== "/dashboard/settings" && (
+              <ButtonLinkedin
+                variant="outline"
+                text="Connect"
+                className="btn-xs rounded-md"
+              />
+            )}
           </div>
         </div>
 
         <div className="flex-1 overflow-auto py-4 md:py-6">
-          <AnalyticsProvider>
-            <div className="container px-4 sm:px-6 md:px-8 max-w-6xl mx-auto">
-              {children}
-            </div>
-          </AnalyticsProvider>
+          <div className="container px-4 sm:px-6 md:px-8 max-w-6xl mx-auto">
+            {children}
+          </div>
         </div>
       </main>
     </div>

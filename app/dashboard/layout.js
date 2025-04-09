@@ -3,6 +3,7 @@ import config from "@/config";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { Suspense } from "react";
 
 // This is a server-side component to ensure the user is logged in.
 // If not, it will redirect to the login page.
@@ -42,5 +43,15 @@ export default async function LayoutPrivate({ children }) {
     redirect(config.auth.loginUrl);
   }
 
-  return <DashboardShell>{children}</DashboardShell>;
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen bg-black text-white items-center justify-center">
+          <div className="loading loading-spinner loading-lg"></div>
+        </div>
+      }
+    >
+      <DashboardShell>{children}</DashboardShell>
+    </Suspense>
+  );
 }
