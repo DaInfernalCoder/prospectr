@@ -18,6 +18,11 @@ export async function GET(request, params) {
       .eq("job_id", jobId)
       .eq("user_id", user.id)
       .single();
+    console.log("Job lookup error or not found:", {
+      error,
+      jobId,
+      userId: user.id,
+    });
 
     if (error || !job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });

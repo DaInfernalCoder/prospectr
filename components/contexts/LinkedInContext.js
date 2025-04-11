@@ -40,7 +40,7 @@ const LinkedInProviderContent = ({ children }) => {
     try {
       // Update loading state within the linkedInStatus object
       setLinkedInStatus((prev) => ({ ...prev, loading: true, error: null }));
-      const response = await fetch("/api/linkedin/status");
+      const response = await fetch("/api/auths/linkedin/status");
       if (!response.ok) {
         throw new Error("Failed to refresh LinkedIn status");
       }
@@ -90,7 +90,7 @@ const LinkedInProviderContent = ({ children }) => {
       try {
         // Update loading state
         setLinkedInStatus((prev) => ({ ...prev, loading: true, error: null }));
-        const response = await fetch("/api/linkedin/status");
+        const response = await fetch("/api/auths/linkedin/status");
         if (!response.ok) {
           throw new Error("Failed to check LinkedIn status");
         }
