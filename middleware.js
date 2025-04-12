@@ -74,7 +74,7 @@ export async function middleware(request) {
       !request.nextUrl.pathname.startsWith("/reset-password") &&
       !request.nextUrl.pathname.startsWith("/api/stripe") && // Exclude Stripe API routes
       request.nextUrl.pathname !== "/" &&
-      !request.nextUrl.pathname.startsWith("/api")
+      !request.nextUrl.pathname.startsWith("/api/auths/linkedin")
     ) {
       const url = request.nextUrl.clone();
       url.pathname = "/signin";

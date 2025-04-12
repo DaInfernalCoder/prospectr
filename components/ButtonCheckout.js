@@ -41,6 +41,7 @@ const ButtonCheckout = ({
   }, []);
 
   const handlePayment = async () => {
+    console.log("handlePayment triggered. User:", user);
     try {
       setIsLoading(true);
 
