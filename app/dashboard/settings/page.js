@@ -25,9 +25,10 @@ export default function SettingsPage() {
         if (!res.ok) throw new Error("Failed to fetch user data");
         const data = await res.json();
         setUser(data.user);
-        setIsSubscribed(data.user?.isSubscribed || false);
+        setIsSubscribed(data.profile?.has_access === true);
       } catch (error) {
         console.error("Error fetching user data:", error);
+        setIsSubscribed(false);
       } finally {
         setIsLoading(false);
       }
@@ -87,35 +88,21 @@ export default function SettingsPage() {
                         : "You don't have an active subscription"}
                     </p>
                   </div>
-
-                  {isSubscribed && (
-                    <div className="mt-2">
-                      <p className="text-sm text-white">
-                        <span className="text-red-500 font-medium">
-                          {proPlan.connectionLimit}
-                        </span>{" "}
-                        connection requests per month
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex-shrink-0">
                   <div className="flex flex-col gap-2 w-full sm:w-auto">
-                    {isSubscribed && (
+                    {isSubscribed ? (
                       <button
                         onClick={handleManageBilling}
                         className="btn btn-sm h-9 min-h-0 px-4 btn-outline w-full sm:w-auto"
                       >
                         Manage Billing
                       </button>
-                    )}
-
-                    {!isSubscribed && (
-                      <ButtonCheckout
+                    ) : (
+                      <ButtonCheckout // Only shown if isSubscribed is false
                         priceId={proPlan?.priceId}
-                        productLink={proPlan?.link}
-                        className="btn btn-sm h-9 min-h-0 px-4 bg-gradient-to-r from-red-500 to-red-700 border-0 text-white hover:from-red-600 hover:to-red-800 w-full sm:w-auto"
+                        className="btn btn-sm h-9 min-h-0 px-4 bg-gradient-to-r from-red-500 to-red-700 ..."
                       >
                         <span className="flex items-center justify-center gap-1">
                           <Zap className="w-3 h-3" />

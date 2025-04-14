@@ -2,9 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { createCheckoutSession } from "@/utils/stripe-client";
-import config from "@/config";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 // This component is used to create Stripe Checkout Sessions
 // If user is not logged in, it redirects to signup page first
@@ -22,26 +19,9 @@ const ButtonCheckout = ({
   showIcon = false, // Changed default to false to remove the lightning bolt
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await fetch("/api/users");
-        if (!res.ok) return;
-        const data = await res.json();
-        setUser(data.user);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-    getUser();
-  }, []);
 
   const handlePayment = async () => {
-    console.log("handlePayment triggered. User:", user);
     try {
       setIsLoading(true);
 
@@ -52,18 +32,6 @@ const ButtonCheckout = ({
       }
 
       // If user is not logged in, save plan info and redirect to signup
-      if (!user) {
-        // Save selected plan to localStorage
-        localStorage.setItem("selectedPlanId", priceId);
-
-        // Determine the current URL to return to after signup
-        const returnUrl = window.location.pathname + window.location.search;
-        localStorage.setItem("checkoutReturnUrl", returnUrl);
-
-        // Redirect to signup page
-        router.push("/signup?checkout=pending");
-        return;
-      }
 
       // Otherwise create a checkout session
       const result = await createCheckoutSession({
@@ -72,16 +40,17 @@ const ButtonCheckout = ({
         cancelUrl: `${window.location.origin}${window.location.pathname}?checkout=cancel`,
       });
 
-      // Check if we need to redirect to signup
-      if (result.redirectToSignup) {
-        router.push(result.url);
-        return;
-      }
-
       // Otherwise redirect to Stripe checkout
-      window.location.href = result.url;
+      if (result.url) {
+        window.location.href = result.url;
+      } else {
+        // Handle unexpected response from createCheckoutSession if necessary
+        console.error("Checkout session creation failed, no URL returned.");
+        // Optionally show a toast error here
+      }
     } catch (error) {
-      console.error("Error creating checkout session:", error);
+      console.error("Error during handlePayment:", error);
+      // Optionally show a toast error here
     } finally {
       setIsLoading(false);
     }
