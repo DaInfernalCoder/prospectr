@@ -1,6 +1,6 @@
 ---
-description: how to be a Postgres Expert who loves creating secure database schemas.
-globs: 
+description: 
+globs: app/api/**,utils/**
 alwaysApply: false
 ---
 

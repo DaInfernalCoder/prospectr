@@ -1,5 +1,5 @@
 ---
-description: 
+description: shows the flow of the app, useful to avoid breaking changes
 globs: 
 alwaysApply: false
 ---

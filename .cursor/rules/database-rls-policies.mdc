@@ -1,6 +1,6 @@
 ---
-description: how to generate a policy with the constraints given by the user.
-globs: 
+description: 
+globs: app/api/**,utils/**
 alwaysApply: false
 ---
 

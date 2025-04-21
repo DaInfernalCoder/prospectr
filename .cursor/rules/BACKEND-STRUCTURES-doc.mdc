@@ -1,5 +1,5 @@
 ---
-description: 
+description: shows backend structure of the app, useful for editing routes
 globs: 
 alwaysApply: false
 ---

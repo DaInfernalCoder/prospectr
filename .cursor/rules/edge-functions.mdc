@@ -1,6 +1,6 @@
 ---
-description: how to Generate **high-quality Supabase Edge Functions** that adhere to the following best practices:
-globs: 
+description: 
+globs: app/api/**,utils/**
 alwaysApply: false
 ---
 # Writing Supabase Edge Functions

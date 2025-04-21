@@ -424,8 +424,8 @@ const AddLeadsPageContent = () => {
                     distance === "FIRST_DEGREE"
                       ? "1st connections"
                       : distance === "SECOND_DEGREE"
-                      ? "2nd connections"
-                      : "3rd+ connections";
+                        ? "2nd connections"
+                        : "3rd+ connections";
                   return (
                     <div key={distance} className="flex items-center">
                       <input
@@ -686,8 +686,8 @@ const AddLeadsPageContent = () => {
             {typeof error === "string"
               ? error
               : error instanceof Error
-              ? error.message
-              : "An error occurred during search"}
+                ? error.message
+                : "An error occurred during search"}
           </div>
         )}
 
@@ -779,11 +779,11 @@ const AddLeadsPageContent = () => {
                               {profile.network_distance === "FIRST_DEGREE"
                                 ? "1st"
                                 : profile.network_distance === "SECOND_DEGREE"
-                                ? "2nd"
-                                : profile.network_distance ===
-                                  "THIRD_DEGREE_AND_BEYOND"
-                                ? "3rd+"
-                                : profile.network_distance}
+                                  ? "2nd"
+                                  : profile.network_distance ===
+                                      "THIRD_DEGREE_AND_BEYOND"
+                                    ? "3rd+"
+                                    : profile.network_distance}
                             </div>
                             {profile.shared_connections_count > 0 && (
                               <span className="text-xs text-[#A3A3A3] mt-1">

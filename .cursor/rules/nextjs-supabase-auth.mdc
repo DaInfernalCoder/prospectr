@@ -1,6 +1,6 @@
 ---
-description: how to implement supabase auth
-globs: 
+description: 
+globs: app/auth/**,utils/**
 alwaysApply: false
 ---
 
