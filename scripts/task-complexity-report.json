@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "generatedAt": "2025-04-21T17:36:40.499Z",
+    "tasksAnalyzed": 10,
+    "thresholdScore": 5,
+    "projectName": "Prospectr",
+    "usedResearch": true
+  },
+  "complexityAnalysis": [
+    {
+      "taskId": 1,
+      "taskTitle": "Environment Setup and Project Configuration",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down the environment setup into subtasks for cloning the boilerplate, installing dependencies, configuring environment variables, setting up the database schema and extensions, configuring security policies, and initializing version control.",
+      "reasoning": "This task involves multiple distinct activities (dependency management, environment configuration, database schema, security, and version control). Each step is foundational and requires careful sequencing and validation, making the overall complexity above average but not extreme."
+    },
+    {
+      "taskId": 2,
+      "taskTitle": "Authentication System Implementation",
+      "complexityScore": 8,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "List subtasks for building authentication pages, integrating Supabase Auth, setting up protected routes, managing user sessions, handling password resets, creating user profiles, and implementing a landing page.",
+      "reasoning": "Authentication is a critical and security-sensitive area, requiring integration with external services, UI/UX considerations, and robust session management. The need for secure flows and error handling increases complexity."
+    },
+    {
+      "taskId": 3,
+      "taskTitle": "Dashboard Layout and Navigation",
+      "complexityScore": 6,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Identify subtasks for creating dashboard layouts, sidebar navigation, homepage, page templates, theming, responsive design, and notification integration.",
+      "reasoning": "While primarily UI-focused, this task requires thoughtful component structure, responsive design, and integration of third-party libraries. Complexity is moderate due to the breadth of UI elements and state management."
+    },
+    {
+      "taskId": 4,
+      "taskTitle": "LinkedIn OAuth Integration",
+      "complexityScore": 8,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Detail subtasks for implementing OAuth endpoints, integrating Unipile API, securely storing tokens, handling token refresh, building UI for connection management, sending reconnection emails, and robust error handling.",
+      "reasoning": "OAuth flows are inherently complex due to security, third-party integration, token management, and error handling. The need to coordinate backend, frontend, and email flows adds to the challenge."
+    },
+    {
+      "taskId": 5,
+      "taskTitle": "LinkedIn Profile Search Implementation",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "Break down into subtasks for building the search UI, implementing filters, integrating the Unipile API, managing results and pagination, handling selection state, and ensuring robust error/loading handling.",
+      "reasoning": "This task combines UI, API integration, state management, and user experience considerations. The need for efficient data handling and error management increases complexity."
+    },
+    {
+      "taskId": 6,
+      "taskTitle": "Message Editor with Templates",
+      "complexityScore": 7,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "List subtasks for building the message editor UI, implementing variable insertion, managing templates, enforcing character limits, adding follow-up toggles, parsing variables, and previewing messages.",
+      "reasoning": "Rich text editing, template management, and variable parsing require careful UI and logic design. Ensuring usability and correctness adds to the complexity."
+    },
+    {
+      "taskId": 7,
+      "taskTitle": "Connection Request Automation",
+      "complexityScore": 9,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Detail subtasks for enhancing API endpoints, implementing a queue system, handling rate limits, tracking statuses, managing retries, building campaign review UI, and robust error handling.",
+      "reasoning": "Automating connection requests involves asynchronous processing, rate limiting, error handling, and integration with multiple APIs and database tables. The orchestration and reliability requirements make this highly complex."
+    },
+    {
+      "taskId": 8,
+      "taskTitle": "Campaign Management System",
+      "complexityScore": 8,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Break down into subtasks for building campaign list/detail pages, implementing CRUD operations, analytics, cron job setup, filtering/sorting, and integrating with backend APIs.",
+      "reasoning": "Campaign management requires complex UI, analytics, background job scheduling, and integration with other modules. The need for real-time updates and data consistency increases complexity."
+    },
+    {
+      "taskId": 9,
+      "taskTitle": "Subscription Management with Stripe",
+      "complexityScore": 8,
+      "recommendedSubtasks": 6,
+      "expansionPrompt": "List subtasks for building subscription UI, integrating Stripe checkout and customer portal, handling webhooks, enforcing feature limits, and managing upgrade prompts.",
+      "reasoning": "Payment integration is complex due to security, compliance, webhook handling, and the need to enforce feature restrictions based on subscription status."
+    },
+    {
+      "taskId": 10,
+      "taskTitle": "Deployment and Monitoring Setup",
+      "complexityScore": 7,
+      "recommendedSubtasks": 7,
+      "expansionPrompt": "Identify subtasks for configuring deployment, setting up analytics and monitoring, implementing error tracking, performing end-to-end testing, updating documentation, and executing production deployment.",
+      "reasoning": "Deployment and monitoring involve multiple environments, configuration management, testing, and documentation. Ensuring reliability and observability across the stack adds moderate complexity."
+    }
+  ]
+}

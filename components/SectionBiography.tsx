@@ -74,7 +74,7 @@ function SectionBiography() {
           </div>
 
           {/* Video Section */}
-          <div className="w-full space-y-6">
+          {/* <div className="w-full space-y-6">
             <p className="text-lg font-medium text-center text-gray-300">
               See how Prospectr can transform your LinkedIn outreach 👇
             </p>
@@ -103,7 +103,7 @@ function SectionBiography() {
                 priority
               />
             </motion.div>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

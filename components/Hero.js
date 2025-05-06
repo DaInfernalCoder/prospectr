@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
 import Image from "next/image";
 import { RainbowButton } from "./ui/rainbow-button";
 import { Splite } from "./ui/splite";
 import { Play } from "lucide-react";
-import { TypeAnimation } from 'react-type-animation';
+import { TypeAnimation } from "react-type-animation";
 import TestimonialsAvatars from "./TestimonialsAvatars";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const Hero = () => {
   const router = useRouter();
 
   const handleStartFinding = () => {
-    router.push('/dashboard');
+    router.push("/dashboard");
   };
 
   return (
@@ -21,7 +21,7 @@ const Hero = () => {
         <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-red-500/10 rounded-full blur-3xl transform -translate-x-1/4 -translate-y-1/4"></div>
         <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-red-500/5 rounded-full blur-3xl transform translate-x-1/4 translate-y-1/4"></div>
       </div>
-      
+
       <div className="max-w-[1300px] mx-auto px-4 sm:px-6 w-full relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Left content */}
@@ -33,64 +33,70 @@ const Hero = () => {
               </span>
               B2B SaaS Founders: Stop Wasting Time
             </div>
-            
+
             <h1 className="font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tight">
-              <span className="text-white">10x Your LinkedIn</span>{' '}
+              <span className="text-white">10x Your LinkedIn</span>{" "}
               <span className="inline-block min-w-[180px] sm:min-w-[220px] md:min-w-[280px] lg:min-w-[320px]">
                 <TypeAnimation
                   sequence={[
-                    'Outreach',
+                    "Outreach",
                     2000,
-                    'Connections',
+                    "Connections",
                     2000,
-                    'Sales Leads', 
-                    2000, 
-                    'Revenue',
+                    "Sales Leads",
+                    2000,
+                    "Revenue",
                     2000,
                   ]}
                   wrapper="span"
                   speed={40}
                   repeat={Infinity}
                   className="inline-block text-transparent bg-clip-text bg-gradient bg-[length:300%_auto] animate-rainbow"
-                  style={{ 
-                    display: 'inline-block',
-                    whiteSpace: 'nowrap',
+                  style={{
+                    display: "inline-block",
+                    whiteSpace: "nowrap",
                   }}
                 />
               </span>
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed max-w-2xl">
-              <span className="font-semibold text-white">Prospectr</span> is your AI-powered LinkedIn assistant that finds targeted leads, 
-              sends personalized messages, and converts connections into customers—without the 
+              <span className="font-semibold text-white">Prospectr</span> is
+              your AI-powered LinkedIn assistant that finds targeted leads,
+              sends personalized messages, and converts connections into
+              customers—without the
               <span className="line-through px-1">hours of manual work</span>.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 items-center">
-              <RainbowButton 
+              <RainbowButton
                 onClick={handleStartFinding}
                 className="text-base sm:text-lg font-semibold px-8 sm:px-10 py-4 sm:py-5 w-full sm:w-auto hover:scale-105 transition-transform ease-in-out shadow-lg shadow-red-500/20"
               >
                 Start Finding Leads
               </RainbowButton>
-              
-              <a 
+
+              {/* <a 
                 href="#features" 
                 className="text-base sm:text-lg font-medium text-white/80 hover:text-white flex items-center gap-2 transition-colors"
               >
                 <Play className="w-4 h-4" />
                 See how it works
-              </a>
+              </a> */}
             </div>
 
             <div className="mt-4 sm:mt-6">
               <div className="flex items-center gap-3">
-                <div className="flex -space-x-2">
+                {/* <div className="flex -space-x-2">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-700 border-2 border-black"></div>
+                    <div
+                      key={i}
+                      className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-red-700 border-2 border-black"
+                    ></div>
                   ))}
-                </div>
+                </div> */}
                 <p className="text-sm text-white/70">
-                  <span className="font-semibold text-white">120+</span> founders growing their businesses with Prospectr
+                  <span className="font-semibold text-white">120+</span>{" "}
+                  founders growing their businesses with Prospectr
                 </p>
               </div>
             </div>
@@ -99,7 +105,10 @@ const Hero = () => {
           {/* Right content */}
           <div className="w-full lg:w-1/2 h-[350px] sm:h-[450px] md:h-[500px] lg:h-[650px] relative mt-2 sm:mt-4 lg:mt-8">
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-red-500/5 to-transparent"></div>
-            <Splite scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode" className="w-full h-full scale-110 sm:scale-125 lg:scale-140" />
+            <Splite
+              scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              className="w-full h-full scale-110 sm:scale-125 lg:scale-140"
+            />
           </div>
         </div>
       </div>

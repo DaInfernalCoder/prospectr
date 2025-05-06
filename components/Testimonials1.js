@@ -14,7 +14,7 @@ const Testimonial = () => {
         <div className="absolute bottom-1/4 left-1/3 w-1/4 h-1/4 bg-purple-500/10 rounded-full blur-3xl"></div>
         <div className="opacity-30 absolute inset-0 bg-[linear-gradient(to_right,#080808_1px,transparent_1px),linear-gradient(to_bottom,#080808_1px,transparent_1px)] bg-[size:38px_38px]"></div>
       </div>
-      
+
       <div className="mx-auto max-w-2xl lg:max-w-5xl relative z-10">
         {/* Section Badge */}
         <div className="flex justify-center mb-16">
@@ -23,14 +23,16 @@ const Testimonial = () => {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
             </span>
-            <span className="text-lg font-bold tracking-wider uppercase">Featured Testimonial</span>
+            <span className="text-lg font-bold tracking-wider uppercase">
+              Featured Testimonial
+            </span>
           </div>
         </div>
-        
+
         <figure className="mt-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="relative">
-              {/* Glow effect behind image */}
+            {/* <div className="relative">
+              Glow effect behind image
               <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 via-pink-500/30 to-purple-500/30 rounded-xl blur-md"></div>
               
               <div className="relative rounded-xl border border-base-content/5 bg-base-content/5 p-1.5 sm:-rotate-1 transform hover:rotate-0 transition-transform duration-300">
@@ -43,17 +45,31 @@ const Testimonial = () => {
                   alt="A testimonial from David Thompson, VP of Sales at TechGrowth"
                 />
               </div>
-            </div>
+            </div> */}
 
-            <div className="bg-gradient-to-br from-red-900/10 to-purple-900/10 rounded-xl p-8 border border-red-500/10 shadow-xl">
+            <div className="bg-gradient-to-br from-red-900/10 to-purple-900/10 rounded-xl p-8 border border-red-500/10 shadow-xl w-full">
               <blockquote className="text-xl font-medium leading-8 text-white sm:text-2xl sm:leading-10 relative">
-                <span className="absolute -top-6 -left-2 text-6xl text-red-500/20">"</span>
-                I was skeptical at first about automation tools for LinkedIn, but Prospectr is different. It&apos;s not just about mass messaging - it&apos;s about <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-pink-500 to-purple-400 font-bold">smart targeting and personalized outreach at scale</span>. Our sales team has seen a <span className="font-bold text-white">230% increase in qualified leads</span> since implementing Prospectr. The ROI has been exceptional.
-                <span className="absolute -bottom-6 -right-2 text-6xl text-purple-500/20">"</span>
+                <span className="absolute -top-6 -left-2 text-6xl text-red-500/20">
+                  "
+                </span>
+                I was skeptical at first about automation tools for LinkedIn,
+                but Prospectr is different. It&apos;s not just about mass
+                messaging - it&apos;s about{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-pink-500 to-purple-400 font-bold">
+                  smart targeting and personalized outreach at scale
+                </span>
+                . Our sales team has seen a{" "}
+                <span className="font-bold text-white">
+                  230% increase in qualified leads
+                </span>{" "}
+                since implementing Prospectr. The ROI has been exceptional.
+                <span className="absolute -bottom-6 -right-2 text-6xl text-purple-500/20">
+                  "
+                </span>
               </blockquote>
-              
+
               <div className="h-px w-full bg-gradient-to-r from-red-500/30 via-pink-500/30 to-purple-500/30 my-8"></div>
-              
+
               <figcaption className="flex items-center justify-start gap-5">
                 <div className="text-base">
                   <div className="font-semibold text-white mb-0.5">
@@ -66,8 +82,8 @@ const Testimonial = () => {
 
                 {/* Using the CompanyLogo component */}
                 <div className="bg-white/5 p-2 rounded-lg">
-                  <CompanyLogo 
-                    name="" 
+                  <CompanyLogo
+                    name=""
                     width={100}
                     height={40}
                     className="w-24"
