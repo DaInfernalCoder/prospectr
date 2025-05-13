@@ -10,10 +10,6 @@
     {
       "path": "/api/cron/check-invitations",
       "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/check-responses",
-      "schedule": "0 0 * * *"
     }
   ]
 }
