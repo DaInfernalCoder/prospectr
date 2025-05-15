@@ -10,7 +10,10 @@ const Footer = () => {
   return (
     <footer className="bg-black border-t border-zinc-800">
       <div className="max-w-7xl mx-auto px-8 py-24">
-        <div className=" flex lg:items-start md:flex-row md:flex-nowrap flex-wrap flex-col">
+        <div
+          clas
+          sName=" flex lg:items-start md:flex-row md:flex-nowrap flex-wrap flex-col"
+        >
           <div className="w-64 flex-shrink-0 md:mx-0 mx-auto text-center md:text-left">
             <Link
               href="/#"
@@ -54,13 +57,23 @@ const Footer = () => {
                     Support
                   </a>
                 )}
-                <Link href="/#pricing" className="text-white/70 hover:text-white transition-colors">
+                <Link
+                  href="/#pricing"
+                  className="text-white/70 hover:text-white transition-colors"
+                >
                   Pricing
                 </Link>
-                <Link href="/blog" className="text-white/70 hover:text-white transition-colors">
+                <Link
+                  href="/blog"
+                  className="text-white/70 hover:text-white transition-colors"
+                >
                   Blog
                 </Link>
-                <a href="/#" target="_blank" className="text-white/70 hover:text-white transition-colors">
+                <a
+                  href="/#"
+                  target="_blank"
+                  className="text-white/70 hover:text-white transition-colors"
+                >
                   Affiliates
                 </a>
               </div>
@@ -72,10 +85,16 @@ const Footer = () => {
               </div>
 
               <div className="flex flex-col justify-center items-center md:items-start gap-2 mb-10 text-sm">
-                <Link href="/tos" className="text-white/70 hover:text-white transition-colors">
+                <Link
+                  href="/tos"
+                  className="text-white/70 hover:text-white transition-colors"
+                >
                   Terms of services
                 </Link>
-                <Link href="/privacy-policy" className="text-white/70 hover:text-white transition-colors">
+                <Link
+                  href="/privacy-policy"
+                  className="text-white/70 hover:text-white transition-colors"
+                >
                   Privacy policy
                 </Link>
               </div>
