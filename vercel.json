@@ -8,11 +8,7 @@
   },
   "crons": [
     {
-      "path": "/api/cron/check-invitations",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/check-responses",
+      "path": "/api/cron/check-linkedin-activity",
       "schedule": "0 0 * * *"
     }
   ]
