@@ -1,12 +1,71 @@
 profiles (
-  id UUID   
-  user_id UUID REFERENCES auth.users NOT NULL, -- Supabase Auth user ID
-  linkedin_token TEXT, -- Encrypted LinkedIn token (using pgcrypto)
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  user_id UUID NOT NULL REFERENCES auth.users(id), -- Supabase Auth user ID
+  linkedin_token TEXT, -- Legacy LinkedIn token field
   linkedin_status BOOLEAN DEFAULT FALSE, -- Is LinkedIn connected?
   message_quota INT DEFAULT 50, -- Daily message limit
   stripe_customer_id TEXT, -- Stripe customer ID
-  subscription_tier TEXT DEFAULT 'free', -- free/pro/premium
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  subscription_tier TEXT DEFAULT 'FREE', -- FREE/PRO/PREMIUM
+  oauth_state TEXT, -- OAuth state token
+  unipile_account_id TEXT, -- Unipile integration ID (primary field for LinkedIn connection)
+  reconnect_token TEXT, -- Token for reconnection
+  reconnect_expires_at DATE, -- Token expiration date
+  customer_id TEXT, -- Customer identifier
+  price_id TEXT, -- Subscription price ID
+  has_access BOOLEAN DEFAULT FALSE, -- Access control flag
+  subscription_id TEXT, -- Subscription identifier
+  subscription_status TEXT, -- Current subscription status
+  trial_ends_at TIMESTAMPTZ, -- Trial period end date
+  cancel_at_period_end TIMESTAMPTZ, -- Subscription end date
+  subscription_created_at TIMESTAMPTZ, -- Subscription start date
+  last_payment_at TIMESTAMPTZ, -- Last payment timestamp
+  canceled_at TIMESTAMPTZ, -- Cancellation timestamp
+  payment_failed BOOLEAN DEFAULT FALSE, -- Payment status flag
+  linkedin_connection_status TEXT DEFAULT 'disconnected' -- LinkedIn connection state
+);
+
+invitation_jobs (
+  job_id TEXT PRIMARY KEY DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  user_id UUID REFERENCES auth.users(id),
+  status TEXT NOT NULL,
+  total_invitations INTEGER,
+  invitations_sent INTEGER DEFAULT 0,
+  invitations_failed INTEGER DEFAULT 0,
+  started_at TIMESTAMPTZ,
+  last_updated TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  error_message TEXT,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  template_id UUID REFERENCES invitation_templates(id),
+  message TEXT,
+  name TEXT
+);
+
+invitation_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  linkedin_user_id TEXT,
+  linkedin_profile_url TEXT,
+  invitation_status TEXT DEFAULT 'pending',
+  invitation_sent_at TIMESTAMPTZ DEFAULT now(),
+  invitation_accepted_at TIMESTAMPTZ,
+  follow_up_sent_at TIMESTAMPTZ,
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  job_id TEXT NOT NULL REFERENCES invitation_jobs(job_id),
+  has_responded BOOLEAN DEFAULT FALSE,
+  first_response_at TIMESTAMPTZ,
+  name TEXT
+);
+
+invitation_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  user_id UUID REFERENCES auth.users(id),
+  name TEXT NOT NULL,
+  follow_up_message TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT now()
 );
 
 linkedin_connections (
@@ -17,4 +76,30 @@ linkedin_connections (
   headline TEXT,
   connected_at TIMESTAMPTZ, -- When the connection was made
   status TEXT -- pending/accepted/ignored
+);
+
+saved_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  profile_data JSONB NOT NULL,
+  tags TEXT[],
+  notes TEXT,
+  profile_id TEXT NOT NULL,
+  user_id UUID REFERENCES auth.users(id)
+);
+
+linkedin_status_updates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  connection_id UUID NOT NULL,
+  status TEXT NOT NULL,
+  account_id TEXT,
+  timestamp TIMESTAMPTZ DEFAULT now(),
+  metadata JSONB DEFAULT '{}'
+);
+
+leads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );

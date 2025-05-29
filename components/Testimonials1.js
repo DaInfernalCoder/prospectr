@@ -72,12 +72,8 @@ const Testimonial = () => {
 
               <figcaption className="flex items-center justify-start gap-5">
                 <div className="text-base">
-                  <div className="font-semibold text-white mb-0.5">
-                    David Thompson
-                  </div>
-                  <div className="text-gray-300">
-                    VP of Sales, TechGrowth Inc.
-                  </div>
+                  <div className="font-semibold text-white mb-0.5">Sunny</div>
+                  <div className="text-gray-300">CEO, Digital SEO Bull.</div>
                 </div>
 
                 {/* Using the CompanyLogo component */}

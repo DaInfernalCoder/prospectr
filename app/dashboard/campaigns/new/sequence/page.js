@@ -22,29 +22,33 @@ export default function SequencePage() {
 
   // Check if we have leads
   useEffect(() => {
-    if (selectedLeads.length === 0) {
-      router.push("/dashboard/campaigns/new/leads");
-    }
+    // TEMPORARILY REMOVED VALIDATION - Allow proceeding without leads
+    // if (selectedLeads.length === 0) {
+    //   router.push("/dashboard/campaigns/new/leads");
+    // }
   }, [selectedLeads, router]);
 
   // Validate form
   const validateForm = () => {
-    const newErrors = {};
+    // TEMPORARILY REMOVED VALIDATION - Always return true
+    return true;
 
-    // Connection message is now optional, but still has a character limit
-    if (connectionMessage && connectionMessage.length > 300) {
-      newErrors.connectionMessage =
-        "Connection message must be less than 300 characters";
-    }
+    // const newErrors = {};
 
-    // Follow-up message is still optional with a character limit
-    if (followUpMessage && followUpMessage.length > 1000) {
-      newErrors.followUpMessage =
-        "Follow-up message must be less than 1000 characters";
-    }
+    // // Connection message is now optional, but still has a character limit
+    // if (connectionMessage && connectionMessage.length > 300) {
+    //   newErrors.connectionMessage =
+    //     "Connection message must be less than 300 characters";
+    // }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // // Follow-up message is still optional with a character limit
+    // if (followUpMessage && followUpMessage.length > 1000) {
+    //   newErrors.followUpMessage =
+    //     "Follow-up message must be less than 1000 characters";
+    // }
+
+    // setErrors(newErrors);
+    // return Object.keys(newErrors).length === 0;
   };
 
   // Go to previous step

@@ -32,9 +32,10 @@ export default function ReviewPage() {
 
   // Check if we have leads (but messages are now optional)
   useEffect(() => {
-    if (selectedLeads.length === 0) {
-      router.push("/dashboard/campaigns/new/leads");
-    }
+    // TEMPORARILY REMOVED VALIDATION - Allow proceeding without leads
+    // if (selectedLeads.length === 0) {
+    //   router.push("/dashboard/campaigns/new/leads");
+    // }
   }, [selectedLeads, router]);
 
   // Send connection requests mutation

@@ -224,17 +224,17 @@ export default function SettingsPage() {
             {linkedInStatus.connected && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-[#1A1A1A]">
                 <div>
-                  <p className="text-white">Link Additional Account</p>
+                  <p className="text-white">Replace LinkedIn Account</p>
                   <p className="text-sm text-[#A1A1AA]">
-                    Connect a new LinkedIn account to expand your outreach
-                    capabilities
+                    Connect a different LinkedIn account to replace your current
+                    connection
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() =>
                       (window.location.href =
-                        "/api/auths/linkedin/connect?link_new=true&redirect_to=settings")
+                        "/api/auths/linkedin/link-new?redirect_to=settings")
                     }
                     className="btn btn-sm h-9 min-h-0 px-4 btn-outline bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#C9E5FF] border-[#2A2A2A]"
                   >
@@ -244,9 +244,9 @@ export default function SettingsPage() {
                       fill="currentColor"
                       className="w-4 h-4 mr-2"
                     >
-                      <path d="M12 4.5a.75.75 0 01.75.75v6h6a.75.75 0 010 1.5h-6v6a.75.75 0 01-1.5 0v-6h-6a.75.75 0 010-1.5h6v-6A.75.75 0 0112 4.5z" />
+                      <path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                     </svg>
-                    Link New Account
+                    Replace Account
                   </button>
                 </div>
               </div>

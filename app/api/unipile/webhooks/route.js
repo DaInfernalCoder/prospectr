@@ -16,11 +16,11 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(request) {
-  console.log("=== WEBHOOK RECEIVED ==="); // Changed log message slightly
+  console.log("=== WEBHOOK RECEIVED ===");
 
   try {
     const payload = await request.json();
-    console.log("Webhook Payload:", JSON.stringify(payload, null, 2)); // Log the full payload
+    console.log("Webhook Payload:", JSON.stringify(payload, null, 2));
 
     // Validate essential payload fields
     if (!payload.account_id || !payload.name) {
@@ -33,11 +33,11 @@ export async function POST(request) {
       );
     }
 
-    const userId = payload.name; // Assuming payload.name contains the Supabase user_id
     const unipileAccountId = payload.account_id;
+    const userId = payload.name; // This contains the user_id
 
     console.log(
-      `Attempting to update profile for user_id: ${userId} with unipile_account_id: ${unipileAccountId}`
+      `Processing LinkedIn connection for user_id: ${userId}, unipile_account_id: ${unipileAccountId}`
     );
 
     // Use the supabaseAdmin client (with Service Role Key) to bypass RLS
@@ -46,6 +46,7 @@ export async function POST(request) {
       .update({
         unipile_account_id: unipileAccountId,
         linkedin_status: true, // Set status to true upon successful connection
+        linkedin_connection_status: "connected",
         // Optionally update a timestamp:
         // linkedin_connected_at: new Date().toISOString(),
       })

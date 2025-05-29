@@ -137,6 +137,37 @@ export async function POST(request) {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error("Unipile API error:", errorData);
+
+      // If account not found, reset the LinkedIn connection in database
+      if (
+        response.status === 404 ||
+        (errorData.detail && errorData.detail.includes("Account not found"))
+      ) {
+        console.log(
+          "Account not found, resetting LinkedIn connection for user:",
+          user.id
+        );
+
+        // Reset the LinkedIn connection
+        await supabase
+          .from("profiles")
+          .update({
+            linkedin_status: false,
+            unipile_account_id: null,
+            linkedin_connection_status: "disconnected",
+          })
+          .eq("user_id", user.id);
+
+        return NextResponse.json(
+          {
+            error:
+              "LinkedIn account disconnected. Please reconnect your LinkedIn account in Settings.",
+            needsReconnection: true,
+          },
+          { status: 400 }
+        );
+      }
+
       return NextResponse.json(
         {
           error:
