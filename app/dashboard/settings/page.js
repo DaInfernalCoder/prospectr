@@ -219,6 +219,39 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
+
+            {/* Link New Account Section */}
+            {linkedInStatus.connected && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-[#1A1A1A]">
+                <div>
+                  <p className="text-white">Link Additional Account</p>
+                  <p className="text-sm text-[#A1A1AA]">
+                    Connect a new LinkedIn account to expand your outreach
+                    capabilities
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() =>
+                      (window.location.href =
+                        "/api/auths/linkedin/connect?link_new=true&redirect_to=settings")
+                    }
+                    className="btn btn-sm h-9 min-h-0 px-4 btn-outline bg-[#1A1A1A] hover:bg-[#2A2A2A] text-[#C9E5FF] border-[#2A2A2A]"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="w-4 h-4 mr-2"
+                    >
+                      <path d="M12 4.5a.75.75 0 01.75.75v6h6a.75.75 0 010 1.5h-6v6a.75.75 0 01-1.5 0v-6h-6a.75.75 0 010-1.5h6v-6A.75.75 0 0112 4.5z" />
+                    </svg>
+                    Link New Account
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="pt-4 border-t border-[#1A1A1A]">
               <p className="text-sm text-[#A1A1AA]">
                 Connecting your LinkedIn account allows Prospectr to send

@@ -36,10 +36,24 @@ export async function GET(request) {
         { status: 402 }
       );
     }
-    if (!user)
-      return NextResponse.json({ status: 404, message: "There is no user" });
+
+    // Check if this is for linking a new account
+    const { searchParams } = new URL(request.url);
+    const isLinkingNew = searchParams.get("link_new") === "true";
+    const redirectTo = searchParams.get("redirect_to") || "dashboard";
 
     const client = new UnipileClient(BASE_URL, ACCESS_TOKEN);
+
+    // Determine redirect URLs based on context
+    const baseRedirectUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const successRedirect =
+      redirectTo === "settings"
+        ? `${baseRedirectUrl}/dashboard/settings?linkedin_connected=true`
+        : `${baseRedirectUrl}/dashboard?linkedin_connected=true`;
+    const failureRedirect =
+      redirectTo === "settings"
+        ? `${baseRedirectUrl}/dashboard/settings?linkedin_failed=true`
+        : `${baseRedirectUrl}/dashboard?linkedin_failed=true`;
 
     // 3. Create auth link
     const response = await client.account.createHostedAuthLink({
@@ -47,11 +61,11 @@ export async function GET(request) {
       providers: ["LINKEDIN"],
       api_url: BASE_URL,
       expiresOn: new Date(Date.now() + 3600 * 1000),
-      // Use current user's ID
-      name: user.id,
+      // Use different name suffix for new accounts
+      name: isLinkingNew ? `${user.id}_new` : user.id,
       notify_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/unipile/webhooks`,
-      success_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?linkedin_connected=true`, // Add query param
-      failure_redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?linkedin_failed=true`, // Add query param for failure
+      success_redirect_url: successRedirect,
+      failure_redirect_url: failureRedirect,
     });
 
     return NextResponse.redirect(response.url);
