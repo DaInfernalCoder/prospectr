@@ -7,6 +7,9 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=flat-square&logo=supabase)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 
+## How it works
+It allows you to paste a linkedin search url (when you go into linkedin you can search for a type of person), it'll then parse maybe 1k people from there, read those people's linkedin profile to personalize messages (ex: " Hey Jeff, noticed you just joined Apple, here's something that could help you work less "), and then it'll send those connection requests safely within linkedin limits (200/week max)
+
 ## Overview
 
 Prospectr is a comprehensive LinkedIn automation platform that streamlines professional networking through AI-powered messaging and intelligent prospect targeting. Built to solve the time-consuming process of manual outreach, this platform enables users to scale their networking efforts while maintaining personalization and authenticity.
