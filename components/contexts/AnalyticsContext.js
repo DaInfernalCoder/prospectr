@@ -50,6 +50,14 @@ export function AnalyticsProvider({ children }) {
               throw new Error('Failed to fetch analytics data');
             }
           }
+        } else {
+          // No user session, set initial state
+          setAnalyticsData({
+            isLoading: false,
+            data: null,
+            error: null,
+            lastFetched: null,
+          });
         }
       } catch (error) {
         console.error("Failed to fetch analytics data:", error);
@@ -62,14 +70,16 @@ export function AnalyticsProvider({ children }) {
       }
     };
 
-    // Fetch data on auth state change
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
+    // PERFORMANCE: Set up auth state listener once
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Clear cache and fetch fresh data on sign in
+        sessionStorage.removeItem('analyticsData');
         fetchAnalyticsData();
       } else if (event === 'SIGNED_OUT') {
         // Clear analytics data on sign out
         setAnalyticsData({
-          isLoading: true,
+          isLoading: false,
           data: null,
           error: null,
           lastFetched: null,
@@ -78,13 +88,13 @@ export function AnalyticsProvider({ children }) {
       }
     });
 
-    // Initial fetch
+    // Initial fetch only if not already triggered by auth listener
     fetchAnalyticsData();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase]);
 
   // Function to refresh analytics data on demand
   const refreshAnalyticsData = async () => {
