@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,9 +174,17 @@ const AddLeadsPageContent = () => {
         schoolTimer
       );
     }
+
+    // PERFORMANCE: Cleanup timers on unmount to prevent memory leaks
+    return () => {
+      if (locationTimer.current) clearTimeout(locationTimer.current);
+      if (companyTimer.current) clearTimeout(companyTimer.current);
+      if (industryTimer.current) clearTimeout(industryTimer.current);
+      if (schoolTimer.current) clearTimeout(schoolTimer.current);
+    };
   }, [advancedSearch, debouncedParameterSearch]);
 
-  // Modified search query
+  // Modified search query with optimized caching
   const {
     data: searchResults = { results: [] },
     isLoading,
@@ -304,6 +312,8 @@ const AddLeadsPageContent = () => {
     },
     enabled: false, // Don't run query on mount
     retry: false, // Don't retry on failure
+    staleTime: 1000 * 60 * 10, // PERFORMANCE: Keep search results fresh for 10 minutes
+    gcTime: 1000 * 60 * 30, // PERFORMANCE: Cache results for 30 minutes
   });
 
   // Handle redirect to checkout when needed
@@ -313,24 +323,24 @@ const AddLeadsPageContent = () => {
     }
   }, [checkoutUrl, router]);
 
-  // Toggle section expansion
-  const toggleSection = (section) => {
+  // PERFORMANCE: Memoize toggle functions to prevent child re-renders
+  const toggleSection = useCallback((section) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
-  };
+  }, []);
 
   // Handle exclusion checkbox changes
-  const handleExclusionChange = (exclusion) => {
+  const handleExclusionChange = useCallback((exclusion) => {
     setExclusions((prev) => ({
       ...prev,
       [exclusion]: !prev[exclusion],
     }));
-  };
+  }, []);
 
   // Handle advanced search parameter changes
-  const handleAdvancedSearchChange = (field, value) => {
+  const handleAdvancedSearchChange = useCallback((field, value) => {
     setAdvancedSearch((prev) => ({
       ...prev,
       [field]: value,
@@ -348,10 +358,10 @@ const AddLeadsPageContent = () => {
         [`${field}Ids`]: [],
       }));
     }
-  };
+  }, []);
 
   // Modified handleSearch to wait for parameter loading
-  const handleSearch = async (e) => {
+  const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
 
     // Check if any parameters are still loading
@@ -366,10 +376,10 @@ const AddLeadsPageContent = () => {
 
     refetch();
     setCurrentPage(1);
-  };
+  }, [parameterLoading, refetch]);
 
   // Toggle lead selection
-  const toggleLeadSelection = (profile) => {
+  const toggleLeadSelection = useCallback((profile) => {
     if (selectedProfiles.some((p) => p.identifier === profile.identifier)) {
       setSelectedProfiles(
         selectedProfiles.filter((p) => p.identifier !== profile.identifier)
@@ -379,13 +389,13 @@ const AddLeadsPageContent = () => {
       setSelectedProfiles([...selectedProfiles, profile]);
       addSelectedLead(profile);
     }
-  };
+  }, [selectedProfiles, removeSelectedLead, addSelectedLead]);
 
   // Save selected leads and go to next step
-  const goToNextStep = () => {
+  const goToNextStep = useCallback(() => {
     setSelectedLeads(selectedProfiles);
     router.push("/dashboard/campaigns/new/sequence");
-  };
+  }, [selectedProfiles, setSelectedLeads, router]);
 
   // Initialize selected profiles from store on mount
   useEffect(() => {
@@ -393,20 +403,20 @@ const AddLeadsPageContent = () => {
   }, [selectedLeads]);
 
   // Change page
-  const handlePageChange = (newPage) => {
+  const handlePageChange = useCallback((newPage) => {
     if (newPage < 1 || newPage > Math.ceil(totalResults / resultsPerPage))
       return;
     setCurrentPage(newPage);
-  };
+  }, [totalResults, resultsPerPage]);
 
-  // Get current page results
-  const getCurrentPageResults = () => {
+  // PERFORMANCE: Memoize paginated results to avoid recalculating on unrelated re-renders
+  const currentPageResults = useMemo(() => {
     if (!searchResults || !searchResults.results) return [];
 
     const startIndex = (currentPage - 1) * resultsPerPage;
     const endIndex = startIndex + resultsPerPage;
     return searchResults.results.slice(startIndex, endIndex);
-  };
+  }, [searchResults, currentPage, resultsPerPage]);
 
   // Filter sections
   const filterSections = [
@@ -718,7 +728,7 @@ const AddLeadsPageContent = () => {
               </div>
 
               <div className="space-y-4">
-                {getCurrentPageResults().map((profile) => (
+                {currentPageResults.map((profile) => (
                   <div
                     key={profile.identifier || profile.id}
                     className={`p-4 border rounded-lg transition-colors ${
@@ -747,6 +757,7 @@ const AddLeadsPageContent = () => {
                             src={profile.profile_picture}
                             alt={profile.name}
                             className="w-12 h-12 rounded-full object-cover"
+                            loading="lazy"
                           />
                         </div>
                       )}

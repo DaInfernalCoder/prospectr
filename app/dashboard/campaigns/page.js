@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Users, BarChart2 } from "lucide-react";
-import { useState, Suspense } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { useAnalytics } from "@/components/contexts/AnalyticsContext";
 import UpdateFrequencyInfo from "../../components/UpdateFrequencyInfo";
@@ -12,22 +12,20 @@ function CampaignsContent() {
   const router = useRouter();
   const { analyticsData } = useAnalytics();
 
-  // Helper function to transform analytics data into the format we need
-  const getCampaignData = () => {
+  // PERFORMANCE: Memoize campaign data transformation to prevent unnecessary recalculations
+  const campaigns = useMemo(() => {
     if (!analyticsData.data || !analyticsData.data.campaigns) {
       return { active: [], drafts: [], completed: [] };
     }
 
-    const campaigns = analyticsData.data.campaigns || [];
+    const campaignsData = analyticsData.data.campaigns || [];
 
     return {
-      active: campaigns.filter((camp) => camp.status === "processing"),
-      drafts: campaigns.filter((camp) => camp.status === "pending"),
-      completed: campaigns.filter((camp) => camp.status === "completed"),
+      active: campaignsData.filter((camp) => camp.status === "processing"),
+      drafts: campaignsData.filter((camp) => camp.status === "pending"),
+      completed: campaignsData.filter((camp) => camp.status === "completed"),
     };
-  };
-
-  const campaigns = getCampaignData();
+  }, [analyticsData.data]);
 
   const handleViewDetails = (campaignId) => {
     router.push(`/dashboard/campaigns/${campaignId}`);
