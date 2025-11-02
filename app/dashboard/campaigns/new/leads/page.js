@@ -409,8 +409,8 @@ const AddLeadsPageContent = () => {
     setCurrentPage(newPage);
   }, [totalResults, resultsPerPage]);
 
-  // PERFORMANCE: Memoize paginated results to prevent unnecessary recalculations
-  const getCurrentPageResults = useMemo(() => {
+  // PERFORMANCE: Memoize paginated results to avoid recalculating on unrelated re-renders
+  const currentPageResults = useMemo(() => {
     if (!searchResults || !searchResults.results) return [];
 
     const startIndex = (currentPage - 1) * resultsPerPage;
@@ -728,7 +728,7 @@ const AddLeadsPageContent = () => {
               </div>
 
               <div className="space-y-4">
-                {getCurrentPageResults.map((profile) => (
+                {currentPageResults.map((profile) => (
                   <div
                     key={profile.identifier || profile.id}
                     className={`p-4 border rounded-lg transition-colors ${

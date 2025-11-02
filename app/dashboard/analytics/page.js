@@ -1,19 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useAnalytics } from "@/components/contexts/AnalyticsContext";
 import { Suspense } from "react";
+
+// Helper function to format numbers with commas - moved outside component for better performance
+const formatNumber = (num) => {
+  return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "0";
+};
 
 function AnalyticsContent() {
   const router = useRouter();
   const { analyticsData, refreshAnalyticsData } = useAnalytics();
   const [timeframe, setTimeframe] = useState("all");
-
-  // PERFORMANCE: Memoize formatNumber function to prevent recreation on each render
-  const formatNumber = useCallback((num) => {
-    return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "0";
-  }, []);
 
   // Handle refresh button click
   const handleRefresh = async () => {
