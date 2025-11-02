@@ -236,6 +236,7 @@ export default function ReviewPage() {
                         src={lead.profile_picture}
                         alt={lead.name}
                         className="w-8 h-8 rounded-full mr-3"
+                        loading="lazy"
                       />
                     )}
                     <div>

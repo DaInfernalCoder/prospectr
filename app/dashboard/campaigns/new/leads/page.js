@@ -174,9 +174,17 @@ const AddLeadsPageContent = () => {
         schoolTimer
       );
     }
+
+    // PERFORMANCE: Cleanup timers on unmount to prevent memory leaks
+    return () => {
+      if (locationTimer.current) clearTimeout(locationTimer.current);
+      if (companyTimer.current) clearTimeout(companyTimer.current);
+      if (industryTimer.current) clearTimeout(industryTimer.current);
+      if (schoolTimer.current) clearTimeout(schoolTimer.current);
+    };
   }, [advancedSearch, debouncedParameterSearch]);
 
-  // Modified search query
+  // Modified search query with optimized caching
   const {
     data: searchResults = { results: [] },
     isLoading,
@@ -304,6 +312,8 @@ const AddLeadsPageContent = () => {
     },
     enabled: false, // Don't run query on mount
     retry: false, // Don't retry on failure
+    staleTime: 1000 * 60 * 10, // PERFORMANCE: Keep search results fresh for 10 minutes
+    gcTime: 1000 * 60 * 30, // PERFORMANCE: Cache results for 30 minutes
   });
 
   // Handle redirect to checkout when needed
@@ -747,6 +757,7 @@ const AddLeadsPageContent = () => {
                             src={profile.profile_picture}
                             alt={profile.name}
                             className="w-12 h-12 rounded-full object-cover"
+                            loading="lazy"
                           />
                         </div>
                       )}

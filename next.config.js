@@ -1,5 +1,11 @@
 const nextConfig = {
   reactStrictMode: true,
+  // PERFORMANCE: Enable compiler optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? {
+      exclude: ["error", "warn"],
+    } : false,
+  },
   images: {
     domains: [
       // NextJS <Image> component needs to whitelist domains for src={}

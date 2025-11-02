@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { Crisp } from "crisp-sdk-web";
 import NextTopLoader from "nextjs-toploader";
@@ -71,7 +71,22 @@ const CrispChat = () => {
 // 5. LinkedInProvider: Manage LinkedIn connection status throughout the app
 // 6. AnalyticsProvider: Manage analytics data fetching and caching
 const ClientLayout = ({ children }) => {
-  const queryClient = new QueryClient();
+  // PERFORMANCE: Memoize QueryClient to prevent recreation on every render
+  // Configure with optimized defaults for better performance
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60 * 5, // Data stays fresh for 5 minutes
+            gcTime: 1000 * 60 * 30, // Cache garbage collected after 30 minutes
+            refetchOnWindowFocus: false, // Don't refetch on window focus
+            retry: 1, // Only retry failed requests once
+          },
+        },
+      }),
+    []
+  );
 
   return (
     <>
